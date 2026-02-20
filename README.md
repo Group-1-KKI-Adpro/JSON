@@ -55,34 +55,34 @@ Deployment preparation will be performed at the 25% milestone.
 ## Milestones & Work Plan
 
 Preparation
-- Requirement analysis & system scope definition — All members
-- Tech stack decision & repository setup — Tara
-- CI/CD setup & backend + DB integration demo — Tara
+- Requirement analysis & system scope definition — All Members
+- Tech stack decision & repository setup — Tara Nirmala Anwar
+- CI/CD setup & backend + DB integration demo — Tara Nirmala Anwar
 - Landing page / frontend setup — Muhammad Rifqi AlGhan
 
 25%
-- Authentication & Profile implementation — Tara
-- Inventory & Catalog structure — Evelyn
-- Order flow design — Sultanadika
+- Authentication & Profile implementation — Tara Nirmala Anwar
+- Inventory & Catalog structure — Evelyne Octaviana Benedicta Aritonang
+- Order flow design — Sultanadika Shidqi M
 - Wallet balance logic — Muhammad Rifqi AlGhan
-- Voucher data model — Melanton
+- Voucher data model — Melanton Gabriel Siregar
 
 50%
-- Inventory CRUD & stock validation
-- Order lifecycle implementation
-- Wallet payment & refund logic
-- Voucher validation
-- Integration testing
+- Inventory CRUD & stock validation — All Members
+- Order lifecycle implementation — All Members
+- Wallet payment & refund logic — All Members
+- Voucher validation — All Members
+- Integration testing — All Members
 
 75%
-- Concurrency handling (flash sale / war scenario)
-- Rating & reputation system
-- Refactoring & architectural improvements
+- Concurrency handling (flash sale / war scenario) — All Members
+- Rating & reputation system — All Members
+- Refactoring & architectural improvements — All Members
 
 100% (Final)
-- Full system integration
-- Performance optimization
-- Final testing & presentation
+- Full system integration — All Members
+- Performance optimization — All Members
+- Final testing & presentation — All Members
 
 ## Repository
 This repository can be run locally by the teaching assistant and already demonstrates:
