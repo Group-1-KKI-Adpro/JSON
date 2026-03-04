@@ -76,14 +76,21 @@ Authentication is stable so everyone can build and test with real users.
 - `POST /api/auth/register` → create user (default role = `TITIPER`)
 - `POST /api/auth/login` → returns JWT
 - `GET /api/auth/me` → returns current user info from JWT
-- `PATCH /api/profile` → set/update `username` + `fullName`
+- `PATCH /api/auth/profile` → set/update `username` + `fullName`
   - If username missing → auto-generate from email local-part (example: `budi@gmail.com → budi`)
   - Username must be unique
 
 **Security**
-- Stateless security config (no session)
-- Permit `/api/auth/**` (+ `/api/health`, `/error`, static if needed)
-- JWT generation works and can be used by other endpoints
+- Stateless security configuration using Spring Security (SessionCreationPolicy.STATELESS).
+- Public endpoints:
+  - POST `/api/auth/register`
+  - POST `/api/auth/login`
+  - GET `/api/health`
+  - `/error` and static assets (`/`, `/index.html`, `/css/**`, `/js/**`, `/images/**`)
+- All other endpoints require JWT authentication.
+- JWT tokens are generated during login and must be provided using:
+  Authorization: Bearer <token>
+- Authenticated endpoints can retrieve the current user identity from the JWT via Spring Security `Authentication`.
 
 **Integration contract for others**
 - Other modules can rely on: `userId/email/role/status` from JWT and/or `/api/auth/me`.
