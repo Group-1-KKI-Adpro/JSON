@@ -19,7 +19,6 @@ import lombok.Setter;
 import java.time.Instant;
 
 @Getter
-@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(
@@ -47,6 +46,7 @@ public class Transaction {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
+    @Setter
     private TransactionStatus status = TransactionStatus.PENDING;
 
     @Column(name = "reference_id", length = 100)
@@ -56,19 +56,22 @@ public class Transaction {
     private String description;
 
     @Column(name = "failure_reason", length = 255)
+    @Setter
     private String failureReason;
 
     @Column(name = "balance_before")
+    @Setter
     private Long balanceBefore;
 
     @Column(name = "balance_after")
+    @Setter
     private Long balanceAfter;
 
     @Column(name = "created_at", nullable = false, updatable = false)
-    private Instant createdAt;
+    private Instant createdAt = Instant.now();
 
     @Column(name = "updated_at", nullable = false)
-    private Instant updatedAt;
+    private Instant updatedAt = Instant.now();
 
     public Transaction(Long userId,
                        TransactionType type,
@@ -79,7 +82,7 @@ public class Transaction {
         this.userId = userId;
         this.type = type;
         this.amount = amount;
-        this.status = status == null ? TransactionStatus.PENDING : status;
+        if (status != null) this.status = status;
         this.referenceId = referenceId;
         this.description = description;
     }
@@ -89,7 +92,6 @@ public class Transaction {
         Instant now = Instant.now();
         this.createdAt = now;
         this.updatedAt = now;
-        if (this.status == null) this.status = TransactionStatus.PENDING;
     }
 
     @PreUpdate
