@@ -2,7 +2,9 @@ package id.ac.ui.cs.advprog.kki.json.auth.dto;
 
 import id.ac.ui.cs.advprog.kki.json.model.AccountStatus;
 import id.ac.ui.cs.advprog.kki.json.model.Role;
+import lombok.Getter;
 
+@Getter
 public class MeResponse {
 
     private Long id;
@@ -21,10 +23,4 @@ public class MeResponse {
         this.status = status;
     }
 
-    public Long getId() { return id; }
-    public String getEmail() { return email; }
-    public String getUsername() { return username; }
-    public String getFullName() { return fullName; }
-    public Role getRole() { return role; }
-    public AccountStatus getStatus() { return status; }
 }
