@@ -28,10 +28,16 @@ public class SecurityConfig {
 
                         .requestMatchers(HttpMethod.GET, "/api/health").permitAll()
 
-                        .requestMatchers("/", "/index.html", "/favicon.ico").permitAll()
-                        .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/admin/vouchers").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/vouchers/**").permitAll()
 
+                        .requestMatchers("/", "/index.html", "/favicon.ico").permitAll()
+                        .requestMatchers("/Transaction/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/wallet", "/transactions").permitAll()
+                        .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
                         .requestMatchers("/error").permitAll()
+
+                        .requestMatchers("/api/orders/**").permitAll()
 
                         .anyRequest().authenticated()
                 )
