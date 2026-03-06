@@ -33,6 +33,8 @@ public class SecurityConfig {
 
                         .requestMatchers("/error").permitAll()
 
+                        .requestMatchers("/api/orders/**").permitAll()
+
                         .anyRequest().authenticated()
                 )
                 .httpBasic(httpBasic -> httpBasic.disable())
