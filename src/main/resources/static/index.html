@@ -3,24 +3,153 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>JaStip Online Nasional (JSON)</title>
+    <title>JSON – Auth Playground</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }
-        a { margin-right: 12px; }
+        body { font-family: Arial, sans-serif; margin: 32px; line-height: 1.5; }
+        .row { display: flex; gap: 24px; flex-wrap: wrap; }
+        .card { border: 1px solid #ddd; border-radius: 8px; padding: 16px; width: 360px; }
+        input { width: 100%; padding: 8px; margin: 6px 0 12px; }
+        button { padding: 10px 12px; cursor: pointer; }
+        pre { background: #f6f6f6; padding: 12px; border-radius: 8px; overflow: auto; }
+        .small { font-size: 12px; color: #666; }
     </style>
 </head>
 <body>
 <h1>JaStip Online Nasional (JSON)</h1>
+<p class="small">Local Auth & Profile test page (Register → Login → Me → Update Profile).</p>
 
-<p>
-    Welcome! This is the landing page for the project.
-</p>
+<div style="margin: 10px 0 18px; display: flex; gap: 10px; flex-wrap: wrap;">
+    <a href="/wallet"><button type="button">Wallet</button></a>
+    <a href="/transactions"><button type="button">Transactions</button></a>
+</div>
+<div class="row">
+    <div class="card">
+        <h2>Register</h2>
+        <input id="regEmail" placeholder="email" />
+        <input id="regPass" placeholder="password" type="password" />
+        <input id="regName" placeholder="fullName" />
+        <button onclick="register()">Register</button>
+        <pre id="regOut"></pre>
+    </div>
 
-<h2>Quick Links</h2>
-<ul>
-    <li><a href="/api">API (optional)</a></li>
-</ul>
+    <div class="card">
+        <h2>Login</h2>
+        <input id="logEmail" placeholder="email" />
+        <input id="logPass" placeholder="password" type="password" />
+        <button onclick="login()">Login</button>
+        <p class="small">Token is saved in localStorage (shared across pages).</p>
+        <pre id="logOut"></pre>
+    </div>
+
+    <div class="card">
+        <h2>Me</h2>
+        <button onclick="me()">GET /api/auth/me</button>
+        <pre id="meOut"></pre>
+    </div>
+
+    <div class="card">
+        <h2>Update Profile</h2>
+        <input id="profUsername" placeholder="username (optional)" />
+        <input id="profFullName" placeholder="fullName (optional)" />
+        <button onclick="updateProfile()">PATCH /api/auth/profile</button>
+        <pre id="profOut"></pre>
+    </div>
+</div>
 
 <hr />
+<h3>Current Token</h3>
+<button onclick="clearToken()">Clear Token</button>
+<pre id="tokenOut">(none)</pre>
+
+<script>
+    const TOKEN_KEY = "json_token";
+    let token = localStorage.getItem(TOKEN_KEY);
+
+    function setToken(t) {
+        token = t;
+        document.getElementById("tokenOut").textContent = token ?? "(none)";
+        if (token) localStorage.setItem(TOKEN_KEY, token);
+        else localStorage.removeItem(TOKEN_KEY);
+    }
+
+    function clearToken() {
+        setToken(null);
+    }
+
+    async function register() {
+        const body = {
+            email: document.getElementById("regEmail").value,
+            password: document.getElementById("regPass").value,
+            fullName: document.getElementById("regName").value
+        };
+
+        const res = await fetch("/api/auth/register", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body)
+        });
+
+        const text = await res.text();
+        document.getElementById("regOut").textContent = `${res.status}\n${text}`;
+    }
+
+    async function login() {
+        const body = {
+            email: document.getElementById("logEmail").value,
+            password: document.getElementById("logPass").value
+        };
+
+        const res = await fetch("/api/auth/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body)
+        });
+
+        const json = await res.json().catch(() => null);
+        document.getElementById("logOut").textContent = `${res.status}\n${JSON.stringify(json, null, 2)}`;
+
+        if (res.ok && json?.token) setToken(json.token);
+    }
+
+    async function me() {
+        if (!token) {
+            document.getElementById("meOut").textContent = "No token. Please login first.";
+            return;
+        }
+
+        const res = await fetch("/api/auth/me", {
+            headers: { "Authorization": `Bearer ${token}` }
+        });
+
+        const text = await res.text();
+        document.getElementById("meOut").textContent = `${res.status}\n${text}`;
+    }
+
+    async function updateProfile() {
+        if (!token) {
+            document.getElementById("profOut").textContent = "No token. Please login first.";
+            return;
+        }
+
+        const body = {
+            username: document.getElementById("profUsername").value,
+            fullName: document.getElementById("profFullName").value
+        };
+
+        const res = await fetch("/api/auth/profile", {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify(body)
+        });
+
+        const text = await res.text();
+        document.getElementById("profOut").textContent = `${res.status}\n${text}`;
+    }
+    setToken(token);
+
+</script>
 </body>
 </html>
