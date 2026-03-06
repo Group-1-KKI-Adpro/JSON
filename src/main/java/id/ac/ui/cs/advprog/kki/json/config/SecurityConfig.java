@@ -29,6 +29,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/health").permitAll()
 
                         .requestMatchers("/", "/index.html", "/favicon.ico").permitAll()
+                        .requestMatchers("/Transaction/**").permitAll()
                         .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
 
                         .requestMatchers("/error").permitAll()

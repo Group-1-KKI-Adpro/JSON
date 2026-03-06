@@ -18,6 +18,10 @@
 <h1>JaStip Online Nasional (JSON)</h1>
 <p class="small">Local Auth & Profile test page (Register → Login → Me → Update Profile).</p>
 
+<div style="margin: 10px 0 18px; display: flex; gap: 10px; flex-wrap: wrap;">
+    <a href="/Transaction/wallet.html"><button type="button">Wallet</button></a>
+    <a href="/Transaction/transaction.html"><button type="button">Transactions</button></a>
+</div>
 <div class="row">
     <div class="card">
         <h2>Register</h2>
@@ -33,7 +37,7 @@
         <input id="logEmail" placeholder="email" />
         <input id="logPass" placeholder="password" type="password" />
         <button onclick="login()">Login</button>
-        <p class="small">Token is saved in browser memory (not persistent).</p>
+        <p class="small">Token is saved in localStorage (shared across pages).</p>
         <pre id="logOut"></pre>
     </div>
 
@@ -54,14 +58,22 @@
 
 <hr />
 <h3>Current Token</h3>
+<button onclick="clearToken()">Clear Token</button>
 <pre id="tokenOut">(none)</pre>
 
 <script>
-    let token = null;
+    const TOKEN_KEY = "json_token";
+    let token = localStorage.getItem(TOKEN_KEY);
 
     function setToken(t) {
         token = t;
         document.getElementById("tokenOut").textContent = token ?? "(none)";
+        if (token) localStorage.setItem(TOKEN_KEY, token);
+        else localStorage.removeItem(TOKEN_KEY);
+    }
+
+    function clearToken() {
+        setToken(null);
     }
 
     async function register() {
@@ -136,6 +148,7 @@
         const text = await res.text();
         document.getElementById("profOut").textContent = `${res.status}\n${text}`;
     }
-</script>
+    setToken(token);
+
 </body>
 </html>

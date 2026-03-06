@@ -2,14 +2,15 @@ package id.ac.ui.cs.advprog.kki.json.wallet.controller;
 
 import id.ac.ui.cs.advprog.kki.json.auth.service.AuthService;
 import id.ac.ui.cs.advprog.kki.json.model.User;
+import id.ac.ui.cs.advprog.kki.json.wallet.dto.BalanceResponse;
+import id.ac.ui.cs.advprog.kki.json.wallet.dto.TopupRequest;
+import id.ac.ui.cs.advprog.kki.json.wallet.dto.TopupResponse;
+import id.ac.ui.cs.advprog.kki.json.wallet.dto.TransactionResponse;
 import id.ac.ui.cs.advprog.kki.json.wallet.model.Transaction;
-import id.ac.ui.cs.advprog.kki.json.wallet.model.TransactionStatus;
-import id.ac.ui.cs.advprog.kki.json.wallet.model.TransactionType;
 import id.ac.ui.cs.advprog.kki.json.wallet.model.Wallet;
 import id.ac.ui.cs.advprog.kki.json.wallet.service.WalletService;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Positive;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.Instant;
 import java.util.List;
 
 @RestController
@@ -79,25 +79,4 @@ public class WalletController {
                 tx.getDescription()
         );
     }
-
-    public record BalanceResponse(Long userId, long balance) {
-    }
-
-    public record TopupRequest(@Positive long amount, String description) {
-    }
-
-    public record TopupResponse(BalanceResponse balance, TransactionResponse transaction) {
-    }
-
-    public record TransactionResponse(
-            Long id,
-            Long userId,
-            TransactionType type,
-            long amount,
-            TransactionStatus status,
-            Instant timestamp,
-            String description
-    ) {
-    }
 }
-
