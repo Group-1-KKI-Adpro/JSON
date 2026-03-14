@@ -88,5 +88,20 @@ public class WalletServiceImpl implements WalletService {
         }
         return transactionRepository.findByUserIdOrderByCreatedAtDesc(userId);
     }
+
+    @Override
+    public Transaction deduct(Long userId, long amount, String referenceId, String description) {
+        throw new UnsupportedOperationException("deduct is not implemented yet");
+    }
+
+    @Override
+    public Transaction refund(Long userId, long amount, String referenceId, String description) {
+        throw new UnsupportedOperationException("refund is not implemented yet");
+    }
+
+    @Override
+    public Transaction withdraw(Long userId, long amount, String description) {
+        throw new UnsupportedOperationException("withdraw is not implemented yet");
+    }
 }
 

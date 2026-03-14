@@ -11,5 +11,11 @@ public interface WalletService {
     Transaction topup(Long userId, long amount, String description);
 
     List<Transaction> listTransactions(Long userId);
+
+    Transaction deduct(Long userId, long amount, String referenceId, String description);
+
+    Transaction refund(Long userId, long amount, String referenceId, String description);
+
+    Transaction withdraw(Long userId, long amount, String description);
 }
 
