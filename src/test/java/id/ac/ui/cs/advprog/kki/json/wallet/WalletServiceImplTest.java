@@ -194,7 +194,7 @@ public class WalletServiceImplTest {
 
         verify(walletRepository).findByUserId(1L);
         verify(walletRepository, never()).save(any(Wallet.class));
-        verifyNoInteractions(transactionRepository);
+        verify(transactionRepository, never()).save(any(Transaction.class));
     }
 
     @Test
@@ -221,8 +221,6 @@ public class WalletServiceImplTest {
 
     @Test
     void WithdrawShouldCreatePendingTransactionAndNotAllowNegativeBalance() {
-        when(walletRepository.findByUserId(1L)).thenReturn(Optional.of(wallet));
-        when(walletRepository.save(any(Wallet.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(transactionRepository.save(any(Transaction.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         Transaction tx = walletService.withdraw(1L, 10L, "withdraw");
@@ -232,5 +230,76 @@ public class WalletServiceImplTest {
         assertEquals(TransactionType.WITHDRAW, tx.getType());
         assertEquals(10L, tx.getAmount());
         assertEquals(TransactionStatus.PENDING, tx.getStatus());
+    }
+
+    @Test
+    void VerifyWithdrawSuccessShouldDeductBalanceAndMarkTransactionSuccess() {
+        Transaction pending = new Transaction(1L, TransactionType.WITHDRAW, 30L, TransactionStatus.PENDING, null, "w");
+
+        when(transactionRepository.findByIdAndType(10L, TransactionType.WITHDRAW)).thenReturn(Optional.of(pending));
+        when(walletRepository.findByUserId(1L)).thenReturn(Optional.of(wallet));
+        when(walletRepository.save(any(Wallet.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(transactionRepository.save(any(Transaction.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Transaction tx = walletService.verifyWithdraw(10L, TransactionStatus.SUCCESS, null);
+
+        assertSame(pending, tx);
+        assertEquals(TransactionStatus.SUCCESS, tx.getStatus());
+        assertEquals(100L, tx.getBalanceBefore());
+        assertEquals(70L, tx.getBalanceAfter());
+
+        ArgumentCaptor<Wallet> walletCaptor = ArgumentCaptor.forClass(Wallet.class);
+        verify(walletRepository).save(walletCaptor.capture());
+        assertEquals(70L, walletCaptor.getValue().getBalance());
+
+        verify(transactionRepository).save(pending);
+    }
+
+    @Test
+    void VerifyWithdrawFailedShouldNotChangeBalance() {
+        Transaction pending = new Transaction(1L, TransactionType.WITHDRAW, 30L, TransactionStatus.PENDING, null, "w");
+
+        when(transactionRepository.findByIdAndType(10L, TransactionType.WITHDRAW)).thenReturn(Optional.of(pending));
+        when(transactionRepository.save(any(Transaction.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Transaction tx = walletService.verifyWithdraw(10L, TransactionStatus.FAILED, "nope");
+
+        assertSame(pending, tx);
+        assertEquals(TransactionStatus.FAILED, tx.getStatus());
+        assertEquals("nope", tx.getFailureReason());
+
+        verifyNoInteractions(walletRepository);
+        verify(transactionRepository).save(pending);
+    }
+
+    @Test
+    void VerifyWithdrawWhenInsufficientBalanceAtVerificationShouldFailAndNotPersistWallet() {
+        Wallet low = new Wallet(1L, 10L);
+        Transaction pending = new Transaction(1L, TransactionType.WITHDRAW, 30L, TransactionStatus.PENDING, null, "w");
+
+        when(transactionRepository.findByIdAndType(10L, TransactionType.WITHDRAW)).thenReturn(Optional.of(pending));
+        when(walletRepository.findByUserId(1L)).thenReturn(Optional.of(low));
+        when(transactionRepository.save(any(Transaction.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Transaction tx = walletService.verifyWithdraw(10L, TransactionStatus.SUCCESS, null);
+
+        assertSame(pending, tx);
+        assertEquals(TransactionStatus.FAILED, tx.getStatus());
+        assertNotNull(tx.getFailureReason());
+
+        verify(walletRepository, never()).save(any(Wallet.class));
+        verify(transactionRepository).save(pending);
+    }
+
+    @Test
+    void VerifyWithdrawWhenAlreadyVerifiedWithSameStatusShouldBeIdempotent() {
+        Transaction verified = new Transaction(1L, TransactionType.WITHDRAW, 30L, TransactionStatus.SUCCESS, null, "w");
+        when(transactionRepository.findByIdAndType(10L, TransactionType.WITHDRAW)).thenReturn(Optional.of(verified));
+
+        Transaction tx = walletService.verifyWithdraw(10L, TransactionStatus.SUCCESS, null);
+
+        assertSame(verified, tx);
+        verify(transactionRepository, never()).save(any(Transaction.class));
+        verifyNoInteractions(walletRepository);
     }
 }

@@ -1,4 +1,6 @@
 package id.ac.ui.cs.advprog.kki.json.wallet.dto;
 
-public class WithdrawRequest {
+import jakarta.validation.constraints.Positive;
+
+public record WithdrawRequest(@Positive long amount, String description) {
 }

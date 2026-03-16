@@ -12,7 +12,11 @@ public record TransactionResponse(
         long amount,
         TransactionStatus status,
         Instant timestamp,
-        String description
+        String description,
+        String referenceId,
+        Long balanceBefore,
+        Long balanceAfter,
+        String failureReason
 ) {
 }
 

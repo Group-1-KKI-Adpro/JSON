@@ -23,9 +23,19 @@ import java.time.Instant;
 @Entity
 @Table(
         name = "wallet_transactions",
+        uniqueConstraints = {
+                // Idempotency guard for internal payment/refund calls.
+                // Allows same referenceId for different types (PAYMENT vs REFUND).
+                // Note: reference_id can be null; H2 allows multiple nulls in UNIQUE constraints.
+                @jakarta.persistence.UniqueConstraint(
+                        name = "uq_wallet_tx_user_type_ref",
+                        columnNames = {"user_id", "type", "reference_id"}
+                )
+        },
         indexes = {
                 @Index(name = "idx_wallet_transactions_user_id", columnList = "user_id"),
-                @Index(name = "idx_wallet_transactions_created_at", columnList = "created_at")
+                @Index(name = "idx_wallet_transactions_created_at", columnList = "created_at"),
+                @Index(name = "idx_wallet_transactions_reference_id", columnList = "reference_id")
         }
 )
 public class Transaction {
