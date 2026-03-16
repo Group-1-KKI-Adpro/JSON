@@ -29,6 +29,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/health").permitAll()
 
                         .requestMatchers(HttpMethod.POST, "/api/admin/vouchers").permitAll()
+                        // Admin-only wallet operations (e.g., withdraw verification).
+                        // Note: user login produces authorities like ROLE_ADMIN (see JwtAuthFilter).
+                        .requestMatchers("/api/admin/wallet/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/vouchers/**").permitAll()
 
                         .requestMatchers("/", "/index.html", "/favicon.ico").permitAll()
