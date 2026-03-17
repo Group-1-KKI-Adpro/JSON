@@ -12,7 +12,10 @@ public class CatalogItem {
 
     private int jastiperId;
     private String name;
+
+    @Column(columnDefinition = "TEXT")
     private String description;
+
     private int price;
     private int stock;
     private String origin;
@@ -66,6 +69,9 @@ public class CatalogItem {
     }
 
     public void setPrice(int price) {
+        if (price < 0) {
+            throw new IllegalArgumentException("Price cannot be negative");
+        }
         this.price = price;
     }
 
@@ -74,6 +80,9 @@ public class CatalogItem {
     }
 
     public void setStock(int stock) {
+        if (stock < 0) {
+            throw new IllegalArgumentException("Stock cannot be negative");
+        }
         this.stock = stock;
     }
 
