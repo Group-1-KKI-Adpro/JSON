@@ -26,7 +26,10 @@ public class AuthService {
         }
 
         String hashedPassword = passwordEncoder.encode(password);
-        User user = new User(email, hashedPassword, fullName);
+
+        String cleanedFullName = (fullName == null || fullName.isBlank()) ? null : fullName.trim();
+        User user = new User(email, hashedPassword, cleanedFullName);
+        user.setUsername(autoUsernameFromEmail(email));
 
         return userRepository.save(user);
     }

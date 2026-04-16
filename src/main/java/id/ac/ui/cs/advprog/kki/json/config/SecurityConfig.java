@@ -33,6 +33,8 @@ public class SecurityConfig {
 
                         .requestMatchers("/error").permitAll()
 
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+
                         .anyRequest().authenticated()
                 )
                 .httpBasic(httpBasic -> httpBasic.disable())
