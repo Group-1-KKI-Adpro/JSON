@@ -1,23 +1,72 @@
 package id.ac.ui.cs.advprog.kki.json.model;
 
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "order_items")
 public class OrderItem {
 
-    private String orderId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private String id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id", nullable = false)
+    private Order order;
+
+    @Column(nullable = false)
     private String catalogItemId;
+
+    @Column(nullable = false)
     private int qty;
+
+    @Column(nullable = false)
     private Double priceSnapshot;
 
     public OrderItem() {}
 
-    public String getOrderId() { return orderId; }
-    public void setOrderId(String orderId) { this.orderId = orderId; }
+    public String getId() {
+        return id;
+    }
 
-    public String getCatalogItemId() { return catalogItemId; }
-    public void setCatalogItemId(String catalogItemId) { this.catalogItemId = catalogItemId; }
+    public Order getOrder() {
+        return order;
+    }
 
-    public int getQty() { return qty; }
-    public void setQty(int qty) { this.qty = qty; }
+    public void setOrder(Order order) {
+        this.order = order;
+    }
 
-    public Double getPriceSnapshot() { return priceSnapshot; }
-    public void setPriceSnapshot(Double priceSnapshot) { this.priceSnapshot = priceSnapshot; }
+    public String getCatalogItemId() {
+        return catalogItemId;
+    }
+
+    public void setCatalogItemId(String catalogItemId) {
+        if (catalogItemId == null || catalogItemId.isBlank()) {
+            throw new IllegalArgumentException("catalogItemId cannot be empty");
+        }
+        this.catalogItemId = catalogItemId;
+    }
+
+    public int getQty() {
+        return qty;
+    }
+
+    public void setQty(int qty) {
+        if (qty <= 0) {
+            throw new IllegalArgumentException("Quantity must be greater than 0");
+        }
+        this.qty = qty;
+    }
+
+    public Double getPriceSnapshot() {
+        return priceSnapshot;
+    }
+
+    public void setPriceSnapshot(Double priceSnapshot) {
+        if (priceSnapshot == null || priceSnapshot < 0) {
+            throw new IllegalArgumentException("Price must be >= 0");
+        }
+        this.priceSnapshot = priceSnapshot;
+    }
 }
