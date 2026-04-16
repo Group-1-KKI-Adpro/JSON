@@ -28,8 +28,11 @@ public class SecurityConfig {
 
                         .requestMatchers(HttpMethod.GET, "/api/health").permitAll()
 
-                        .requestMatchers(HttpMethod.POST, "/api/admin/vouchers").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/admin/vouchers").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/api/admin/vouchers/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/vouchers/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/vouchers/validate").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/vouchers/use").permitAll()
 
                         .requestMatchers("/", "/index.html", "/favicon.ico").permitAll()
                         .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
