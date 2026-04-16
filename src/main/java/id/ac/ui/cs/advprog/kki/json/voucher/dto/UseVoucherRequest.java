@@ -10,15 +10,11 @@ public class UseVoucherRequest {
     @NotBlank
     private String orderId;
 
-    @NotBlank
-    private String userId;
-
     protected UseVoucherRequest() {}
 
-    public UseVoucherRequest(String code, String orderId, String userId) {
+    public UseVoucherRequest(String code, String orderId) {
         this.code = code;
         this.orderId = orderId;
-        this.userId = userId;
     }
 
     public String getCode() {
@@ -27,9 +23,5 @@ public class UseVoucherRequest {
 
     public String getOrderId() {
         return orderId;
-    }
-
-    public String getUserId() {
-        return userId;
     }
 }

@@ -1,6 +1,8 @@
 package id.ac.ui.cs.advprog.kki.json.controller;
 
+import id.ac.ui.cs.advprog.kki.json.auth.service.AuthService;
 import id.ac.ui.cs.advprog.kki.json.service.VoucherService;
+import id.ac.ui.cs.advprog.kki.json.model.User;
 import id.ac.ui.cs.advprog.kki.json.voucher.dto.CreateVoucherRequest;
 import id.ac.ui.cs.advprog.kki.json.voucher.dto.UpdateVoucherRequest;
 import id.ac.ui.cs.advprog.kki.json.voucher.dto.UseVoucherRequest;
@@ -11,6 +13,7 @@ import id.ac.ui.cs.advprog.kki.json.voucher.dto.VoucherResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,9 +24,11 @@ import java.util.stream.Collectors;
 public class VoucherController {
 
     private final VoucherService voucherService;
+    private final AuthService authService;
 
-    public VoucherController(VoucherService voucherService) {
+    public VoucherController(VoucherService voucherService, AuthService authService) {
         this.voucherService = voucherService;
+        this.authService = authService;
     }
 
     @PostMapping("/admin/vouchers")
@@ -54,8 +59,16 @@ public class VoucherController {
     }
 
     @PostMapping("/vouchers/use")
-    public ResponseEntity<UseVoucherResponse> useVoucher(@Valid @RequestBody UseVoucherRequest request) {
-        UseVoucherResponse response = voucherService.useVoucher(request.getCode(), request.getOrderId(), request.getUserId());
+    public ResponseEntity<UseVoucherResponse> useVoucher(@Valid @RequestBody UseVoucherRequest request,
+                                                         Authentication authentication) {
+        String email = (String) authentication.getPrincipal();
+        User user = authService.getByEmail(email);
+
+        UseVoucherResponse response = voucherService.useVoucher(
+                request.getCode(),
+                request.getOrderId(),
+                String.valueOf(user.getId())
+        );
         return ResponseEntity.ok(response);
     }
 
