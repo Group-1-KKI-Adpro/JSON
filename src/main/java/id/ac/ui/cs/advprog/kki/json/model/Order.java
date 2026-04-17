@@ -14,9 +14,9 @@ public class Order {
     private String id;
 
     @Column(nullable = false)
-    private String buyerId;
+    private Long buyerId;
 
-    private String jastiperId;
+    private Long jastiperId;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -26,9 +26,12 @@ public class Order {
     private String shippingAddress;
 
     @Column(nullable = false)
-    private Double totalPrice;
+    private Long totalPrice;
 
+    @Column(nullable = false)
     private LocalDateTime createdAt;
+
+    @Column(nullable = false)
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "order",
@@ -39,11 +42,15 @@ public class Order {
 
     public Order() {}
 
-    // ✅ Auto timestamps
+    // ✅ Auto timestamps + default status safety
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
+
+        if (status == null) {
+            status = OrderStatus.PAID;
+        }
     }
 
     @PreUpdate
@@ -51,31 +58,31 @@ public class Order {
         updatedAt = LocalDateTime.now();
     }
 
-    // 🔗 Keep this (IMPORTANT for JPA consistency)
+    // 🔗 Maintain bidirectional consistency
     public void addItem(OrderItem item) {
         items.add(item);
         item.setOrder(this);
     }
 
-    // --- Getters only where needed ---
+    // --- Getters & Setters ---
 
     public String getId() {
         return id;
     }
 
-    public String getBuyerId() {
+    public Long getBuyerId() {
         return buyerId;
     }
 
-    public void setBuyerId(String buyerId) {
+    public void setBuyerId(Long buyerId) {
         this.buyerId = buyerId;
     }
 
-    public String getJastiperId() {
+    public Long getJastiperId() {
         return jastiperId;
     }
 
-    public void setJastiperId(String jastiperId) {
+    public void setJastiperId(Long jastiperId) {
         this.jastiperId = jastiperId;
     }
 
@@ -95,11 +102,11 @@ public class Order {
         this.shippingAddress = shippingAddress;
     }
 
-    public Double getTotalPrice() {
+    public Long getTotalPrice() {
         return totalPrice;
     }
 
-    public void setTotalPrice(Double totalPrice) {
+    public void setTotalPrice(Long totalPrice) {
         this.totalPrice = totalPrice;
     }
 

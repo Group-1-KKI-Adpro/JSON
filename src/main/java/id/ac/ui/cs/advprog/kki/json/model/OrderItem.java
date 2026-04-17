@@ -14,14 +14,16 @@ public class OrderItem {
     @JoinColumn(name = "order_id", nullable = false)
     private Order order;
 
+
     @Column(nullable = false)
-    private String catalogItemId;
+    private Integer catalogItemId;
 
     @Column(nullable = false)
     private int qty;
 
+
     @Column(nullable = false)
-    private Double priceSnapshot;
+    private Long priceSnapshot;
 
     public OrderItem() {}
 
@@ -37,13 +39,13 @@ public class OrderItem {
         this.order = order;
     }
 
-    public String getCatalogItemId() {
+    public Integer getCatalogItemId() {
         return catalogItemId;
     }
 
-    public void setCatalogItemId(String catalogItemId) {
-        if (catalogItemId == null || catalogItemId.isBlank()) {
-            throw new IllegalArgumentException("catalogItemId cannot be empty");
+    public void setCatalogItemId(Integer catalogItemId) {
+        if (catalogItemId == null) {
+            throw new IllegalArgumentException("catalogItemId cannot be null");
         }
         this.catalogItemId = catalogItemId;
     }
@@ -59,11 +61,11 @@ public class OrderItem {
         this.qty = qty;
     }
 
-    public Double getPriceSnapshot() {
+    public Long getPriceSnapshot() {
         return priceSnapshot;
     }
 
-    public void setPriceSnapshot(Double priceSnapshot) {
+    public void setPriceSnapshot(Long priceSnapshot) {
         if (priceSnapshot == null || priceSnapshot < 0) {
             throw new IllegalArgumentException("Price must be >= 0");
         }

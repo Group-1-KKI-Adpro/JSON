@@ -9,7 +9,7 @@ import java.util.List;
 @Repository
 public interface OrderRepository extends JpaRepository<Order, String> {
 
-    List<Order> findByBuyerId(String buyerId);
 
-    List<Order> findByJastiperId(String jastiperId);
+    List<Order> findByBuyerId(Long buyerId);
+    List<Order> findByJastiperId(Long jastiperId);
 }
