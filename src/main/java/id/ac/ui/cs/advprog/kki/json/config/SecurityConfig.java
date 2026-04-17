@@ -31,6 +31,10 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/users/**").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
 
+                        .requestMatchers(HttpMethod.POST, "/api/admin/vouchers").hasRole("ADMIN")
+                        // Admin-only wallet operations (e.g., withdraw verification).
+                        // Note: user login produces authorities like ROLE_ADMIN (see JwtAuthFilter).
+                        .requestMatchers("/api/admin/wallet/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/vouchers/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/vouchers/validate").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/vouchers/use").authenticated()
