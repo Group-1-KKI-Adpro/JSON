@@ -31,8 +31,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/users/**").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
 
-                        .requestMatchers(HttpMethod.POST, "/api/admin/vouchers").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/vouchers/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/vouchers/validate").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/vouchers/use").authenticated()
 
                         .requestMatchers("/", "/index.html", "/favicon.ico").permitAll()
                         .requestMatchers("/Transaction/**").permitAll()
