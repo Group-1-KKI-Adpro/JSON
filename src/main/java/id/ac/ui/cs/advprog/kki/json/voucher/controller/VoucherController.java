@@ -1,8 +1,8 @@
-package id.ac.ui.cs.advprog.kki.json.controller;
+package id.ac.ui.cs.advprog.kki.json.voucher.controller;
 
 import id.ac.ui.cs.advprog.kki.json.auth.service.AuthService;
-import id.ac.ui.cs.advprog.kki.json.service.VoucherService;
 import id.ac.ui.cs.advprog.kki.json.model.User;
+import id.ac.ui.cs.advprog.kki.json.voucher.service.VoucherService;
 import id.ac.ui.cs.advprog.kki.json.voucher.dto.CreateVoucherRequest;
 import id.ac.ui.cs.advprog.kki.json.voucher.dto.UpdateVoucherRequest;
 import id.ac.ui.cs.advprog.kki.json.voucher.dto.UseVoucherRequest;

@@ -1,11 +1,11 @@
-package id.ac.ui.cs.advprog.kki.json.controller;
+package id.ac.ui.cs.advprog.kki.json.order.controller;
 
 import id.ac.ui.cs.advprog.kki.json.auth.service.AuthService;
 import id.ac.ui.cs.advprog.kki.json.model.User;
 import id.ac.ui.cs.advprog.kki.json.order.dto.CreateOrderRequest;
-import id.ac.ui.cs.advprog.kki.json.model.Order;
-import id.ac.ui.cs.advprog.kki.json.model.OrderStatus;
-import id.ac.ui.cs.advprog.kki.json.service.OrderService;
+import id.ac.ui.cs.advprog.kki.json.order.model.Order;
+import id.ac.ui.cs.advprog.kki.json.order.model.OrderStatus;
+import id.ac.ui.cs.advprog.kki.json.order.service.OrderService;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;

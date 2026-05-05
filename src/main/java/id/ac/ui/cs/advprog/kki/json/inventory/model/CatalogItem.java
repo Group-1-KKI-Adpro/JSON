@@ -1,14 +1,44 @@
-package id.ac.ui.cs.advprog.kki.json.model;
+package id.ac.ui.cs.advprog.kki.json.inventory.model;
 
-public class CatalogItemRequest {
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "catalog_items")
+public class CatalogItem {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
 
     private int jastiperId;
     private String name;
+
+    @Column(columnDefinition = "TEXT")
     private String description;
+
     private int price;
     private int stock;
     private String origin;
     private String purchaseDate;
+    private String createdAt;
+    private String updatedAt;
+
+    public CatalogItem() {}
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = java.time.Instant.now().toString();
+        updatedAt = createdAt;
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = java.time.Instant.now().toString();
+    }
+
+    public int getId() {
+        return id;
+    }
 
     public int getJastiperId() {
         return jastiperId;
@@ -39,6 +69,9 @@ public class CatalogItemRequest {
     }
 
     public void setPrice(int price) {
+        if (price < 0) {
+            throw new IllegalArgumentException("Price cannot be negative");
+        }
         this.price = price;
     }
 
@@ -47,6 +80,9 @@ public class CatalogItemRequest {
     }
 
     public void setStock(int stock) {
+        if (stock < 0) {
+            throw new IllegalArgumentException("Stock cannot be negative");
+        }
         this.stock = stock;
     }
 
@@ -64,5 +100,13 @@ public class CatalogItemRequest {
 
     public void setPurchaseDate(String purchaseDate) {
         this.purchaseDate = purchaseDate;
+    }
+
+    public String getCreatedAt() {
+        return createdAt;
+    }
+
+    public String getUpdatedAt() {
+        return updatedAt;
     }
 }

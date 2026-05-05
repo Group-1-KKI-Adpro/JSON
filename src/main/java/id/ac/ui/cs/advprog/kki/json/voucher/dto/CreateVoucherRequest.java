@@ -1,6 +1,6 @@
 package id.ac.ui.cs.advprog.kki.json.voucher.dto;
 
-import id.ac.ui.cs.advprog.kki.json.model.DiscountType;
+import id.ac.ui.cs.advprog.kki.json.voucher.model.DiscountType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
