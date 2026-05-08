@@ -70,6 +70,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
                         /* EVERYTHING ELSE */
+                        /* EVERYTHING ELSE */
                         .anyRequest().authenticated()
                 )
                 .httpBasic(httpBasic -> httpBasic.disable())
