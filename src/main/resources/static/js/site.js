@@ -286,6 +286,220 @@ function setupSimpleRefresh(buttonId) {
   button.addEventListener("click", () => window.location.reload());
 }
 
+function formatTimestamp(value) {
+  if (!value) return "-";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return String(value);
+  return new Intl.DateTimeFormat("en-GB", {
+    dateStyle: "medium",
+    timeStyle: "short"
+  }).format(date);
+}
+
+function statusClass(status) {
+  const value = String(status || "").toUpperCase();
+  if (value === "SUCCESS") return "badge";
+  if (value === "PENDING") return "badge alt";
+  if (value === "FAILED") return "badge gray";
+  return "badge gray";
+}
+
+function renderWalletBalance(balance) {
+  const el = document.getElementById("walletBalance");
+  if (!el) return;
+
+  el.innerHTML = `
+    <div class="balance-card">
+      <strong>Current balance</strong>
+      <div class="balance-amount">${formatCurrency(balance ?? 0)}</div>
+      <p class="muted" style="margin:10px 0 0;">Available for checkout, refunds, and withdrawals.</p>
+    </div>
+  `;
+}
+
+function renderWalletTransactions(items) {
+  const el = document.getElementById("walletTransactions");
+  if (!el) return;
+
+  if (!items.length) {
+    el.innerHTML = `
+      <div class="empty-state">
+        <strong>No transactions yet</strong>
+        <p style="margin:0 0 14px; line-height:1.6;">Top ups, deductions, refunds, and withdrawals will appear here in order.</p>
+        <a class="btn-ghost" href="/transactions.html">Open transactions</a>
+      </div>
+    `;
+    return;
+  }
+
+  el.innerHTML = items.map((tx) => `
+    <article class="card" style="margin-bottom:12px;">
+      <div class="card-inner">
+        <div class="card-top">
+          <div>
+            <h3 class="card-title">${escapeHtml(tx.type || "TRANSACTION")}</h3>
+            <div class="card-subtitle">${escapeHtml(formatTimestamp(tx.timestamp))}</div>
+          </div>
+          <span class="${statusClass(tx.status)}">${escapeHtml(tx.status || "UNKNOWN")}</span>
+        </div>
+        <p class="muted" style="margin:10px 0 8px;">${escapeHtml(tx.description || "No description")}</p>
+        <div class="badges">
+          <span class="badge gray">${escapeHtml(formatCurrency(tx.amount))}</span>
+          <span class="badge gray">Ref: ${escapeHtml(tx.referenceId || "-")}</span>
+        </div>
+      </div>
+    </article>
+  `).join("");
+}
+
+function renderTransactionsTable(items) {
+  const tbody = document.getElementById("transactionsTableBody");
+  if (!tbody) return;
+
+  if (!items.length) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="6">
+          <div class="empty-state">
+            <strong>No transaction data</strong>
+            <p style="margin:0; line-height:1.6;">Try changing the filter or create a wallet transaction first.</p>
+          </div>
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = items.map((tx) => `
+    <tr>
+      <td>${escapeHtml(formatTimestamp(tx.timestamp))}</td>
+      <td>${escapeHtml(tx.type || "-")}</td>
+      <td>${escapeHtml(formatCurrency(tx.amount))}</td>
+      <td><span class="${statusClass(tx.status)}">${escapeHtml(tx.status || "UNKNOWN")}</span></td>
+      <td>${escapeHtml(tx.description || "-")}</td>
+      <td>${escapeHtml(tx.referenceId || "-")}</td>
+    </tr>
+  `).join("");
+}
+
+async function fetchWalletTransactions(limit = 10) {
+  const response = await authFetch(`/api/wallet/transactions?limit=${limit}`);
+  if (!response.ok) {
+    throw new Error(`Failed to load transactions (${response.status})`);
+  }
+  return response.json();
+}
+
+async function loadWalletPageData() {
+  const balanceResponse = await authFetch("/api/wallet/balance");
+  if (!balanceResponse.ok) {
+    throw new Error(`Failed to load balance (${balanceResponse.status})`);
+  }
+  const balance = await balanceResponse.json();
+  renderWalletBalance(balance.balance);
+
+  const transactions = await fetchWalletTransactions(5);
+  renderWalletTransactions(transactions);
+}
+
+async function loadTransactionsPageData() {
+  const filter = document.getElementById("transactionFilter")?.value || "ALL";
+  const transactions = await fetchWalletTransactions(100);
+  const filtered = filter === "ALL"
+    ? transactions
+    : transactions.filter((tx) => String(tx.type).toUpperCase() === filter);
+
+  renderTransactionsTable(filtered);
+}
+
+function setupWalletForms() {
+  const topupForm = document.getElementById("topupForm");
+  const withdrawForm = document.getElementById("withdrawForm");
+
+  if (topupForm) {
+    topupForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const amount = Number(document.getElementById("topupAmount")?.value || 0);
+      const description = document.getElementById("topupDescription")?.value?.trim() || "";
+
+      try {
+        const response = await authFetch("/api/wallet/topup", {
+          method: "POST",
+          body: JSON.stringify({ amount, description })
+        });
+
+        if (!response.ok) {
+          const text = await response.text();
+          throw new Error(text || "Top up failed");
+        }
+
+        const result = await response.json();
+        renderWalletBalance(result.balance?.balance ?? 0);
+        await loadWalletPageData();
+        topupForm.reset();
+        setNotice("walletNotice", "success", "Top up successful.");
+      } catch (err) {
+        setNotice("walletNotice", "error", err.message || "Top up failed");
+      }
+    });
+  }
+
+  if (withdrawForm) {
+    withdrawForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const amount = Number(document.getElementById("withdrawAmount")?.value || 0);
+      const description = document.getElementById("withdrawDescription")?.value?.trim() || "";
+
+      try {
+        const response = await authFetch("/api/wallet/withdraw", {
+          method: "POST",
+          body: JSON.stringify({ amount, description })
+        });
+
+        if (!response.ok) {
+          const text = await response.text();
+          throw new Error(text || "Withdrawal request failed");
+        }
+
+        await loadWalletPageData();
+        withdrawForm.reset();
+        setNotice("walletNotice", "success", "Withdrawal request submitted.");
+      } catch (err) {
+        setNotice("walletNotice", "error", err.message || "Withdrawal request failed");
+      }
+    });
+  }
+}
+
+function setupTransactionsPage() {
+  const filter = document.getElementById("transactionFilter");
+  const refresh = document.getElementById("refreshTransactions");
+
+  if (filter) {
+    filter.addEventListener("change", async () => {
+      try {
+        await loadTransactionsPageData();
+        setNotice("transactionsNotice", null, "");
+      } catch (err) {
+        setNotice("transactionsNotice", "error", err.message || "Failed to load transactions");
+      }
+    });
+  }
+
+  if (refresh) {
+    refresh.addEventListener("click", async () => {
+      try {
+        await loadTransactionsPageData();
+        setNotice("transactionsNotice", "success", "Transactions refreshed.");
+      } catch (err) {
+        setNotice("transactionsNotice", "error", err.message || "Failed to refresh transactions");
+      }
+    });
+  }
+}
+
 function initPlaceholders() {
   const page = document.body.dataset.page;
 
@@ -421,7 +635,11 @@ function setupPageInteractions() {
   }
 
   if (page === "transactions") {
-    setupSimpleRefresh("refreshTransactions");
+    setupTransactionsPage();
+  }
+
+  if (page === "wallet") {
+    setupWalletForms();
   }
 }
 
@@ -437,6 +655,25 @@ async function initApp() {
   setupAuthForms();
   showToken();
   await loadCurrentUser();
+
+  const page = document.body.dataset.page;
+  if (page === "wallet") {
+    try {
+      await loadWalletPageData();
+      setNotice("walletNotice", null, "");
+    } catch (err) {
+      setNotice("walletNotice", "error", err.message || "Failed to load wallet data");
+    }
+  }
+
+  if (page === "transactions") {
+    try {
+      await loadTransactionsPageData();
+      setNotice("transactionsNotice", null, "");
+    } catch (err) {
+      setNotice("transactionsNotice", "error", err.message || "Failed to load transactions");
+    }
+  }
 }
 
 function setupAuthForms() {
