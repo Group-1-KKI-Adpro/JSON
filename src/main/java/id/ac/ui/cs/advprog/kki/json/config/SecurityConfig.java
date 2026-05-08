@@ -42,7 +42,20 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/admin/vouchers").hasRole("ADMIN")
 
                         /* STATIC PAGES / ASSETS */
-                        .requestMatchers("/", "/index.html", "/favicon.ico").permitAll()
+                        .requestMatchers(
+                                "/",
+                                "/index.html",
+                                "/login.html",
+                                "/register.html",
+                                "/catalog.html",
+                                "/orders.html",
+                                "/vouchers.html",
+                                "/profile.html",
+                                "/wallet.html",
+                                "/transactions.html",
+                                "/favicon.ico",
+                                "/*.html"
+                        ).permitAll()
                         .requestMatchers("/Transaction/**").permitAll()
                         .requestMatchers(
                                 HttpMethod.GET,
