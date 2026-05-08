@@ -34,13 +34,23 @@ public class Order {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
+    @Column
+    private Integer jastiperRating;
+
+    @Column
+    private Integer productRating;
+
+    @Column(length = 500)
+    private String review;
+
     @OneToMany(mappedBy = "order",
             cascade = CascadeType.ALL,
             orphanRemoval = true,
-            fetch = FetchType.EAGER)
+            fetch = FetchType.LAZY)
     private List<OrderItem> items = new ArrayList<>();
 
     public Order() {}
+
 
     @PrePersist
     protected void onCreate() {
@@ -57,10 +67,13 @@ public class Order {
         updatedAt = LocalDateTime.now();
     }
 
+    // 🔗 Maintain bidirectional consistency
     public void addItem(OrderItem item) {
         items.add(item);
         item.setOrder(this);
     }
+
+    // --- Getters & Setters ---
 
     public String getId() {
         return id;
@@ -116,5 +129,29 @@ public class Order {
 
     public List<OrderItem> getItems() {
         return items;
+    }
+
+    public Integer getJastiperRating() {
+        return jastiperRating;
+    }
+
+    public void setJastiperRating(Integer jastiperRating) {
+        this.jastiperRating = jastiperRating;
+    }
+
+    public Integer getProductRating() {
+        return productRating;
+    }
+
+    public void setProductRating(Integer productRating) {
+        this.productRating = productRating;
+    }
+
+    public String getReview() {
+        return review;
+    }
+
+    public void setReview(String review) {
+        this.review = review;
     }
 }
