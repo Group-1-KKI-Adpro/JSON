@@ -1,6 +1,6 @@
 package id.ac.ui.cs.advprog.kki.json.voucher.strategy;
 
-import id.ac.ui.cs.advprog.kki.json.model.Voucher;
+import id.ac.ui.cs.advprog.kki.json.voucher.model.Voucher;
 
 public interface DiscountStrategy {
     /**

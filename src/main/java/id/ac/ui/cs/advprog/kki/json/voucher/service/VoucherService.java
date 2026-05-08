@@ -1,10 +1,16 @@
 package id.ac.ui.cs.advprog.kki.json.voucher.service;
 
-import id.ac.ui.cs.advprog.kki.json.model.DiscountType;
+import id.ac.ui.cs.advprog.kki.json.voucher.model.DiscountType;
+import id.ac.ui.cs.advprog.kki.json.voucher.strategy.DiscountStrategy;
+import id.ac.ui.cs.advprog.kki.json.voucher.strategy.FlatDiscountStrategy;
+import id.ac.ui.cs.advprog.kki.json.voucher.strategy.PercentageDiscountStrategy;
 import id.ac.ui.cs.advprog.kki.json.voucher.dto.CreateVoucherRequest;
 import id.ac.ui.cs.advprog.kki.json.voucher.dto.UpdateVoucherRequest;
 import id.ac.ui.cs.advprog.kki.json.voucher.dto.UseVoucherResponse;
 import id.ac.ui.cs.advprog.kki.json.voucher.dto.ValidateVoucherResponse;
+import id.ac.ui.cs.advprog.kki.json.voucher.model.Voucher;
+import id.ac.ui.cs.advprog.kki.json.voucher.repository.VoucherRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -66,8 +72,12 @@ public class VoucherService {
         return new ValidateVoucherResponse(code, orderTotal, discountAmount, finalTotal);
     }
 
+    @Transactional
     public UseVoucherResponse useVoucher(String code, String orderId, String userId) {
-        Voucher voucher = getVoucherByCode(code);
+        // Fetch the voucher using the locked query to prevent race conditions
+        Voucher voucher = voucherRepository.findByIdForUpdate(code)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Voucher not found"));
+                
         validateVoucherUsability(voucher);
 
         if (voucher.getQuota() <= 0) {
