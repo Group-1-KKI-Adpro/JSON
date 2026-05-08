@@ -3,153 +3,309 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>JSON – Auth Playground</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 32px; line-height: 1.5; }
-        .row { display: flex; gap: 24px; flex-wrap: wrap; }
-        .card { border: 1px solid #ddd; border-radius: 8px; padding: 16px; width: 360px; }
-        input { width: 100%; padding: 8px; margin: 6px 0 12px; }
-        button { padding: 10px 12px; cursor: pointer; }
-        pre { background: #f6f6f6; padding: 12px; border-radius: 8px; overflow: auto; }
-        .small { font-size: 12px; color: #666; }
-    </style>
+    <title>JSON — Jastip Online Nasional</title>
+    <link rel="stylesheet" href="/css/site.css" />
 </head>
 <body>
-<h1>JaStip Online Nasional (JSON)</h1>
-<p class="small">Local Auth & Profile test page (Register → Login → Me → Update Profile).</p>
-
-<div style="margin: 10px 0 18px; display: flex; gap: 10px; flex-wrap: wrap;">
-    <a href="/wallet"><button type="button">Wallet</button></a>
-    <a href="/transactions"><button type="button">Transactions</button></a>
-</div>
-<div class="row">
-    <div class="card">
-        <h2>Register</h2>
-        <input id="regEmail" placeholder="email" />
-        <input id="regPass" placeholder="password" type="password" />
-        <input id="regName" placeholder="fullName" />
-        <button onclick="register()">Register</button>
-        <pre id="regOut"></pre>
+<header class="nav">
+    <div class="container nav-inner">
+        <a class="brand" href="/">
+            <span class="brand-badge">J</span>
+            <span>JSON</span>
+        </a>
+        <nav class="nav-links">
+            <a href="#categories">Categories</a>
+            <a href="#products">Products</a>
+            <a href="#how-it-works">How it works</a>
+            <a href="#jastipers">Jastipers</a>
+        </nav>
+        <div class="nav-actions">
+            <a class="btn btn-ghost" href="/wallet">Wallet</a>
+            <a class="btn btn-ghost" href="/transactions">Transactions</a>
+            <a class="btn btn-primary" href="#products">Start Shopping</a>
+        </div>
     </div>
+</header>
 
-    <div class="card">
-        <h2>Login</h2>
-        <input id="logEmail" placeholder="email" />
-        <input id="logPass" placeholder="password" type="password" />
-        <button onclick="login()">Login</button>
-        <p class="small">Token is saved in localStorage (shared across pages).</p>
-        <pre id="logOut"></pre>
+<main>
+    <section class="hero">
+        <div class="container hero-grid">
+            <div class="hero-card hero-main">
+                <span class="kicker">✈️ Trusted jastip marketplace</span>
+                <h1>Shop limited goods from abroad with a modern, secure marketplace feel.</h1>
+                <p>
+                    JSON connects buyers and jastipers in one clean platform for browsing, ordering,
+                    tracking, wallet payments, and promo vouchers.
+                </p>
+                <div class="hero-actions">
+                    <a class="btn btn-primary" href="#products">Browse products</a>
+                    <a class="btn btn-ghost" href="/wallet">Open wallet</a>
+                </div>
+                <div class="hero-points">
+                    <div class="point">🔒 Secure login</div>
+                    <div class="point">📦 Order tracking</div>
+                    <div class="point">💳 Wallet & vouchers</div>
+                </div>
+            </div>
+
+            <aside class="hero-card hero-side">
+                <div class="hero-side-top">
+                    <div class="badge">Live marketplace preview</div>
+                    <div class="mock-window">
+                        <div class="mock-title">
+                            <span>Trending this week</span>
+                            <span>12 active trips</span>
+                        </div>
+                        <div class="mock-item">
+                            <div class="avatar">JP</div>
+                            <div>
+                                <div style="font-weight:800">Japan skincare set</div>
+                                <div class="small-muted" style="color:#cbd5e1">From Tokyo • 48 left</div>
+                            </div>
+                        </div>
+                        <div class="mock-item">
+                            <div class="avatar green">SN</div>
+                            <div>
+                                <div style="font-weight:800">Limited sneakers</div>
+                                <div class="small-muted" style="color:#cbd5e1">From Seoul • 18 left</div>
+                            </div>
+                        </div>
+                        <div class="mock-item">
+                            <div class="avatar blue">LG</div>
+                            <div>
+                                <div style="font-weight:800">Luxury accessories</div>
+                                <div class="small-muted" style="color:#cbd5e1">From Singapore • 7 left</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div style="display:grid;gap:10px">
+                    <div class="row-item" style="background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.08);color:#fff">
+                        <span>Active orders</span><strong>128</strong>
+                    </div>
+                    <div class="row-item" style="background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.08);color:#fff">
+                        <span>Verified jastipers</span><strong>36</strong>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container stat-grid">
+            <div class="stat">
+                <div class="label">Supported countries</div>
+                <div class="value">8</div>
+                <div class="desc">Japan, Korea, Singapore, and more.</div>
+            </div>
+            <div class="stat">
+                <div class="label">Completed trips</div>
+                <div class="value">240+</div>
+                <div class="desc">Jastipers with delivery history.</div>
+            </div>
+            <div class="stat">
+                <div class="label">Average rating</div>
+                <div class="value">4.8</div>
+                <div class="desc">Trust-first marketplace experience.</div>
+            </div>
+            <div class="stat">
+                <div class="label">Voucher savings</div>
+                <div class="value">15%</div>
+                <div class="desc">Discounts on selected orders.</div>
+            </div>
+        </div>
+    </section>
+
+    <section id="categories" class="section">
+        <div class="container">
+            <div class="section-head">
+                <div>
+                    <h2>Browse by category</h2>
+                    <p>Use the visual tone of a premium marketplace.</p>
+                </div>
+            </div>
+            <div class="grid-4">
+                <div class="card category">
+                    <div class="icon">🧴</div>
+                    <div>
+                        <h3>Skincare</h3>
+                        <p>Popular beauty products from Japan and Korea.</p>
+                    </div>
+                </div>
+                <div class="card category">
+                    <div class="icon green">👟</div>
+                    <div>
+                        <h3>Sneakers</h3>
+                        <p>Limited releases and collector items.</p>
+                    </div>
+                </div>
+                <div class="card category">
+                    <div class="icon blue">🎧</div>
+                    <div>
+                        <h3>Electronics</h3>
+                        <p>Portable gadgets and accessories.</p>
+                    </div>
+                </div>
+                <div class="card category">
+                    <div class="icon">👜</div>
+                    <div>
+                        <h3>Luxury</h3>
+                        <p>Premium goods with clean presentation.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="products" class="section">
+        <div class="container">
+            <div class="section-head">
+                <div>
+                    <h2>Featured products</h2>
+                    <p>These cards are a good visual target for your final UI.</p>
+                </div>
+                <div class="chip-row">
+                    <span class="chip">Japan</span>
+                    <span class="chip">Korea</span>
+                    <span class="chip">Singapore</span>
+                    <span class="chip">Best sellers</span>
+                </div>
+            </div>
+            <div class="grid-3">
+                <article class="card product">
+                    <div class="img">🌸</div>
+                    <div class="body">
+                        <div class="badge">From Tokyo</div>
+                        <h3 style="margin:12px 0 8px">Premium skincare bundle</h3>
+                        <div class="price">Rp 420.000</div>
+                        <div class="meta">Stock left: 48 • Jastiper: Aiko • Arrival: 7–10 days</div>
+                    </div>
+                </article>
+                <article class="card product">
+                    <div class="img">👟</div>
+                    <div class="body">
+                        <div class="badge">Limited drop</div>
+                        <h3 style="margin:12px 0 8px">Seoul sneaker release</h3>
+                        <div class="price">Rp 1.850.000</div>
+                        <div class="meta">Stock left: 18 • Jastiper: Mina • Arrival: 6–8 days</div>
+                    </div>
+                </article>
+                <article class="card product">
+                    <div class="img">🧁</div>
+                    <div class="body">
+                        <div class="badge">Popular snack</div>
+                        <h3 style="margin:12px 0 8px">Japan snack box</h3>
+                        <div class="price">Rp 180.000</div>
+                        <div class="meta">Stock left: 62 • Jastiper: Ken • Arrival: 5–9 days</div>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <section id="how-it-works" class="section">
+        <div class="container">
+            <div class="section-head">
+                <div>
+                    <h2>How it works</h2>
+                    <p>Simple flow for buyers and jastipers.</p>
+                </div>
+            </div>
+            <div class="steps">
+                <div class="step">
+                    <div class="num">1</div>
+                    <h3>Browse items</h3>
+                    <p class="page-sub">Users search by country, category, and stock before adding to cart.</p>
+                </div>
+                <div class="step">
+                    <div class="num">2</div>
+                    <h3>Pay and confirm</h3>
+                    <p class="page-sub">Wallet balance and vouchers are used during checkout.</p>
+                </div>
+                <div class="step">
+                    <div class="num">3</div>
+                    <h3>Track delivery</h3>
+                    <p class="page-sub">Order status moves from paid to purchased, shipped, and completed.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="jastipers" class="section">
+        <div class="container">
+            <div class="section-head">
+                <div>
+                    <h2>Top jastipers</h2>
+                    <p>Profile cards that make the platform feel trustworthy.</p>
+                </div>
+            </div>
+            <div class="grid-3">
+                <div class="card">
+                    <div style="display:flex;gap:14px;align-items:center">
+                        <div class="avatar">AK</div>
+                        <div>
+                            <div style="font-weight:800">Aiko Kim</div>
+                            <div class="small-muted">Tokyo • 4.9 rating</div>
+                        </div>
+                    </div>
+                    <p class="page-sub" style="margin-top:12px">Beauty, snacks, and premium lifestyle goods.</p>
+                </div>
+                <div class="card">
+                    <div style="display:flex;gap:14px;align-items:center">
+                        <div class="avatar green">MN</div>
+                        <div>
+                            <div style="font-weight:800">Mina Park</div>
+                            <div class="small-muted">Seoul • 4.8 rating</div>
+                        </div>
+                    </div>
+                    <p class="page-sub" style="margin-top:12px">Best for fashion drops and limited releases.</p>
+                </div>
+                <div class="card">
+                    <div style="display:flex;gap:14px;align-items:center">
+                        <div class="avatar blue">RK</div>
+                        <div>
+                            <div style="font-weight:800">Raka Tan</div>
+                            <div class="small-muted">Singapore • 4.9 rating</div>
+                        </div>
+                    </div>
+                    <p class="page-sub" style="margin-top:12px">Fast handling for electronics and accessories.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container split">
+            <div class="panel">
+                <h2 style="margin-top:0">Open the demo pages</h2>
+                <p class="page-sub">These are the pages already wired to your backend routes.</p>
+                <div class="hero-actions">
+                    <a class="btn btn-primary" href="/wallet">Wallet</a>
+                    <a class="btn btn-ghost" href="/transactions">Transactions</a>
+                </div>
+            </div>
+            <div class="panel">
+                <h2 style="margin-top:0">Design direction</h2>
+                <p class="page-sub">
+                    Use rounded cards, strong spacing, and one warm accent color so the site feels like
+                    a premium marketplace instead of a plain admin page.
+                </p>
+                <div class="chip-row">
+                    <span class="chip">Modern</span>
+                    <span class="chip">Clean</span>
+                    <span class="chip">Marketplace</span>
+                    <span class="chip">Travel vibe</span>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer class="footer">
+    <div class="container footer-inner">
+        <div><strong>JSON — Jastip Online Nasional</strong><div class="small-muted">Frontend showcase for your group project.</div></div>
+        <div class="small-muted">Home page lives in <code>src/main/resources/static/index.html</code></div>
     </div>
-
-    <div class="card">
-        <h2>Me</h2>
-        <button onclick="me()">GET /api/auth/me</button>
-        <pre id="meOut"></pre>
-    </div>
-
-    <div class="card">
-        <h2>Update Profile</h2>
-        <input id="profUsername" placeholder="username (optional)" />
-        <input id="profFullName" placeholder="fullName (optional)" />
-        <button onclick="updateProfile()">PATCH /api/auth/profile</button>
-        <pre id="profOut"></pre>
-    </div>
-</div>
-
-<hr />
-<h3>Current Token</h3>
-<button onclick="clearToken()">Clear Token</button>
-<pre id="tokenOut">(none)</pre>
-
-<script>
-    const TOKEN_KEY = "json_token";
-    let token = localStorage.getItem(TOKEN_KEY);
-
-    function setToken(t) {
-        token = t;
-        document.getElementById("tokenOut").textContent = token ?? "(none)";
-        if (token) localStorage.setItem(TOKEN_KEY, token);
-        else localStorage.removeItem(TOKEN_KEY);
-    }
-
-    function clearToken() {
-        setToken(null);
-    }
-
-    async function register() {
-        const body = {
-            email: document.getElementById("regEmail").value,
-            password: document.getElementById("regPass").value,
-            fullName: document.getElementById("regName").value
-        };
-
-        const res = await fetch("/api/auth/register", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(body)
-        });
-
-        const text = await res.text();
-        document.getElementById("regOut").textContent = `${res.status}\n${text}`;
-    }
-
-    async function login() {
-        const body = {
-            email: document.getElementById("logEmail").value,
-            password: document.getElementById("logPass").value
-        };
-
-        const res = await fetch("/api/auth/login", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(body)
-        });
-
-        const json = await res.json().catch(() => null);
-        document.getElementById("logOut").textContent = `${res.status}\n${JSON.stringify(json, null, 2)}`;
-
-        if (res.ok && json?.token) setToken(json.token);
-    }
-
-    async function me() {
-        if (!token) {
-            document.getElementById("meOut").textContent = "No token. Please login first.";
-            return;
-        }
-
-        const res = await fetch("/api/auth/me", {
-            headers: { "Authorization": `Bearer ${token}` }
-        });
-
-        const text = await res.text();
-        document.getElementById("meOut").textContent = `${res.status}\n${text}`;
-    }
-
-    async function updateProfile() {
-        if (!token) {
-            document.getElementById("profOut").textContent = "No token. Please login first.";
-            return;
-        }
-
-        const body = {
-            username: document.getElementById("profUsername").value,
-            fullName: document.getElementById("profFullName").value
-        };
-
-        const res = await fetch("/api/auth/profile", {
-            method: "PATCH",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}`
-            },
-            body: JSON.stringify(body)
-        });
-
-        const text = await res.text();
-        document.getElementById("profOut").textContent = `${res.status}\n${text}`;
-    }
-    setToken(token);
-
-</script>
+</footer>
 </body>
 </html>
