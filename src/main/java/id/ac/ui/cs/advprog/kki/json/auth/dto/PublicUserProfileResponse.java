@@ -13,11 +13,22 @@ public class PublicUserProfileResponse {
 
     private Double averageRating;
     private Integer successfulTransactions;
+    private Integer totalTransactions;
     private Double successRate;
+    private Integer ratingCount;
 
-    public PublicUserProfileResponse(Long id, String username, String fullName,
-                                     Role role, AccountStatus status,
-                                     Double averageRating, Integer successfulTransactions, Double successRate) {
+    public PublicUserProfileResponse(
+            Long id,
+            String username,
+            String fullName,
+            Role role,
+            AccountStatus status,
+            Double averageRating,
+            Integer successfulTransactions,
+            Integer totalTransactions,
+            Double successRate,
+            Integer ratingCount
+    ) {
         this.id = id;
         this.username = username;
         this.fullName = fullName;
@@ -25,7 +36,9 @@ public class PublicUserProfileResponse {
         this.status = status;
         this.averageRating = averageRating;
         this.successfulTransactions = successfulTransactions;
+        this.totalTransactions = totalTransactions;
         this.successRate = successRate;
+        this.ratingCount = ratingCount;
     }
 
     public Long getId() { return id; }
@@ -35,5 +48,7 @@ public class PublicUserProfileResponse {
     public AccountStatus getStatus() { return status; }
     public Double getAverageRating() { return averageRating; }
     public Integer getSuccessfulTransactions() { return successfulTransactions; }
+    public Integer getTotalTransactions() { return totalTransactions; }
     public Double getSuccessRate() { return successRate; }
+    public Integer getRatingCount() { return ratingCount; }
 }

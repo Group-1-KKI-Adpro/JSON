@@ -15,24 +15,15 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     @Bean
-    public SecurityFilterChain filterChain(
-            HttpSecurity http,
-            JwtAuthFilter jwtAuthFilter
-    ) throws Exception {
-
+    public SecurityFilterChain filterChain(HttpSecurity http, JwtAuthFilter jwtAuthFilter) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
-                .headers(headers ->
-                        headers.frameOptions(frame -> frame.disable())
-                )
+                .headers(headers -> headers.frameOptions(frame -> frame.disable()))
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-                .securityContext(sc ->
-                        sc.requireExplicitSave(false)
-                )
+                .securityContext(sc -> sc.requireExplicitSave(false))
                 .authorizeHttpRequests(auth -> auth
-
                         /* AUTH */
                         .requestMatchers(HttpMethod.POST, "/api/auth/register").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
@@ -50,44 +41,33 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/vouchers/use").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/admin/vouchers").hasRole("ADMIN")
 
+                        /* STATIC PAGES / ASSETS */
+                        .requestMatchers("/", "/index.html", "/favicon.ico").permitAll()
+                        .requestMatchers("/Transaction/**").permitAll()
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/auth",
+                                "/profile",
+                                "/catalog",
+                                "/orders",
+                                "/vouchers",
+                                "/wallet",
+                                "/transactions"
+                        ).permitAll()
+                        .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
+                        .requestMatchers("/error").permitAll()
+
                         /* CATALOG + SHOPPING */
                         .requestMatchers("/api/catalog/**").authenticated()
                         .requestMatchers("/api/orders/**").authenticated()
                         .requestMatchers("/api/wallet/**").authenticated()
 
+                        /* INTERNAL */
+                        .requestMatchers("/api/internal/**").hasRole("ADMIN")
+
                         /* ADMIN */
                         .requestMatchers("/api/admin/wallet/**").hasRole("ADMIN")
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
-
-                        /* STATIC PAGES */
-                        .requestMatchers(
-                                "/",
-                                "/index.html",
-                                "/login.html",
-                                "/register.html",
-                                "/catalog.html",
-                                "/orders.html",
-                                "/vouchers.html",
-                                "/profile.html",
-                                "/wallet.html",
-                                "/transactions.html",
-                                "/favicon.ico",
-                                "/*.html"
-                        ).permitAll()
-
-                        /* MODULE / TEMPLATE ROUTES */
-                        .requestMatchers("/Transaction/**").permitAll()
-                        .requestMatchers(
-                                HttpMethod.GET,
-                                "/auth", "/profile", "/catalog", "/orders",
-                                "/vouchers", "/wallet", "/transactions"
-                        ).permitAll()
-
-                        /* STATIC ASSETS */
-                        .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
-
-                        /* ERROR PAGE */
-                        .requestMatchers("/error").permitAll()
 
                         /* EVERYTHING ELSE */
                         .anyRequest().authenticated()
@@ -95,10 +75,7 @@ public class SecurityConfig {
                 .httpBasic(httpBasic -> httpBasic.disable())
                 .formLogin(form -> form.disable());
 
-        http.addFilterBefore(
-                jwtAuthFilter,
-                UsernamePasswordAuthenticationFilter.class
-        );
+        http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

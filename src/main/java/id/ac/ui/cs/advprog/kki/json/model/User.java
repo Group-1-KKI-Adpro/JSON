@@ -1,7 +1,6 @@
 package id.ac.ui.cs.advprog.kki.json.model;
 
 import jakarta.persistence.*;
-
 import java.time.Instant;
 
 @Entity
@@ -24,7 +23,6 @@ public class User {
     @Column(nullable = false, length = 255)
     private String passwordHash;
 
-    // Profile fields (can be set later)
     @Column(unique = true, length = 60)
     private String username;
 
@@ -41,6 +39,21 @@ public class User {
 
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
+
+    @Column(nullable = false)
+    private Integer successfulTransactions = 0;
+
+    @Column(nullable = false)
+    private Integer totalTransactions = 0;
+
+    @Column(nullable = false)
+    private Double averageRating = 0.0;
+
+    @Column(nullable = false)
+    private Integer ratingCount = 0;
+
+    @Version
+    private Long version;
 
     protected User() {}
 
@@ -61,9 +74,18 @@ public class User {
     public Role getRole() { return role; }
     public AccountStatus getStatus() { return status; }
     public Instant getCreatedAt() { return createdAt; }
+    public Integer getSuccessfulTransactions() { return successfulTransactions; }
+    public Integer getTotalTransactions() { return totalTransactions; }
+    public Double getAverageRating() { return averageRating; }
+    public Integer getRatingCount() { return ratingCount; }
+    public Long getVersion() { return version; }
 
     public void setUsername(String username) { this.username = username; }
     public void setFullName(String fullName) { this.fullName = fullName; }
     public void setRole(Role role) { this.role = role; }
     public void setStatus(AccountStatus status) { this.status = status; }
+    public void setSuccessfulTransactions(Integer successfulTransactions) { this.successfulTransactions = successfulTransactions; }
+    public void setTotalTransactions(Integer totalTransactions) { this.totalTransactions = totalTransactions; }
+    public void setAverageRating(Double averageRating) { this.averageRating = averageRating; }
+    public void setRatingCount(Integer ratingCount) { this.ratingCount = ratingCount; }
 }
