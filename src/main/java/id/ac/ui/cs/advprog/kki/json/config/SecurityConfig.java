@@ -9,10 +9,8 @@ import org.springframework.http.HttpMethod;
 
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -42,138 +40,64 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
 
-                        /*
-                         * AUTH
-                         */
-                        .requestMatchers(
-                                HttpMethod.POST,
-                                "/api/auth/register"
-                        ).permitAll()
+                        /* AUTH */
+                        .requestMatchers(HttpMethod.POST, "/api/auth/register").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
 
-                        .requestMatchers(
-                                HttpMethod.POST,
-                                "/api/auth/login"
-                        ).permitAll()
+                        /* PUBLIC API */
+                        .requestMatchers(HttpMethod.GET, "/api/health").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/users/**").permitAll()
 
-                        /*
-                         * PUBLIC API
-                         */
-                        .requestMatchers(
-                                HttpMethod.GET,
-                                "/api/health"
-                        ).permitAll()
+                        /* H2 CONSOLE */
+                        .requestMatchers("/h2-console/**").permitAll()
 
-                        .requestMatchers(
-                                HttpMethod.GET,
-                                "/api/users/**"
-                        ).permitAll()
+                        /* VOUCHERS */
+                        .requestMatchers(HttpMethod.GET, "/api/vouchers/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/vouchers/validate").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/vouchers/use").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/admin/vouchers").hasRole("ADMIN")
 
-                        /*
-                         * H2 CONSOLE
-                         */
-                        .requestMatchers(
-                                "/h2-console/**"
-                        ).permitAll()
+                        /* CATALOG + SHOPPING */
+                        .requestMatchers("/api/catalog/**").authenticated()
+                        .requestMatchers("/api/orders/**").authenticated()
+                        .requestMatchers("/api/wallet/**").authenticated()
 
-                        /*
-                         * VOUCHERS
-                         */
-                        .requestMatchers(
-                                HttpMethod.GET,
-                                "/api/vouchers/**"
-                        ).permitAll()
+                        /* ADMIN */
+                        .requestMatchers("/api/admin/wallet/**").hasRole("ADMIN")
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
-                        .requestMatchers(
-                                HttpMethod.POST,
-                                "/api/vouchers/validate"
-                        ).authenticated()
-
-                        .requestMatchers(
-                                HttpMethod.POST,
-                                "/api/vouchers/use"
-                        ).authenticated()
-
-                        /*
-                         * ADMIN
-                         */
-                        .requestMatchers(
-                                HttpMethod.POST,
-                                "/api/admin/vouchers"
-                        ).hasRole("ADMIN")
-
-                        .requestMatchers(
-                                "/api/admin/wallet/**"
-                        ).hasRole("ADMIN")
-
-                        .requestMatchers(
-                                "/api/admin/**"
-                        ).hasRole("ADMIN")
-
-                        /*
-                         * ORDERS
-                         */
-                        .requestMatchers(
-                                "/api/orders/**"
-                        ).permitAll()
-
-                        /*
-                         * STATIC PAGES
-                         */
+                        /* STATIC PAGES */
                         .requestMatchers(
                                 "/",
                                 "/index.html",
                                 "/login.html",
                                 "/register.html",
+                                "/catalog.html",
+                                "/orders.html",
+                                "/vouchers.html",
+                                "/profile.html",
+                                "/wallet.html",
+                                "/transactions.html",
                                 "/favicon.ico",
                                 "/*.html"
                         ).permitAll()
 
-                        /*
-                         * THYMELEAF PAGES
-                         */
-                        .requestMatchers(
-                                "/Transaction/**"
-                        ).permitAll()
+                        /* LEGACY PAGE ROUTES */
+                        .requestMatchers("/wallet", "/transactions").permitAll()
 
-                        .requestMatchers(
-                                HttpMethod.GET,
-                                "/wallet",
-                                "/transactions"
-                        ).permitAll()
+                        /* STATIC ASSETS */
+                        .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
 
-                        /*
-                         * STATIC ASSETS
-                         */
-                        .requestMatchers(
-                                "/css/**",
-                                "/js/**",
-                                "/images/**"
-                        ).permitAll()
+                        /* ERROR PAGE */
+                        .requestMatchers("/error").permitAll()
 
-                        /*
-                         * ERROR PAGE
-                         */
-                        .requestMatchers(
-                                "/error"
-                        ).permitAll()
-
-                        /*
-                         * EVERYTHING ELSE
-                         */
+                        /* EVERYTHING ELSE */
                         .anyRequest().authenticated()
                 )
 
-                .httpBasic(httpBasic ->
-                        httpBasic.disable()
-                )
+                .httpBasic(httpBasic -> httpBasic.disable())
+                .formLogin(form -> form.disable());
 
-                .formLogin(form ->
-                        form.disable()
-                );
-
-        /*
-         * JWT FILTER
-         */
         http.addFilterBefore(
                 jwtAuthFilter,
                 UsernamePasswordAuthenticationFilter.class

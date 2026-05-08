@@ -1,14 +1,14 @@
 package id.ac.ui.cs.advprog.kki.json.service;
 
-import id.ac.ui.cs.advprog.kki.json.model.*;
-import id.ac.ui.cs.advprog.kki.json.repository.OrderRepository;
+import id.ac.ui.cs.advprog.kki.json.model.Order;
+import id.ac.ui.cs.advprog.kki.json.model.OrderItem;
+import id.ac.ui.cs.advprog.kki.json.model.OrderStatus;
+import id.ac.ui.cs.advprog.kki.json.order.client.InventoryClient;
 import id.ac.ui.cs.advprog.kki.json.order.dto.ItemRequest;
+import id.ac.ui.cs.advprog.kki.json.repository.OrderRepository;
 import org.springframework.stereotype.Service;
 
-import id.ac.ui.cs.advprog.kki.json.order.client.InventoryClient;
-import id.ac.ui.cs.advprog.kki.json.order.client.WalletClient;
-import id.ac.ui.cs.advprog.kki.json.order.client.VoucherClient;
-
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -16,20 +16,13 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final InventoryClient inventoryClient;
-    private final WalletClient walletClient;
-    private final VoucherClient voucherClient;
 
     public OrderService(OrderRepository orderRepository,
-                        InventoryClient inventoryClient,
-                        WalletClient walletClient,
-                        VoucherClient voucherClient) {
+                        InventoryClient inventoryClient) {
         this.orderRepository = orderRepository;
         this.inventoryClient = inventoryClient;
-        this.walletClient = walletClient;
-        this.voucherClient = voucherClient;
     }
 
-    // 🔥 CREATE ORDER (FINAL FIXED)
     public Order createOrder(Long buyerId,
                              String shippingAddress,
                              List<ItemRequest> items,
@@ -44,61 +37,43 @@ public class OrderService {
         order.setBuyerId(buyerId);
         order.setShippingAddress(shippingAddress);
 
-        long total = 0;
-
-        // ✅ Build order + validation
+        long total = 0L;
         for (ItemRequest req : items) {
-
             if (req.getCatalogItemId() == null) {
                 throw new IllegalArgumentException("catalogItemId is required");
             }
-
             if (req.getQty() == null || req.getQty() <= 0) {
                 throw new IllegalArgumentException("qty must be > 0");
             }
-
             if (req.getPriceSnapshot() == null || req.getPriceSnapshot() < 0) {
                 throw new IllegalArgumentException("priceSnapshot must be >= 0");
             }
 
             OrderItem item = new OrderItem();
-            item.setCatalogItemId(req.getCatalogItemId()); // Integer
+            item.setCatalogItemId(req.getCatalogItemId());
             item.setQty(req.getQty());
-            item.setPriceSnapshot(req.getPriceSnapshot().longValue()); // convert Double → Long
-
+            item.setPriceSnapshot(req.getPriceSnapshot().longValue());
             order.addItem(item);
 
             total += req.getPriceSnapshot().longValue() * req.getQty();
-        }
-
-        if (voucherCode != null && !voucherCode.isBlank()) {
-            double discounted = voucherClient.applyVoucher(voucherCode, (double) total);
-            total = (long) discounted;
-        }
-
-        long balance = walletClient.getBalance(token);
-        if (balance < total) {
-            throw new RuntimeException("Insufficient balance");
-        }
-
-        for (OrderItem item : order.getItems()) {
-            inventoryClient.reserveItem(
-                    item.getCatalogItemId(),
-                    item.getQty()
-            );
         }
 
         order.setTotalPrice(total);
         order.setStatus(OrderStatus.PAID);
 
         Order savedOrder = orderRepository.save(order);
+        List<OrderItem> reservedItems = new ArrayList<>();
 
-
-        if (voucherCode != null && !voucherCode.isBlank()) {
-            voucherClient.useVoucher(voucherCode, savedOrder.getId(), token);
+        try {
+            for (OrderItem item : savedOrder.getItems()) {
+                inventoryClient.reserveItem(item.getCatalogItemId(), item.getQty(), token);
+                reservedItems.add(item);
+            }
+            return savedOrder;
+        } catch (RuntimeException e) {
+            rollbackReservation(savedOrder, reservedItems, token);
+            throw e;
         }
-
-        return savedOrder;
     }
 
     public Order updateStatus(String orderId, OrderStatus newStatus) {
@@ -122,8 +97,7 @@ public class OrderService {
         };
     }
 
-
-    public Order cancelOrder(String orderId) {
+    public Order cancelOrder(String orderId, String token) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
 
@@ -131,7 +105,9 @@ public class OrderService {
             throw new RuntimeException("Cannot cancel completed order");
         }
 
-        walletClient.refund(order.getBuyerId(), order.getTotalPrice());
+        for (OrderItem item : order.getItems()) {
+            inventoryClient.releaseItem(item.getCatalogItemId(), item.getQty(), token);
+        }
 
         order.setStatus(OrderStatus.CANCELLED);
         return orderRepository.save(order);
@@ -143,5 +119,24 @@ public class OrderService {
 
     public List<Order> getJastiperOrders(Long jastiperId) {
         return orderRepository.findByJastiperId(jastiperId);
+    }
+
+    private void rollbackReservation(Order savedOrder,
+                                     List<OrderItem> reservedItems,
+                                     String token) {
+        for (int i = reservedItems.size() - 1; i >= 0; i--) {
+            OrderItem item = reservedItems.get(i);
+            try {
+                inventoryClient.releaseItem(item.getCatalogItemId(), item.getQty(), token);
+            } catch (RuntimeException ignored) {
+                // Best-effort rollback.
+            }
+        }
+
+        try {
+            orderRepository.delete(savedOrder);
+        } catch (RuntimeException ignored) {
+            // Best-effort cleanup.
+        }
     }
 }

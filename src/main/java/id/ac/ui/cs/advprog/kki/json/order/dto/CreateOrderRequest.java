@@ -5,8 +5,19 @@ import java.util.List;
 public class CreateOrderRequest {
 
     private String shippingAddress;
-    private List<ItemRequest> items;
+    private List<String> items;
     private String voucherCode;
+
+    public CreateOrderRequest() {
+    }
+
+    public CreateOrderRequest(String shippingAddress,
+                              List<String> items,
+                              String voucherCode) {
+        this.shippingAddress = shippingAddress;
+        this.items = items;
+        this.voucherCode = voucherCode;
+    }
 
     public String getShippingAddress() {
         return shippingAddress;
@@ -16,11 +27,11 @@ public class CreateOrderRequest {
         this.shippingAddress = shippingAddress;
     }
 
-    public List<ItemRequest> getItems() {
+    public List<String> getItems() {
         return items;
     }
 
-    public void setItems(List<ItemRequest> items) {
+    public void setItems(List<String> items) {
         this.items = items;
     }
 
