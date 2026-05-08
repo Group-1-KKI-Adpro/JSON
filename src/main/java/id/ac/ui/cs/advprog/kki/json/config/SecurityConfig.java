@@ -1,12 +1,9 @@
 package id.ac.ui.cs.advprog.kki.json.config;
 
 import id.ac.ui.cs.advprog.kki.json.auth.security.JwtAuthFilter;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
 import org.springframework.http.HttpMethod;
-
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -18,90 +15,45 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     @Bean
-    public SecurityFilterChain filterChain(
-            HttpSecurity http,
-            JwtAuthFilter jwtAuthFilter
-    ) throws Exception {
-
+    public SecurityFilterChain filterChain(HttpSecurity http, JwtAuthFilter jwtAuthFilter) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
-
-                .headers(headers ->
-                        headers.frameOptions(frame -> frame.disable())
-                )
-
+                .headers(headers -> headers.frameOptions(frame -> frame.disable()))
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-
-                .securityContext(sc ->
-                        sc.requireExplicitSave(false)
-                )
-
+                .securityContext(sc -> sc.requireExplicitSave(false))
                 .authorizeHttpRequests(auth -> auth
-
-                        /* AUTH */
                         .requestMatchers(HttpMethod.POST, "/api/auth/register").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
 
-                        /* PUBLIC API */
                         .requestMatchers(HttpMethod.GET, "/api/health").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/users/**").permitAll()
-
-                        /* H2 CONSOLE */
                         .requestMatchers("/h2-console/**").permitAll()
 
-                        /* VOUCHERS */
+                        .requestMatchers(HttpMethod.POST, "/api/admin/vouchers").hasRole("ADMIN")
+                        // Admin-only wallet operations (e.g., withdraw verification).
+                        // Note: user login produces authorities like ROLE_ADMIN (see JwtAuthFilter).
+                        .requestMatchers("/api/admin/wallet/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/vouchers/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/vouchers/validate").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/vouchers/use").authenticated()
-                        .requestMatchers(HttpMethod.POST, "/api/admin/vouchers").hasRole("ADMIN")
 
-                        /* CATALOG + SHOPPING */
-                        .requestMatchers("/api/catalog/**").authenticated()
-                        .requestMatchers("/api/orders/**").authenticated()
-                        .requestMatchers("/api/wallet/**").authenticated()
-
-                        /* ADMIN */
-                        .requestMatchers("/api/admin/wallet/**").hasRole("ADMIN")
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-
-                        /* STATIC PAGES */
-                        .requestMatchers(
-                                "/",
-                                "/index.html",
-                                "/login.html",
-                                "/register.html",
-                                "/catalog.html",
-                                "/orders.html",
-                                "/vouchers.html",
-                                "/profile.html",
-                                "/wallet.html",
-                                "/transactions.html",
-                                "/favicon.ico",
-                                "/*.html"
-                        ).permitAll()
-
-                        /* LEGACY PAGE ROUTES */
-                        .requestMatchers("/wallet", "/transactions").permitAll()
-
-                        /* STATIC ASSETS */
+                        .requestMatchers("/", "/index.html", "/favicon.ico").permitAll()
+                        .requestMatchers("/Transaction/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/auth", "/profile", "/catalog", "/orders", "/vouchers", "/wallet", "/transactions").permitAll()
                         .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
-
-                        /* ERROR PAGE */
                         .requestMatchers("/error").permitAll()
 
-                        /* EVERYTHING ELSE */
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/orders/**").permitAll()
+
                         .anyRequest().authenticated()
                 )
-
                 .httpBasic(httpBasic -> httpBasic.disable())
                 .formLogin(form -> form.disable());
 
-        http.addFilterBefore(
-                jwtAuthFilter,
-                UsernamePasswordAuthenticationFilter.class
-        );
+        http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
