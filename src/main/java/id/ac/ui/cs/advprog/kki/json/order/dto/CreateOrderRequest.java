@@ -8,6 +8,17 @@ public class CreateOrderRequest {
     private List<ItemRequest> items;
     private String voucherCode;
 
+    public CreateOrderRequest() {
+    }
+
+    public CreateOrderRequest(String shippingAddress,
+                              List<ItemRequest> items,
+                              String voucherCode) {
+        this.shippingAddress = shippingAddress;
+        this.items = items;
+        this.voucherCode = voucherCode;
+    }
+
     public String getShippingAddress() {
         return shippingAddress;
     }

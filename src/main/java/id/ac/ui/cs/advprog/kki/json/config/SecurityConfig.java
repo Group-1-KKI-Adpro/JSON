@@ -24,17 +24,24 @@ public class SecurityConfig {
                 )
                 .securityContext(sc -> sc.requireExplicitSave(false))
                 .authorizeHttpRequests(auth -> auth
-                        // Auth endpoints
+                        /* AUTH */
                         .requestMatchers(HttpMethod.POST, "/api/auth/register").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
 
-                        // Public endpoints
+                        /* PUBLIC API */
                         .requestMatchers(HttpMethod.GET, "/api/health").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/users/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/vouchers/**").permitAll()
+
+                        /* H2 CONSOLE */
                         .requestMatchers("/h2-console/**").permitAll()
 
-                        // Static pages/assets
+                        /* VOUCHERS */
+                        .requestMatchers(HttpMethod.GET, "/api/vouchers/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/vouchers/validate").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/vouchers/use").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/admin/vouchers").hasRole("ADMIN")
+
+                        /* STATIC PAGES / ASSETS */
                         .requestMatchers("/", "/index.html", "/favicon.ico").permitAll()
                         .requestMatchers("/Transaction/**").permitAll()
                         .requestMatchers(
@@ -50,22 +57,19 @@ public class SecurityConfig {
                         .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
                         .requestMatchers("/error").permitAll()
 
-                        // Voucher authenticated operations
-                        .requestMatchers(HttpMethod.POST, "/api/vouchers/validate").authenticated()
-                        .requestMatchers(HttpMethod.POST, "/api/vouchers/use").authenticated()
+                        /* CATALOG + SHOPPING */
+                        .requestMatchers("/api/catalog/**").authenticated()
+                        .requestMatchers("/api/orders/**").authenticated()
+                        .requestMatchers("/api/wallet/**").authenticated()
 
-                        // Internal endpoints must NOT be public
+                        /* INTERNAL */
                         .requestMatchers("/api/internal/**").hasRole("ADMIN")
 
-                        // Admin endpoints
-                        .requestMatchers(HttpMethod.POST, "/api/admin/vouchers").hasRole("ADMIN")
+                        /* ADMIN */
                         .requestMatchers("/api/admin/wallet/**").hasRole("ADMIN")
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
-                        // Order endpoints must require login
-                        .requestMatchers("/api/orders/**").authenticated()
-
-                        // Everything else requires authentication
+                        /* EVERYTHING ELSE */
                         .anyRequest().authenticated()
                 )
                 .httpBasic(httpBasic -> httpBasic.disable())

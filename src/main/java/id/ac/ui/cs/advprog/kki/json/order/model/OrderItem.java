@@ -1,5 +1,6 @@
 package id.ac.ui.cs.advprog.kki.json.order.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 @Entity
@@ -12,15 +13,14 @@ public class OrderItem {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
+    @JsonIgnore
     private Order order;
-
 
     @Column(nullable = false)
     private Integer catalogItemId;
 
     @Column(nullable = false)
     private int qty;
-
 
     @Column(nullable = false)
     private Long priceSnapshot;
