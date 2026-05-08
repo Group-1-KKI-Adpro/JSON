@@ -1,6 +1,6 @@
-package id.ac.ui.cs.advprog.kki.json.repository;
+package id.ac.ui.cs.advprog.kki.json.order.repository;
 
-import id.ac.ui.cs.advprog.kki.json.model.Order;
+import id.ac.ui.cs.advprog.kki.json.order.model.Order;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

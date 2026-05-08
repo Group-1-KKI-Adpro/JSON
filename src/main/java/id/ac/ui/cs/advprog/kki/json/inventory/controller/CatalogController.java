@@ -1,11 +1,11 @@
-package id.ac.ui.cs.advprog.kki.json.controller;
+package id.ac.ui.cs.advprog.kki.json.inventory.controller;
 
-import id.ac.ui.cs.advprog.kki.json.model.CatalogItem;
-import id.ac.ui.cs.advprog.kki.json.model.CatalogItemRequest;
-import id.ac.ui.cs.advprog.kki.json.model.CatalogItemResponse;
-import id.ac.ui.cs.advprog.kki.json.model.CatalogItemUpdateRequest;
-import id.ac.ui.cs.advprog.kki.json.model.CatalogReserveRequest;
-import id.ac.ui.cs.advprog.kki.json.service.CatalogService;
+import id.ac.ui.cs.advprog.kki.json.inventory.dto.CatalogItemRequest;
+import id.ac.ui.cs.advprog.kki.json.inventory.dto.CatalogItemResponse;
+import id.ac.ui.cs.advprog.kki.json.inventory.dto.CatalogItemUpdateRequest;
+import id.ac.ui.cs.advprog.kki.json.inventory.dto.CatalogReserveRequest;
+import id.ac.ui.cs.advprog.kki.json.inventory.model.CatalogItem;
+import id.ac.ui.cs.advprog.kki.json.inventory.service.CatalogService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

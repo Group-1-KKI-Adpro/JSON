@@ -1,4 +1,4 @@
-package id.ac.ui.cs.advprog.kki.json.view;
+package id.ac.ui.cs.advprog.kki.json.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
