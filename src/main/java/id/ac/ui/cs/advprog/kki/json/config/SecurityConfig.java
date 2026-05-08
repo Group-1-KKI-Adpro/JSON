@@ -24,19 +24,17 @@ public class SecurityConfig {
                 )
                 .securityContext(sc -> sc.requireExplicitSave(false))
                 .authorizeHttpRequests(auth -> auth
+                        // Auth endpoints
                         .requestMatchers(HttpMethod.POST, "/api/auth/register").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
 
+                        // Public endpoints
                         .requestMatchers(HttpMethod.GET, "/api/health").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/users/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/vouchers/**").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
 
-                        .requestMatchers(HttpMethod.POST, "/api/admin/vouchers").hasRole("ADMIN")
-                        .requestMatchers("/api/admin/wallet/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/api/vouchers/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/vouchers/validate").authenticated()
-                        .requestMatchers(HttpMethod.POST, "/api/vouchers/use").authenticated()
-
+                        // Static pages/assets
                         .requestMatchers("/", "/index.html", "/favicon.ico").permitAll()
                         .requestMatchers("/Transaction/**").permitAll()
                         .requestMatchers(
@@ -52,10 +50,22 @@ public class SecurityConfig {
                         .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
                         .requestMatchers("/error").permitAll()
 
+                        // Voucher authenticated operations
+                        .requestMatchers(HttpMethod.POST, "/api/vouchers/validate").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/vouchers/use").authenticated()
+
+                        // Internal endpoints must NOT be public
                         .requestMatchers("/api/internal/**").hasRole("ADMIN")
+
+                        // Admin endpoints
+                        .requestMatchers(HttpMethod.POST, "/api/admin/vouchers").hasRole("ADMIN")
+                        .requestMatchers("/api/admin/wallet/**").hasRole("ADMIN")
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
+
+                        // Order endpoints must require login
                         .requestMatchers("/api/orders/**").authenticated()
 
+                        // Everything else requires authentication
                         .anyRequest().authenticated()
                 )
                 .httpBasic(httpBasic -> httpBasic.disable())
