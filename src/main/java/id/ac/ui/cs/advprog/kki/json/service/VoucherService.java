@@ -1,25 +1,37 @@
 package id.ac.ui.cs.advprog.kki.json.service;
 
+import id.ac.ui.cs.advprog.kki.json.model.DiscountType;
 import id.ac.ui.cs.advprog.kki.json.model.Voucher;
 import id.ac.ui.cs.advprog.kki.json.repository.VoucherRepository;
 import id.ac.ui.cs.advprog.kki.json.voucher.dto.CreateVoucherRequest;
 import id.ac.ui.cs.advprog.kki.json.voucher.dto.UpdateVoucherRequest;
 import id.ac.ui.cs.advprog.kki.json.voucher.dto.UseVoucherResponse;
 import id.ac.ui.cs.advprog.kki.json.voucher.dto.ValidateVoucherResponse;
+import id.ac.ui.cs.advprog.kki.json.voucher.strategy.DiscountStrategy;
+import id.ac.ui.cs.advprog.kki.json.voucher.strategy.FlatDiscountStrategy;
+import id.ac.ui.cs.advprog.kki.json.voucher.strategy.PercentageDiscountStrategy;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class VoucherService {
 
     private final VoucherRepository voucherRepository;
+    private final Map<DiscountType, DiscountStrategy> discountStrategies;
 
-    public VoucherService(VoucherRepository voucherRepository) {
+    public VoucherService(VoucherRepository voucherRepository,
+                          PercentageDiscountStrategy percentageStrategy,
+                          FlatDiscountStrategy flatStrategy) {
         this.voucherRepository = voucherRepository;
+        this.discountStrategies = Map.of(
+            DiscountType.PERCENTAGE, percentageStrategy,
+            DiscountType.FLAT, flatStrategy
+        );
     }
 
     public Voucher createVoucher(CreateVoucherRequest request) {
@@ -114,9 +126,10 @@ public class VoucherService {
     }
 
     private double calculateDiscount(Voucher voucher, Double orderTotal) {
-        return switch (voucher.getDiscountType()) {
-            case FLAT -> Math.min(voucher.getDiscountValue(), orderTotal);
-            case PERCENTAGE -> Math.min(orderTotal, orderTotal * voucher.getDiscountValue() / 100.0);
-        };
+        DiscountStrategy strategy = discountStrategies.get(voucher.getDiscountType());
+        if (strategy == null) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Unknown discount type: " + voucher.getDiscountType());
+        }
+        return strategy.calculateDiscount(orderTotal, voucher);
     }
 }

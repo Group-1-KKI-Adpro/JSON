@@ -10,6 +10,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.client.RestTemplate;
 
 @Configuration
 public class SecurityConfig {
@@ -62,5 +63,10 @@ public class SecurityConfig {
     @Bean
     public org.springframework.security.core.userdetails.UserDetailsService userDetailsService() {
         return new org.springframework.security.provisioning.InMemoryUserDetailsManager();
+    }
+
+    @Bean
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
     }
 }

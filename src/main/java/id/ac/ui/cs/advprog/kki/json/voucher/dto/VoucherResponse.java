@@ -15,6 +15,9 @@ public class VoucherResponse {
     private DiscountType discountType;
     private Double discountValue;
     private Boolean active;
+    public VoucherResponse() {
+    }
+
 
     public VoucherResponse(Voucher voucher) {
         this.code = voucher.getCode();
