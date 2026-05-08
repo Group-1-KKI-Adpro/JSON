@@ -34,6 +34,15 @@ public class Order {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
+    @Column
+    private Integer jastiperRating;
+
+    @Column
+    private Integer productRating;
+
+    @Column(length = 500)
+    private String review;
+
     @OneToMany(mappedBy = "order",
             cascade = CascadeType.ALL,
             orphanRemoval = true,
@@ -42,7 +51,7 @@ public class Order {
 
     public Order() {}
 
-    // ✅ Auto timestamps + default status safety
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
@@ -120,5 +129,29 @@ public class Order {
 
     public List<OrderItem> getItems() {
         return items;
+    }
+
+    public Integer getJastiperRating() {
+        return jastiperRating;
+    }
+
+    public void setJastiperRating(Integer jastiperRating) {
+        this.jastiperRating = jastiperRating;
+    }
+
+    public Integer getProductRating() {
+        return productRating;
+    }
+
+    public void setProductRating(Integer productRating) {
+        this.productRating = productRating;
+    }
+
+    public String getReview() {
+        return review;
+    }
+
+    public void setReview(String review) {
+        this.review = review;
     }
 }
