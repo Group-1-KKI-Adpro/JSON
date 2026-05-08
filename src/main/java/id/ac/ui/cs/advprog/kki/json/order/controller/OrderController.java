@@ -18,7 +18,8 @@ public class OrderController {
     private final OrderService orderService;
     private final AuthService authService;
 
-    public OrderController(OrderService orderService, AuthService authService) {
+    public OrderController(OrderService orderService,
+                           AuthService authService) {
         this.orderService = orderService;
         this.authService = authService;
     }
@@ -30,6 +31,7 @@ public class OrderController {
         String email = (String) authentication.getPrincipal();
         User user = authService.getByEmail(email);
         Long buyerId = user.getId();
+
         String token = authHeader.replace("Bearer ", "");
 
         return orderService.createOrder(

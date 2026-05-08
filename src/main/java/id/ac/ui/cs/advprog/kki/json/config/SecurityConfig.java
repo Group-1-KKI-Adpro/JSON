@@ -1,12 +1,9 @@
 package id.ac.ui.cs.advprog.kki.json.config;
 
 import id.ac.ui.cs.advprog.kki.json.auth.security.JwtAuthFilter;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
 import org.springframework.http.HttpMethod;
-
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -25,19 +22,15 @@ public class SecurityConfig {
 
         http
                 .csrf(csrf -> csrf.disable())
-
                 .headers(headers ->
                         headers.frameOptions(frame -> frame.disable())
                 )
-
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-
                 .securityContext(sc ->
                         sc.requireExplicitSave(false)
                 )
-
                 .authorizeHttpRequests(auth -> auth
 
                         /* AUTH */
@@ -82,8 +75,13 @@ public class SecurityConfig {
                                 "/*.html"
                         ).permitAll()
 
-                        /* LEGACY PAGE ROUTES */
-                        .requestMatchers("/wallet", "/transactions").permitAll()
+                        /* MODULE / TEMPLATE ROUTES */
+                        .requestMatchers("/Transaction/**").permitAll()
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/auth", "/profile", "/catalog", "/orders",
+                                "/vouchers", "/wallet", "/transactions"
+                        ).permitAll()
 
                         /* STATIC ASSETS */
                         .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
@@ -94,7 +92,6 @@ public class SecurityConfig {
                         /* EVERYTHING ELSE */
                         .anyRequest().authenticated()
                 )
-
                 .httpBasic(httpBasic -> httpBasic.disable())
                 .formLogin(form -> form.disable());
 

@@ -1,6 +1,8 @@
 package id.ac.ui.cs.advprog.kki.json.order.service;
 
 import id.ac.ui.cs.advprog.kki.json.order.client.InventoryClient;
+import id.ac.ui.cs.advprog.kki.json.order.client.VoucherClient;
+import id.ac.ui.cs.advprog.kki.json.order.client.WalletClient;
 import id.ac.ui.cs.advprog.kki.json.order.dto.ItemRequest;
 import id.ac.ui.cs.advprog.kki.json.order.model.Order;
 import id.ac.ui.cs.advprog.kki.json.order.model.OrderItem;
@@ -16,11 +18,17 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final InventoryClient inventoryClient;
+    private final WalletClient walletClient;
+    private final VoucherClient voucherClient;
 
     public OrderService(OrderRepository orderRepository,
-                        InventoryClient inventoryClient) {
+                        InventoryClient inventoryClient,
+                        WalletClient walletClient,
+                        VoucherClient voucherClient) {
         this.orderRepository = orderRepository;
         this.inventoryClient = inventoryClient;
+        this.walletClient = walletClient;
+        this.voucherClient = voucherClient;
     }
 
     public Order createOrder(Long buyerId,
@@ -58,6 +66,16 @@ public class OrderService {
             total += req.getPriceSnapshot().longValue() * req.getQty();
         }
 
+        if (voucherCode != null && !voucherCode.isBlank()) {
+            double discounted = voucherClient.applyVoucher(voucherCode, (double) total);
+            total = (long) discounted;
+        }
+
+        long balance = walletClient.getBalance(token);
+        if (balance < total) {
+            throw new RuntimeException("Insufficient balance");
+        }
+
         order.setTotalPrice(total);
         order.setStatus(OrderStatus.PAID);
 
@@ -69,6 +87,11 @@ public class OrderService {
                 inventoryClient.reserveItem(item.getCatalogItemId(), item.getQty(), token);
                 reservedItems.add(item);
             }
+
+            if (voucherCode != null && !voucherCode.isBlank()) {
+                voucherClient.useVoucher(voucherCode, savedOrder.getId(), token);
+            }
+
             return savedOrder;
         } catch (RuntimeException e) {
             rollbackReservation(savedOrder, reservedItems, token);
@@ -108,6 +131,8 @@ public class OrderService {
         for (OrderItem item : order.getItems()) {
             inventoryClient.releaseItem(item.getCatalogItemId(), item.getQty(), token);
         }
+
+        walletClient.refund(order.getBuyerId(), order.getTotalPrice());
 
         order.setStatus(OrderStatus.CANCELLED);
         return orderRepository.save(order);
