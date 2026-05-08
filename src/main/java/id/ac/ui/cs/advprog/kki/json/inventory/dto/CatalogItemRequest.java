@@ -1,14 +1,6 @@
-package id.ac.ui.cs.advprog.kki.json.model;
+package id.ac.ui.cs.advprog.kki.json.inventory.dto;
 
-import jakarta.persistence.*;
-
-@Entity
-@Table(name = "catalog_items")
-public class CatalogItem {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+public class CatalogItemRequest {
 
     private int jastiperId;
     private String name;
@@ -17,25 +9,6 @@ public class CatalogItem {
     private int stock;
     private String origin;
     private String purchaseDate;
-    private String createdAt;
-    private String updatedAt;
-
-    public CatalogItem() {}
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = java.time.Instant.now().toString();
-        updatedAt = createdAt;
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = java.time.Instant.now().toString();
-    }
-
-    public int getId() {
-        return id;
-    }
 
     public int getJastiperId() {
         return jastiperId;
@@ -91,13 +64,5 @@ public class CatalogItem {
 
     public void setPurchaseDate(String purchaseDate) {
         this.purchaseDate = purchaseDate;
-    }
-
-    public String getCreatedAt() {
-        return createdAt;
-    }
-
-    public String getUpdatedAt() {
-        return updatedAt;
     }
 }

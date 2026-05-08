@@ -31,12 +31,30 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/users/**").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
 
-                        .requestMatchers("/", "/index.html", "/favicon.ico").permitAll()
-                        .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/admin/vouchers").hasRole("ADMIN")
+                        .requestMatchers("/api/admin/wallet/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/vouchers/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/vouchers/validate").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/vouchers/use").authenticated()
 
+                        .requestMatchers("/", "/index.html", "/favicon.ico").permitAll()
+                        .requestMatchers("/Transaction/**").permitAll()
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/auth",
+                                "/profile",
+                                "/catalog",
+                                "/orders",
+                                "/vouchers",
+                                "/wallet",
+                                "/transactions"
+                        ).permitAll()
+                        .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
                         .requestMatchers("/error").permitAll()
 
+                        .requestMatchers("/api/internal/**").hasRole("ADMIN")
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/orders/**").authenticated()
 
                         .anyRequest().authenticated()
                 )

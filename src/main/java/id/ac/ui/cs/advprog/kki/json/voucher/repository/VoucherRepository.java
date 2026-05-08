@@ -1,6 +1,6 @@
-package id.ac.ui.cs.advprog.kki.json.repository;
+package id.ac.ui.cs.advprog.kki.json.voucher.repository;
 
-import id.ac.ui.cs.advprog.kki.json.model.Voucher;
+import id.ac.ui.cs.advprog.kki.json.voucher.model.Voucher;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
