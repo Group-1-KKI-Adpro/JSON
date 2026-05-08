@@ -37,11 +37,12 @@ public class Order {
     @OneToMany(mappedBy = "order",
             cascade = CascadeType.ALL,
             orphanRemoval = true,
-            fetch = FetchType.EAGER)
+            fetch = FetchType.LAZY)
     private List<OrderItem> items = new ArrayList<>();
 
     public Order() {}
 
+    // ✅ Auto timestamps + default status safety
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
@@ -57,10 +58,13 @@ public class Order {
         updatedAt = LocalDateTime.now();
     }
 
+    // 🔗 Maintain bidirectional consistency
     public void addItem(OrderItem item) {
         items.add(item);
         item.setOrder(this);
     }
+
+    // --- Getters & Setters ---
 
     public String getId() {
         return id;
