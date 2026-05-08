@@ -2,7 +2,6 @@ package id.ac.ui.cs.advprog.kki.json.voucher.controller;
 
 import id.ac.ui.cs.advprog.kki.json.auth.service.AuthService;
 import id.ac.ui.cs.advprog.kki.json.model.User;
-import id.ac.ui.cs.advprog.kki.json.voucher.service.VoucherService;
 import id.ac.ui.cs.advprog.kki.json.voucher.dto.CreateVoucherRequest;
 import id.ac.ui.cs.advprog.kki.json.voucher.dto.UpdateVoucherRequest;
 import id.ac.ui.cs.advprog.kki.json.voucher.dto.UseVoucherRequest;
@@ -10,6 +9,7 @@ import id.ac.ui.cs.advprog.kki.json.voucher.dto.UseVoucherResponse;
 import id.ac.ui.cs.advprog.kki.json.voucher.dto.ValidateVoucherRequest;
 import id.ac.ui.cs.advprog.kki.json.voucher.dto.ValidateVoucherResponse;
 import id.ac.ui.cs.advprog.kki.json.voucher.dto.VoucherResponse;
+import id.ac.ui.cs.advprog.kki.json.voucher.service.VoucherService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
 @RestController
 @RequestMapping("/api")
 public class VoucherController {

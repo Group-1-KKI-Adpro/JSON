@@ -91,6 +91,19 @@ public class CatalogController {
         }
     }
 
+    @PostMapping("/catalog/{id}/release")
+    public ResponseEntity<?> releaseStock(@PathVariable int id,
+                                          @RequestBody CatalogReserveRequest request) {
+        try {
+            CatalogItem item = catalogService.releaseStock(id, request.getQuantity());
+            return ResponseEntity.ok(new CatalogItemResponse(item));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(error(e.getMessage()));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error(e.getMessage()));
+        }
+    }
+
     @GetMapping("/admin/catalog")
     public ResponseEntity<List<CatalogItemResponse>> getAllCatalogItemsForAdmin() {
         List<CatalogItemResponse> items = catalogService.getAllCatalogItems()

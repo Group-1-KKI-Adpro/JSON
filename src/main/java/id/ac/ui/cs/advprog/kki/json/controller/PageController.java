@@ -13,12 +13,11 @@ public class PageController {
 
     @GetMapping("/wallet")
     public String walletPage() {
-        return "Transaction/wallet";
+        return "redirect:/wallet.html";
     }
 
     @GetMapping("/transactions")
     public String transactionsPage() {
-        return "Transaction/transaction";
+        return "redirect:/transactions.html";
     }
 }
-

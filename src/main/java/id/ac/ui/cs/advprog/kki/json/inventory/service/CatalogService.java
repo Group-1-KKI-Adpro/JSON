@@ -85,6 +85,16 @@ public class CatalogService {
         return catalogItemRepository.save(item);
     }
 
+    public CatalogItem releaseStock(int id, int quantity) {
+        if (quantity <= 0) {
+            throw new IllegalArgumentException("Quantity must be greater than 0");
+        }
+
+        CatalogItem item = getCatalogItemById(id);
+        item.setStock(item.getStock() + quantity);
+        return catalogItemRepository.save(item);
+    }
+
     private void validateCreateRequest(CatalogItemRequest request) {
         if (request.getName() == null || request.getName().isBlank()) {
             throw new IllegalArgumentException("Name cannot be empty");
