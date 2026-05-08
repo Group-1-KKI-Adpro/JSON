@@ -8,4 +8,9 @@ public class JsonApplication {
     public static void main(String[] args) {
         SpringApplication.run(JsonApplication.class, args);
     }
+
+    @Bean
+    public WebClient.Builder webClientBuilder() {
+        return WebClient.builder();
+    }
 }
