@@ -1,78 +1,78 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>JSON Jastip • Home</title>
-    <link rel="stylesheet" href="/css/site.css" />
-    <script defer src="/js/site.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JSON Jastip • Home</title>
+  <link rel="stylesheet" href="/css/site.css" />
+  <script defer src="/js/site.js"></script>
 </head>
 <body data-page="home">
 <header class="topbar">
-    <a class="brand" href="/index.html">
-        <span class="brand-mark">J</span>
-        <span>JSON Jastip</span>
-    </a>
-    <nav class="nav-links">
-        <a href="/index.html">Home</a>
-        <a href="/catalog.html">Catalog</a>
-        <a href="/orders.html">Orders</a>
-        <a href="/vouchers.html">Vouchers</a>
-        <a href="/wallet.html">Wallet</a>
-        <a href="/transactions.html">Transactions</a>
-        <a href="/profile.html">Profile</a>
-    </nav>
-    <div id="accountWidget" class="account-widget"></div>
+  <a class="brand" href="/index.html">
+    <span class="brand-mark">J</span>
+    <span>JSON Jastip</span>
+  </a>
+  <nav class="nav-links">
+    <a href="/index.html">Home</a>
+    <a href="/catalog.html">Catalog</a>
+    <a href="/orders.html">Orders</a>
+    <a href="/vouchers.html">Vouchers</a>
+    <a href="/wallet.html">Wallet</a>
+    <a href="/transactions.html">Transactions</a>
+    <a href="/profile.html">Profile</a>
+  </nav>
+  <div id="accountWidget" class="account-widget"></div>
 </header>
 
 <main class="shell">
-    <section class="hero">
-        <div class="hero-card">
-            <div class="kicker">Shopping with login, catalog, wallet, and orders</div>
-            <h1>Shop smart with a clean, connected jastip experience.</h1>
-            <p id="welcomeMessage">Log in first to browse the catalog, add items, and place an order. Your username appears in the header on every page once you are signed in.</p>
-            <div id="heroMeta" class="badges"></div>
-            <div id="quickLinks" class="hero-actions" style="margin-top:22px;"></div>
+  <section class="hero">
+    <div class="hero-card">
+      <div class="kicker">Shopping with login, catalog, wallet, and orders</div>
+      <h1>Shop smart with a clean, connected jastip experience.</h1>
+      <p id="welcomeMessage">Log in first to browse the catalog, add items, and place an order. Your username appears in the header on every page once you are signed in.</p>
+      <div id="heroMeta" class="badges"></div>
+      <div id="quickLinks" class="hero-actions" style="margin-top:22px;"></div>
+    </div>
+    <div class="hero-card">
+      <div class="section-header" style="margin-bottom:10px;">
+        <div>
+          <div class="section-title" style="margin:0;">What the app covers</div>
+          <p class="section-subtitle">Each service gets its own page.</p>
         </div>
-        <div class="hero-card">
-            <div class="section-header" style="margin-bottom:10px;">
-                <div>
-                    <div class="section-title" style="margin:0;">What the app covers</div>
-                    <p class="section-subtitle">Each service gets its own page.</p>
-                </div>
-            </div>
-            <div id="highlights" class="hero-tiles"></div>
-        </div>
-    </section>
+      </div>
+      <div id="highlights" class="hero-tiles"></div>
+    </div>
+  </section>
 
-    <section class="section">
-        <div class="section-header">
-            <div>
-                <h2 class="section-title">Service pages</h2>
-                <p class="section-subtitle">Open each page to manage a specific part of the app.</p>
-            </div>
+  <section class="section">
+    <div class="section-header">
+      <div>
+        <h2 class="section-title">Service pages</h2>
+        <p class="section-subtitle">Open each page to manage a specific part of the app.</p>
+      </div>
+    </div>
+    <div class="grid cols-3">
+      <a class="card" href="/catalog.html" style="text-decoration:none;">
+        <div class="card-inner">
+          <div class="card-top"><div><h3 class="card-title">Catalog</h3><div class="card-subtitle">Search items and add new ones.</div></div><span class="badge">Shop</span></div>
+          <p class="muted">This page uses the catalog model and starts empty if your database is clean.</p>
         </div>
-        <div class="grid cols-3">
-            <a class="card" href="/catalog.html" style="text-decoration:none;">
-                <div class="card-inner">
-                    <div class="card-top"><div><h3 class="card-title">Catalog</h3><div class="card-subtitle">Search items and add new ones.</div></div><span class="badge">Shop</span></div>
-                    <p class="muted">This page uses the catalog model and starts empty if your database is clean.</p>
-                </div>
-            </a>
-            <a class="card" href="/orders.html" style="text-decoration:none;">
-                <div class="card-inner">
-                    <div class="card-top"><div><h3 class="card-title">Orders</h3><div class="card-subtitle">Checkout from your cart.</div></div><span class="badge alt">Checkout</span></div>
-                    <p class="muted">Create orders, review history, and cancel active orders.</p>
-                </div>
-            </a>
-            <a class="card" href="/wallet.html" style="text-decoration:none;">
-                <div class="card-inner">
-                    <div class="card-top"><div><h3 class="card-title">Wallet</h3><div class="card-subtitle">Top up and track balance.</div></div><span class="badge gray">Finance</span></div>
-                    <p class="muted">Manage wallet balance and review top ups, withdrawals, and order deductions.</p>
-                </div>
-            </a>
+      </a>
+      <a class="card" href="/orders.html" style="text-decoration:none;">
+        <div class="card-inner">
+          <div class="card-top"><div><h3 class="card-title">Orders</h3><div class="card-subtitle">Checkout from your cart.</div></div><span class="badge alt">Checkout</span></div>
+          <p class="muted">Create orders, review history, and cancel active orders.</p>
         </div>
-    </section>
+      </a>
+      <a class="card" href="/wallet.html" style="text-decoration:none;">
+        <div class="card-inner">
+          <div class="card-top"><div><h3 class="card-title">Wallet</h3><div class="card-subtitle">Top up and track balance.</div></div><span class="badge gray">Finance</span></div>
+          <p class="muted">Manage wallet balance and review top ups, withdrawals, and order deductions.</p>
+        </div>
+      </a>
+    </div>
+  </section>
 </main>
 
 <footer class="footer">© 2026 JSON Jastip. All rights reserved.</footer>
