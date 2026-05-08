@@ -1,4 +1,4 @@
-package id.ac.ui.cs.advprog.kki.json.model;
+package id.ac.ui.cs.advprog.kki.json.inventory.dto;
 
 public class CatalogItemUpdateRequest {
 

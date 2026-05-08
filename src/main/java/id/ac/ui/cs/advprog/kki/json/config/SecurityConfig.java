@@ -41,7 +41,7 @@ public class SecurityConfig {
 
                         .requestMatchers("/", "/index.html", "/favicon.ico").permitAll()
                         .requestMatchers("/Transaction/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/wallet", "/transactions").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/auth", "/profile", "/catalog", "/orders", "/vouchers", "/wallet", "/transactions").permitAll()
                         .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
                         .requestMatchers("/error").permitAll()
 

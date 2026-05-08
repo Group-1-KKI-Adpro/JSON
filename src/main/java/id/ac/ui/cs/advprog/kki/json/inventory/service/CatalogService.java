@@ -1,9 +1,9 @@
-package id.ac.ui.cs.advprog.kki.json.service;
+package id.ac.ui.cs.advprog.kki.json.inventory.service;
 
-import id.ac.ui.cs.advprog.kki.json.model.CatalogItem;
-import id.ac.ui.cs.advprog.kki.json.model.CatalogItemRequest;
-import id.ac.ui.cs.advprog.kki.json.model.CatalogItemUpdateRequest;
-import id.ac.ui.cs.advprog.kki.json.repository.CatalogItemRepository;
+import id.ac.ui.cs.advprog.kki.json.inventory.dto.CatalogItemRequest;
+import id.ac.ui.cs.advprog.kki.json.inventory.dto.CatalogItemUpdateRequest;
+import id.ac.ui.cs.advprog.kki.json.inventory.model.CatalogItem;
+import id.ac.ui.cs.advprog.kki.json.inventory.repository.CatalogItemRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

@@ -1,4 +1,6 @@
-package id.ac.ui.cs.advprog.kki.json.model;
+package id.ac.ui.cs.advprog.kki.json.inventory.dto;
+
+import id.ac.ui.cs.advprog.kki.json.inventory.model.CatalogItem;
 
 public class CatalogItemResponse {
 

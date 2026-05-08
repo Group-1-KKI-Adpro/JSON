@@ -1,9 +1,11 @@
-package id.ac.ui.cs.advprog.kki.json.service;
+package id.ac.ui.cs.advprog.kki.json.order.service;
 
-import id.ac.ui.cs.advprog.kki.json.model.*;
-import id.ac.ui.cs.advprog.kki.json.repository.OrderRepository;
 import id.ac.ui.cs.advprog.kki.json.order.dto.ItemRequest;
 import org.springframework.stereotype.Service;
+import id.ac.ui.cs.advprog.kki.json.order.model.Order;
+import id.ac.ui.cs.advprog.kki.json.order.model.OrderItem;
+import id.ac.ui.cs.advprog.kki.json.order.model.OrderStatus;
+import id.ac.ui.cs.advprog.kki.json.order.repository.OrderRepository;
 
 import id.ac.ui.cs.advprog.kki.json.order.client.InventoryClient;
 import id.ac.ui.cs.advprog.kki.json.order.client.WalletClient;
