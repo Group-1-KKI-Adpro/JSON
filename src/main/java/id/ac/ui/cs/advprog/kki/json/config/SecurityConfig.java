@@ -10,7 +10,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.client.RestTemplate;
 
 @Configuration
 public class SecurityConfig {
@@ -25,26 +24,53 @@ public class SecurityConfig {
                 )
                 .securityContext(sc -> sc.requireExplicitSave(false))
                 .authorizeHttpRequests(auth -> auth
+                        /* AUTH */
                         .requestMatchers(HttpMethod.POST, "/api/auth/register").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
 
+                        /* PUBLIC API */
                         .requestMatchers(HttpMethod.GET, "/api/health").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/users/**").permitAll()
+
+                        /* H2 CONSOLE */
                         .requestMatchers("/h2-console/**").permitAll()
 
+                        /* VOUCHERS */
                         .requestMatchers(HttpMethod.GET, "/api/vouchers/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/vouchers/validate").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/vouchers/use").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/admin/vouchers").hasRole("ADMIN")
 
+                        /* STATIC PAGES / ASSETS */
                         .requestMatchers("/", "/index.html", "/favicon.ico").permitAll()
                         .requestMatchers("/Transaction/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/wallet", "/transactions").permitAll()
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/auth",
+                                "/profile",
+                                "/catalog",
+                                "/orders",
+                                "/vouchers",
+                                "/wallet",
+                                "/transactions"
+                        ).permitAll()
                         .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
                         .requestMatchers("/error").permitAll()
 
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/orders/**").permitAll()
+                        /* CATALOG + SHOPPING */
+                        .requestMatchers("/api/catalog/**").authenticated()
+                        .requestMatchers("/api/orders/**").authenticated()
+                        .requestMatchers("/api/wallet/**").authenticated()
 
+                        /* INTERNAL */
+                        .requestMatchers("/api/internal/**").hasRole("ADMIN")
+
+                        /* ADMIN */
+                        .requestMatchers("/api/admin/wallet/**").hasRole("ADMIN")
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+
+                        /* EVERYTHING ELSE */
+                        /* EVERYTHING ELSE */
                         .anyRequest().authenticated()
                 )
                 .httpBasic(httpBasic -> httpBasic.disable())
@@ -63,10 +89,5 @@ public class SecurityConfig {
     @Bean
     public org.springframework.security.core.userdetails.UserDetailsService userDetailsService() {
         return new org.springframework.security.provisioning.InMemoryUserDetailsManager();
-    }
-
-    @Bean
-    public RestTemplate restTemplate() {
-        return new RestTemplate();
     }
 }

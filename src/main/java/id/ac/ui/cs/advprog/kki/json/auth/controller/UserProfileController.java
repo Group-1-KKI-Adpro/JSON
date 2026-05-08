@@ -1,10 +1,9 @@
 package id.ac.ui.cs.advprog.kki.json.auth.controller;
 
 import id.ac.ui.cs.advprog.kki.json.auth.dto.PublicUserProfileResponse;
+import id.ac.ui.cs.advprog.kki.json.auth.dto.UpdateReputationRequest;
 import id.ac.ui.cs.advprog.kki.json.auth.service.AuthService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 public class UserProfileController {
@@ -18,5 +17,13 @@ public class UserProfileController {
     @GetMapping("/api/users/{username}")
     public PublicUserProfileResponse getPublicProfile(@PathVariable String username) {
         return authService.getPublicProfile(username);
+    }
+
+    @PatchMapping("/api/internal/users/{userId}/reputation")
+    public void updateReputationForInternalTesting(
+            @PathVariable Long userId,
+            @RequestBody UpdateReputationRequest request
+    ) {
+        authService.updateJastiperReputation(userId, request);
     }
 }

@@ -1,15 +1,10 @@
-package id.ac.ui.cs.advprog.kki.json.service;
+package id.ac.ui.cs.advprog.kki.json.voucher.service;
 
 import id.ac.ui.cs.advprog.kki.json.model.DiscountType;
-import id.ac.ui.cs.advprog.kki.json.model.Voucher;
-import id.ac.ui.cs.advprog.kki.json.repository.VoucherRepository;
 import id.ac.ui.cs.advprog.kki.json.voucher.dto.CreateVoucherRequest;
 import id.ac.ui.cs.advprog.kki.json.voucher.dto.UpdateVoucherRequest;
 import id.ac.ui.cs.advprog.kki.json.voucher.dto.UseVoucherResponse;
 import id.ac.ui.cs.advprog.kki.json.voucher.dto.ValidateVoucherResponse;
-import id.ac.ui.cs.advprog.kki.json.voucher.strategy.DiscountStrategy;
-import id.ac.ui.cs.advprog.kki.json.voucher.strategy.FlatDiscountStrategy;
-import id.ac.ui.cs.advprog.kki.json.voucher.strategy.PercentageDiscountStrategy;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
