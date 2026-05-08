@@ -21,4 +21,3 @@ public class PageController {
         return "redirect:/transactions.html";
     }
 }
-
