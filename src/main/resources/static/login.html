@@ -1,62 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Login - JSON Jastip</title>
-
-    <link rel="stylesheet" href="/css/site.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>JSON Jastip • Login</title>
+    <link rel="stylesheet" href="/css/site.css" />
+    <script defer src="/js/site.js"></script>
 </head>
-<body>
+<body data-page="login">
+<header class="topbar">
+    <a class="brand" href="/index.html">
+        <span class="brand-mark">J</span>
+        <span>JSON Jastip</span>
+    </a>
+    <nav class="nav-links">
+        <a href="/index.html">Home</a>
+        <a href="/login.html">Login</a>
+        <a href="/register.html">Register</a>
+    </nav>
+    <div id="accountWidget" class="account-widget"></div>
+</header>
 
-<div class="auth-container">
-
-    <div class="auth-left">
-        <h1>Welcome Back</h1>
-
-        <p>
-            Login to continue shopping internationally.
-        </p>
-    </div>
-
-    <div class="auth-right">
-
-        <div class="auth-card">
-
-            <h2>Login</h2>
-
-            <form id="loginForm">
-
-                <input type="email" placeholder="Email" required>
-
-                <input type="password" placeholder="Password" required>
-
-                <button type="submit">Login</button>
-
-            </form>
-
-            <p class="auth-switch">
-                Don't have an account?
-                <a href="/register.html">Register</a>
-            </p>
-
+<main class="auth-layout">
+    <section class="auth-aside">
+        <div class="auth-copy">
+            <div class="kicker">Protected shopping starts here</div>
+            <h1>Log in before you shop.</h1>
+            <p>Once you sign in, the app shows your username, unlocks the catalog, and lets you move through orders, wallet, vouchers, and transactions with one harmonized interface.</p>
         </div>
-
-    </div>
-
-</div>
-
-<script>
-    document.getElementById("loginForm").addEventListener("submit", function(e){
-      e.preventDefault();
-
-      alert("Login successful!");
-
-      window.location.href = "/index.html";
-    });
-</script>
-
+    </section>
+    <section class="auth-panel-wrap">
+        <div class="auth-card">
+            <h2>Login</h2>
+            <p class="auth-note">Use the same email and password you registered with.</p>
+            <div id="authNotice" class="hidden"></div>
+            <form id="loginForm" class="form">
+                <div class="field">
+                    <label for="loginEmail">Email</label>
+                    <input id="loginEmail" type="email" placeholder="you@example.com" required />
+                </div>
+                <div class="field">
+                    <label for="loginPassword">Password</label>
+                    <input id="loginPassword" type="password" placeholder="Your password" required />
+                </div>
+                <button class="button" type="submit">Log in</button>
+            </form>
+            <p class="auth-switch">No account yet? <a href="/register.html">Create one</a></p>
+        </div>
+    </section>
+</main>
 </body>
 </html>

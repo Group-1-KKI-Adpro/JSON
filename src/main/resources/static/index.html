@@ -3,118 +3,78 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>JSON Jastip</title>
+    <title>JSON Jastip • Home</title>
     <link rel="stylesheet" href="/css/site.css" />
+    <script defer src="/js/site.js"></script>
 </head>
-<body>
-
-<header class="navbar">
-    <div class="logo">JSON Jastip</div>
-
-    <div class="search-box">
-        <input type="text" placeholder="Search products..." />
-    </div>
-
+<body data-page="home">
+<header class="topbar">
+    <a class="brand" href="/index.html">
+        <span class="brand-mark">J</span>
+        <span>JSON Jastip</span>
+    </a>
     <nav class="nav-links">
         <a href="/index.html">Home</a>
-        <a href="/wallet">Wallet</a>
-        <a href="/transactions">Transactions</a>
-        <a href="/login.html" class="login-btn">Login</a>
-        <a href="/register.html" class="register-btn">Register</a>
+        <a href="/catalog.html">Catalog</a>
+        <a href="/orders.html">Orders</a>
+        <a href="/vouchers.html">Vouchers</a>
+        <a href="/wallet.html">Wallet</a>
+        <a href="/transactions.html">Transactions</a>
+        <a href="/profile.html">Profile</a>
     </nav>
+    <div id="accountWidget" class="account-widget"></div>
 </header>
 
-<section class="hero">
-    <div class="hero-content">
-        <h1>International Shopping Made Easy</h1>
+<main class="shell">
+    <section class="hero">
+        <div class="hero-card">
+            <div class="kicker">Shopping with login, catalog, wallet, and orders</div>
+            <h1>Shop smart with a clean, connected jastip experience.</h1>
+            <p id="welcomeMessage">Log in first to browse the catalog, add items, and place an order. Your username appears in the header on every page once you are signed in.</p>
+            <div id="heroMeta" class="badges"></div>
+            <div id="quickLinks" class="hero-actions" style="margin-top:22px;"></div>
+        </div>
+        <div class="hero-card">
+            <div class="section-header" style="margin-bottom:10px;">
+                <div>
+                    <div class="section-title" style="margin:0;">What the app covers</div>
+                    <p class="section-subtitle">Each service gets its own page.</p>
+                </div>
+            </div>
+            <div id="highlights" class="hero-tiles"></div>
+        </div>
+    </section>
 
-        <p>
-            Buy products from overseas safely with trusted jastipers.
-        </p>
-
-        <div class="hero-buttons">
-            <a href="#products" class="primary-btn">Shop Now</a>
-            <a href="/register.html" class="secondary-btn">
-                Become Jastiper
+    <section class="section">
+        <div class="section-header">
+            <div>
+                <h2 class="section-title">Service pages</h2>
+                <p class="section-subtitle">Open each page to manage a specific part of the app.</p>
+            </div>
+        </div>
+        <div class="grid cols-3">
+            <a class="card" href="/catalog.html" style="text-decoration:none;">
+                <div class="card-inner">
+                    <div class="card-top"><div><h3 class="card-title">Catalog</h3><div class="card-subtitle">Search items and add new ones.</div></div><span class="badge">Shop</span></div>
+                    <p class="muted">This page uses the catalog model and starts empty if your database is clean.</p>
+                </div>
+            </a>
+            <a class="card" href="/orders.html" style="text-decoration:none;">
+                <div class="card-inner">
+                    <div class="card-top"><div><h3 class="card-title">Orders</h3><div class="card-subtitle">Checkout from your cart.</div></div><span class="badge alt">Checkout</span></div>
+                    <p class="muted">Create orders, review history, and cancel active orders.</p>
+                </div>
+            </a>
+            <a class="card" href="/wallet.html" style="text-decoration:none;">
+                <div class="card-inner">
+                    <div class="card-top"><div><h3 class="card-title">Wallet</h3><div class="card-subtitle">Top up and track balance.</div></div><span class="badge gray">Finance</span></div>
+                    <p class="muted">Manage wallet balance and review top ups, withdrawals, and order deductions.</p>
+                </div>
             </a>
         </div>
-    </div>
-</section>
+    </section>
+</main>
 
-<section class="categories">
-    <h2>Popular Categories</h2>
-
-    <div class="category-grid">
-        <div class="category-card">Japan Snacks</div>
-        <div class="category-card">Korean Skincare</div>
-        <div class="category-card">Luxury Bags</div>
-        <div class="category-card">Sneakers</div>
-        <div class="category-card">Electronics</div>
-        <div class="category-card">Anime Goods</div>
-    </div>
-</section>
-
-<section class="products" id="products">
-
-    <h2>Featured Products</h2>
-
-    <div class="product-grid">
-
-        <div class="product-card">
-            <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=1200&auto=format&fit=crop">
-
-            <div class="product-info">
-                <h3>Nike Sneakers</h3>
-                <p>From Japan</p>
-                <span>Rp 2.500.000</span>
-
-                <button>Add to Cart</button>
-            </div>
-        </div>
-
-        <div class="product-card">
-            <img src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=1200&auto=format&fit=crop">
-
-            <div class="product-info">
-                <h3>Oversized Shirt</h3>
-                <p>From Korea</p>
-                <span>Rp 350.000</span>
-
-                <button>Add to Cart</button>
-            </div>
-        </div>
-
-        <div class="product-card">
-            <img src="https://images.unsplash.com/photo-1511556820780-d912e42b4980?q=80&w=1200&auto=format&fit=crop">
-
-            <div class="product-info">
-                <h3>Skincare Set</h3>
-                <p>From Korea</p>
-                <span>Rp 800.000</span>
-
-                <button>Add to Cart</button>
-            </div>
-        </div>
-
-        <div class="product-card">
-            <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=1200&auto=format&fit=crop">
-
-            <div class="product-info">
-                <h3>Wireless Headphones</h3>
-                <p>From Singapore</p>
-                <span>Rp 1.200.000</span>
-
-                <button>Add to Cart</button>
-            </div>
-        </div>
-
-    </div>
-
-</section>
-
-<footer class="footer">
-    <p>© 2026 JSON Jastip. All rights reserved.</p>
-</footer>
-
+<footer class="footer">© 2026 JSON Jastip. All rights reserved.</footer>
 </body>
 </html>
