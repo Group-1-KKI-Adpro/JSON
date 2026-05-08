@@ -14,12 +14,17 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Supplier;
 
 @Service
 public class WalletServiceImpl implements WalletService {
 
     private final WalletRepository walletRepository;
     private final TransactionRepository transactionRepository;
+    private final ConcurrentMap<Long, ReentrantLock> userLocks = new ConcurrentHashMap<>();
 
     public WalletServiceImpl(WalletRepository walletRepository,
                              TransactionRepository transactionRepository) {
@@ -32,18 +37,20 @@ public class WalletServiceImpl implements WalletService {
     public Wallet getOrCreateWallet(Long userId) {
         requireUserId(userId);
 
-        return walletRepository.findByUserId(userId).orElseGet(() -> {
-            try {
-                return walletRepository.save(new Wallet(userId));
-            } catch (DataIntegrityViolationException e) {
-                // Another request created it between find and save.
-                return walletRepository.findByUserId(userId)
-                        .orElseThrow(() -> new ResponseStatusException(
-                                HttpStatus.INTERNAL_SERVER_ERROR,
-                                "Failed to create wallet"
-                        ));
-            }
-        });
+        return withUserLock(userId, () ->
+                walletRepository.findByUserId(userId).orElseGet(() -> {
+                    try {
+                        return walletRepository.save(new Wallet(userId));
+                    } catch (DataIntegrityViolationException e) {
+                        // Another request created it between find and save.
+                        return walletRepository.findByUserId(userId)
+                                .orElseThrow(() -> new ResponseStatusException(
+                                        HttpStatus.INTERNAL_SERVER_ERROR,
+                                        "Failed to create wallet"
+                                ));
+                    }
+                })
+        );
     }
 
     @Override
@@ -51,17 +58,20 @@ public class WalletServiceImpl implements WalletService {
     public Transaction topup(Long userId, long amount, String description) {
         requirePositiveAmount(amount);
 
-        Wallet wallet = getOrCreateWallet(userId);
+        return withUserLock(userId, () -> {
+            Wallet wallet = getOrCreateWallet(userId);
 
-        long before = wallet.getBalance();
-        long after = safeAdd(before, amount);
+            long before = wallet.getBalance();
+            requireNonNegativeBalance(before);
+            long after = safeAdd(before, amount);
 
-        // Simulation: directly succeed.
-        wallet.setBalance(after);
-        walletRepository.save(wallet);
+            // Simulation: directly succeed.
+            wallet.setBalance(after);
+            walletRepository.save(wallet);
 
-        Transaction tx = successTx(userId, TransactionType.TOPUP, amount, null, description, before, after);
-        return transactionRepository.save(tx);
+            Transaction tx = successTx(userId, TransactionType.TOPUP, amount, null, description, before, after);
+            return transactionRepository.save(tx);
+        });
     }
 
     @Override
@@ -77,26 +87,32 @@ public class WalletServiceImpl implements WalletService {
         requirePositiveAmount(amount);
         requireReferenceId(referenceId);
 
-        Transaction existing = findExistingByReference(userId, TransactionType.PAYMENT, referenceId);
-        if (existing != null) return existing;
+        return withUserLock(userId, () -> {
+            Transaction existing = findExistingByReference(userId, TransactionType.PAYMENT, referenceId);
+            if (existing != null) {
+                ensureIdempotentRequestMatches(existing, amount);
+                return existing;
+            }
 
-        Wallet wallet = getOrCreateWallet(userId);
-        long before = wallet.getBalance();
-        if (before < amount) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Insufficient balance");
-        }
+            Wallet wallet = getOrCreateWallet(userId);
+            long before = wallet.getBalance();
+            requireNonNegativeBalance(before);
+            if (before < amount) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Insufficient balance");
+            }
 
-        long after = safeSubtract(before, amount);
-        if (after < 0) {
-            // Defensive; should be covered by before < amount.
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Insufficient balance");
-        }
+            long after = safeSubtract(before, amount);
+            if (after < 0) {
+                // Defensive; should be covered by before < amount.
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Insufficient balance");
+            }
 
-        wallet.setBalance(after);
-        walletRepository.save(wallet);
+            wallet.setBalance(after);
+            walletRepository.save(wallet);
 
-        Transaction tx = successTx(userId, TransactionType.PAYMENT, amount, referenceId, description, before, after);
-        return saveIdempotentByReference(tx);
+            Transaction tx = successTx(userId, TransactionType.PAYMENT, amount, referenceId, description, before, after);
+            return saveIdempotentByReference(tx);
+        });
     }
 
     @Override
@@ -106,19 +122,25 @@ public class WalletServiceImpl implements WalletService {
         requirePositiveAmount(amount);
         requireReferenceId(referenceId);
 
-        Transaction existing = findExistingByReference(userId, TransactionType.REFUND, referenceId);
-        if (existing != null) return existing;
+        return withUserLock(userId, () -> {
+            Transaction existing = findExistingByReference(userId, TransactionType.REFUND, referenceId);
+            if (existing != null) {
+                ensureIdempotentRequestMatches(existing, amount);
+                return existing;
+            }
 
-        Wallet wallet = getOrCreateWallet(userId);
-        long before = wallet.getBalance();
+            Wallet wallet = getOrCreateWallet(userId);
+            long before = wallet.getBalance();
+            requireNonNegativeBalance(before);
 
-        long after = safeAdd(before, amount);
+            long after = safeAdd(before, amount);
 
-        wallet.setBalance(after);
-        walletRepository.save(wallet);
+            wallet.setBalance(after);
+            walletRepository.save(wallet);
 
-        Transaction tx = successTx(userId, TransactionType.REFUND, amount, referenceId, description, before, after);
-        return saveIdempotentByReference(tx);
+            Transaction tx = successTx(userId, TransactionType.REFUND, amount, referenceId, description, before, after);
+            return saveIdempotentByReference(tx);
+        });
     }
 
     @Override
@@ -147,47 +169,53 @@ public class WalletServiceImpl implements WalletService {
         }
         requireVerifyStatus(status);
 
-        // State machine rules:
-        // - Only WITHDRAW transactions can be verified here.
-        // - Only PENDING can transition to SUCCESS/FAILED.
-        // - SUCCESS triggers the actual wallet balance deduction.
-        // - FAILED does not change balance.
-        Transaction tx = transactionRepository.findByIdAndType(transactionId, TransactionType.WITHDRAW)
+        Transaction initial = transactionRepository.findByIdAndType(transactionId, TransactionType.WITHDRAW)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Withdraw transaction not found"));
 
-        Transaction alreadyVerified = returnIfAlreadyVerified(tx, status);
-        if (alreadyVerified != null) return alreadyVerified;
-        if (status == TransactionStatus.FAILED) {
-            return finalizeWithdrawAsFailed(tx, failureReason);
-        }
+        return withUserLock(initial.getUserId(), () -> {
+            // State machine rules:
+            // - Only WITHDRAW transactions can be verified here.
+            // - Only PENDING can transition to SUCCESS/FAILED.
+            // - SUCCESS triggers the actual wallet balance deduction.
+            // - FAILED does not change balance.
+            Transaction tx = transactionRepository.findByIdAndType(transactionId, TransactionType.WITHDRAW)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Withdraw transaction not found"));
 
-        long amount = requireWithdrawAmount(tx);
+            Transaction alreadyVerified = returnIfAlreadyVerified(tx, status);
+            if (alreadyVerified != null) return alreadyVerified;
+            if (status == TransactionStatus.FAILED) {
+                return finalizeWithdrawAsFailed(tx, failureReason);
+            }
 
-        // The balance check is intentionally performed at verification time (not at request time),
-        // so the system never commits a negative balance even if funds changed while pending.
-        Wallet wallet = getOrCreateWallet(tx.getUserId());
-        long before = wallet.getBalance();
-        if (before < amount) {
-            tx.setStatus(TransactionStatus.FAILED);
-            tx.setFailureReason("Insufficient balance at verification time");
+            long amount = requireWithdrawAmount(tx);
+
+            // The balance check is intentionally performed at verification time (not at request time),
+            // so the system never commits a negative balance even if funds changed while pending.
+            Wallet wallet = getOrCreateWallet(tx.getUserId());
+            long before = wallet.getBalance();
+            requireNonNegativeBalance(before);
+            if (before < amount) {
+                tx.setStatus(TransactionStatus.FAILED);
+                tx.setFailureReason("Insufficient balance at verification time");
+                return transactionRepository.save(tx);
+            }
+
+            long after = safeSubtract(before, amount);
+            if (after < 0) {
+                tx.setStatus(TransactionStatus.FAILED);
+                tx.setFailureReason("Insufficient balance at verification time");
+                return transactionRepository.save(tx);
+            }
+
+            wallet.setBalance(after);
+            walletRepository.save(wallet);
+
+            tx.setStatus(TransactionStatus.SUCCESS);
+            tx.setFailureReason(null);
+            tx.setBalanceBefore(before);
+            tx.setBalanceAfter(after);
             return transactionRepository.save(tx);
-        }
-
-        long after = safeSubtract(before, amount);
-        if (after < 0) {
-            tx.setStatus(TransactionStatus.FAILED);
-            tx.setFailureReason("Insufficient balance at verification time");
-            return transactionRepository.save(tx);
-        }
-
-        wallet.setBalance(after);
-        walletRepository.save(wallet);
-
-        tx.setStatus(TransactionStatus.SUCCESS);
-        tx.setFailureReason(null);
-        tx.setBalanceBefore(before);
-        tx.setBalanceAfter(after);
-        return transactionRepository.save(tx);
+        });
     }
 
     private static Transaction returnIfAlreadyVerified(Transaction tx, TransactionStatus desiredStatus) {
@@ -224,6 +252,12 @@ public class WalletServiceImpl implements WalletService {
         }
     }
 
+    private static void requireNonNegativeBalance(long balance) {
+        if (balance < 0) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Wallet balance is corrupted");
+        }
+    }
+
     private static void requireReferenceId(String referenceId) {
         if (referenceId == null || referenceId.isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "referenceId is required");
@@ -240,6 +274,12 @@ public class WalletServiceImpl implements WalletService {
     }
 
     private static long safeAdd(long left, long right) {
+        if (left < 0) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Wallet balance is corrupted");
+        }
+        if (right < 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Amount must be positive");
+        }
         try {
             return Math.addExact(left, right);
         } catch (ArithmeticException e) {
@@ -248,6 +288,12 @@ public class WalletServiceImpl implements WalletService {
     }
 
     private static long safeSubtract(long left, long right) {
+        if (left < 0) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Wallet balance is corrupted");
+        }
+        if (right < 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Amount must be positive");
+        }
         try {
             return Math.subtractExact(left, right);
         } catch (ArithmeticException e) {
@@ -271,8 +317,30 @@ public class WalletServiceImpl implements WalletService {
         } catch (DataIntegrityViolationException e) {
             // Another request with same (user,type,referenceId) already created the tx.
             Transaction created = findExistingByReference(tx.getUserId(), tx.getType(), tx.getReferenceId());
-            if (created != null) return created;
+            if (created != null) {
+                ensureIdempotentRequestMatches(created, tx.getAmount());
+                return created;
+            }
             throw e;
+        }
+    }
+
+    private static void ensureIdempotentRequestMatches(Transaction existing, long requestedAmount) {
+        if (existing.getAmount() != requestedAmount) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Existing transaction reference does not match the requested amount"
+            );
+        }
+    }
+
+    private <T> T withUserLock(Long userId, Supplier<T> action) {
+        ReentrantLock lock = userLocks.computeIfAbsent(userId, ignored -> new ReentrantLock());
+        lock.lock();
+        try {
+            return action.get();
+        } finally {
+            lock.unlock();
         }
     }
 

@@ -1,7 +1,7 @@
 package id.ac.ui.cs.advprog.kki.json.voucher.dto;
 
-import id.ac.ui.cs.advprog.kki.json.model.DiscountType;
-import id.ac.ui.cs.advprog.kki.json.model.Voucher;
+import id.ac.ui.cs.advprog.kki.json.voucher.model.DiscountType;
+import id.ac.ui.cs.advprog.kki.json.voucher.model.Voucher;
 
 import java.time.Instant;
 
@@ -15,6 +15,9 @@ public class VoucherResponse {
     private DiscountType discountType;
     private Double discountValue;
     private Boolean active;
+    public VoucherResponse() {
+    }
+
 
     public VoucherResponse(Voucher voucher) {
         this.code = voucher.getCode();
