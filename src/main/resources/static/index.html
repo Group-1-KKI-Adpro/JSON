@@ -1,311 +1,120 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>JSON — Jastip Online Nasional</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>JSON Jastip</title>
     <link rel="stylesheet" href="/css/site.css" />
 </head>
 <body>
-<header class="nav">
-    <div class="container nav-inner">
-        <a class="brand" href="/">
-            <span class="brand-badge">J</span>
-            <span>JSON</span>
-        </a>
-        <nav class="nav-links">
-            <a href="#categories">Categories</a>
-            <a href="#products">Products</a>
-            <a href="#how-it-works">How it works</a>
-            <a href="#jastipers">Jastipers</a>
-        </nav>
-        <div class="nav-actions">
-            <a class="btn btn-ghost" href="/wallet">Wallet</a>
-            <a class="btn btn-ghost" href="/transactions">Transactions</a>
-            <a class="btn btn-primary" href="#products">Start Shopping</a>
-        </div>
+
+<header class="navbar">
+    <div class="logo">JSON Jastip</div>
+
+    <div class="search-box">
+        <input type="text" placeholder="Search products..." />
     </div>
+
+    <nav class="nav-links">
+        <a href="/index.html">Home</a>
+        <a href="/wallet">Wallet</a>
+        <a href="/transactions">Transactions</a>
+        <a href="/login.html" class="login-btn">Login</a>
+        <a href="/register.html" class="register-btn">Register</a>
+    </nav>
 </header>
 
-<main>
-    <section class="hero">
-        <div class="container hero-grid">
-            <div class="hero-card hero-main">
-                <span class="kicker">✈️ Trusted jastip marketplace</span>
-                <h1>Shop limited goods from abroad with a modern, secure marketplace feel.</h1>
-                <p>
-                    JSON connects buyers and jastipers in one clean platform for browsing, ordering,
-                    tracking, wallet payments, and promo vouchers.
-                </p>
-                <div class="hero-actions">
-                    <a class="btn btn-primary" href="#products">Browse products</a>
-                    <a class="btn btn-ghost" href="/wallet">Open wallet</a>
-                </div>
-                <div class="hero-points">
-                    <div class="point">🔒 Secure login</div>
-                    <div class="point">📦 Order tracking</div>
-                    <div class="point">💳 Wallet & vouchers</div>
-                </div>
-            </div>
+<section class="hero">
+    <div class="hero-content">
+        <h1>International Shopping Made Easy</h1>
 
-            <aside class="hero-card hero-side">
-                <div class="hero-side-top">
-                    <div class="badge">Live marketplace preview</div>
-                    <div class="mock-window">
-                        <div class="mock-title">
-                            <span>Trending this week</span>
-                            <span>12 active trips</span>
-                        </div>
-                        <div class="mock-item">
-                            <div class="avatar">JP</div>
-                            <div>
-                                <div style="font-weight:800">Japan skincare set</div>
-                                <div class="small-muted" style="color:#cbd5e1">From Tokyo • 48 left</div>
-                            </div>
-                        </div>
-                        <div class="mock-item">
-                            <div class="avatar green">SN</div>
-                            <div>
-                                <div style="font-weight:800">Limited sneakers</div>
-                                <div class="small-muted" style="color:#cbd5e1">From Seoul • 18 left</div>
-                            </div>
-                        </div>
-                        <div class="mock-item">
-                            <div class="avatar blue">LG</div>
-                            <div>
-                                <div style="font-weight:800">Luxury accessories</div>
-                                <div class="small-muted" style="color:#cbd5e1">From Singapore • 7 left</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div style="display:grid;gap:10px">
-                    <div class="row-item" style="background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.08);color:#fff">
-                        <span>Active orders</span><strong>128</strong>
-                    </div>
-                    <div class="row-item" style="background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.08);color:#fff">
-                        <span>Verified jastipers</span><strong>36</strong>
-                    </div>
-                </div>
-            </aside>
+        <p>
+            Buy products from overseas safely with trusted jastipers.
+        </p>
+
+        <div class="hero-buttons">
+            <a href="#products" class="primary-btn">Shop Now</a>
+            <a href="/register.html" class="secondary-btn">
+                Become Jastiper
+            </a>
         </div>
-    </section>
+    </div>
+</section>
 
-    <section class="section">
-        <div class="container stat-grid">
-            <div class="stat">
-                <div class="label">Supported countries</div>
-                <div class="value">8</div>
-                <div class="desc">Japan, Korea, Singapore, and more.</div>
-            </div>
-            <div class="stat">
-                <div class="label">Completed trips</div>
-                <div class="value">240+</div>
-                <div class="desc">Jastipers with delivery history.</div>
-            </div>
-            <div class="stat">
-                <div class="label">Average rating</div>
-                <div class="value">4.8</div>
-                <div class="desc">Trust-first marketplace experience.</div>
-            </div>
-            <div class="stat">
-                <div class="label">Voucher savings</div>
-                <div class="value">15%</div>
-                <div class="desc">Discounts on selected orders.</div>
+<section class="categories">
+    <h2>Popular Categories</h2>
+
+    <div class="category-grid">
+        <div class="category-card">Japan Snacks</div>
+        <div class="category-card">Korean Skincare</div>
+        <div class="category-card">Luxury Bags</div>
+        <div class="category-card">Sneakers</div>
+        <div class="category-card">Electronics</div>
+        <div class="category-card">Anime Goods</div>
+    </div>
+</section>
+
+<section class="products" id="products">
+
+    <h2>Featured Products</h2>
+
+    <div class="product-grid">
+
+        <div class="product-card">
+            <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=1200&auto=format&fit=crop">
+
+            <div class="product-info">
+                <h3>Nike Sneakers</h3>
+                <p>From Japan</p>
+                <span>Rp 2.500.000</span>
+
+                <button>Add to Cart</button>
             </div>
         </div>
-    </section>
 
-    <section id="categories" class="section">
-        <div class="container">
-            <div class="section-head">
-                <div>
-                    <h2>Browse by category</h2>
-                    <p>Use the visual tone of a premium marketplace.</p>
-                </div>
-            </div>
-            <div class="grid-4">
-                <div class="card category">
-                    <div class="icon">🧴</div>
-                    <div>
-                        <h3>Skincare</h3>
-                        <p>Popular beauty products from Japan and Korea.</p>
-                    </div>
-                </div>
-                <div class="card category">
-                    <div class="icon green">👟</div>
-                    <div>
-                        <h3>Sneakers</h3>
-                        <p>Limited releases and collector items.</p>
-                    </div>
-                </div>
-                <div class="card category">
-                    <div class="icon blue">🎧</div>
-                    <div>
-                        <h3>Electronics</h3>
-                        <p>Portable gadgets and accessories.</p>
-                    </div>
-                </div>
-                <div class="card category">
-                    <div class="icon">👜</div>
-                    <div>
-                        <h3>Luxury</h3>
-                        <p>Premium goods with clean presentation.</p>
-                    </div>
-                </div>
+        <div class="product-card">
+            <img src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=1200&auto=format&fit=crop">
+
+            <div class="product-info">
+                <h3>Oversized Shirt</h3>
+                <p>From Korea</p>
+                <span>Rp 350.000</span>
+
+                <button>Add to Cart</button>
             </div>
         </div>
-    </section>
 
-    <section id="products" class="section">
-        <div class="container">
-            <div class="section-head">
-                <div>
-                    <h2>Featured products</h2>
-                    <p>These cards are a good visual target for your final UI.</p>
-                </div>
-                <div class="chip-row">
-                    <span class="chip">Japan</span>
-                    <span class="chip">Korea</span>
-                    <span class="chip">Singapore</span>
-                    <span class="chip">Best sellers</span>
-                </div>
-            </div>
-            <div class="grid-3">
-                <article class="card product">
-                    <div class="img">🌸</div>
-                    <div class="body">
-                        <div class="badge">From Tokyo</div>
-                        <h3 style="margin:12px 0 8px">Premium skincare bundle</h3>
-                        <div class="price">Rp 420.000</div>
-                        <div class="meta">Stock left: 48 • Jastiper: Aiko • Arrival: 7–10 days</div>
-                    </div>
-                </article>
-                <article class="card product">
-                    <div class="img">👟</div>
-                    <div class="body">
-                        <div class="badge">Limited drop</div>
-                        <h3 style="margin:12px 0 8px">Seoul sneaker release</h3>
-                        <div class="price">Rp 1.850.000</div>
-                        <div class="meta">Stock left: 18 • Jastiper: Mina • Arrival: 6–8 days</div>
-                    </div>
-                </article>
-                <article class="card product">
-                    <div class="img">🧁</div>
-                    <div class="body">
-                        <div class="badge">Popular snack</div>
-                        <h3 style="margin:12px 0 8px">Japan snack box</h3>
-                        <div class="price">Rp 180.000</div>
-                        <div class="meta">Stock left: 62 • Jastiper: Ken • Arrival: 5–9 days</div>
-                    </div>
-                </article>
+        <div class="product-card">
+            <img src="https://images.unsplash.com/photo-1511556820780-d912e42b4980?q=80&w=1200&auto=format&fit=crop">
+
+            <div class="product-info">
+                <h3>Skincare Set</h3>
+                <p>From Korea</p>
+                <span>Rp 800.000</span>
+
+                <button>Add to Cart</button>
             </div>
         </div>
-    </section>
 
-    <section id="how-it-works" class="section">
-        <div class="container">
-            <div class="section-head">
-                <div>
-                    <h2>How it works</h2>
-                    <p>Simple flow for buyers and jastipers.</p>
-                </div>
-            </div>
-            <div class="steps">
-                <div class="step">
-                    <div class="num">1</div>
-                    <h3>Browse items</h3>
-                    <p class="page-sub">Users search by country, category, and stock before adding to cart.</p>
-                </div>
-                <div class="step">
-                    <div class="num">2</div>
-                    <h3>Pay and confirm</h3>
-                    <p class="page-sub">Wallet balance and vouchers are used during checkout.</p>
-                </div>
-                <div class="step">
-                    <div class="num">3</div>
-                    <h3>Track delivery</h3>
-                    <p class="page-sub">Order status moves from paid to purchased, shipped, and completed.</p>
-                </div>
+        <div class="product-card">
+            <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=1200&auto=format&fit=crop">
+
+            <div class="product-info">
+                <h3>Wireless Headphones</h3>
+                <p>From Singapore</p>
+                <span>Rp 1.200.000</span>
+
+                <button>Add to Cart</button>
             </div>
         </div>
-    </section>
 
-    <section id="jastipers" class="section">
-        <div class="container">
-            <div class="section-head">
-                <div>
-                    <h2>Top jastipers</h2>
-                    <p>Profile cards that make the platform feel trustworthy.</p>
-                </div>
-            </div>
-            <div class="grid-3">
-                <div class="card">
-                    <div style="display:flex;gap:14px;align-items:center">
-                        <div class="avatar">AK</div>
-                        <div>
-                            <div style="font-weight:800">Aiko Kim</div>
-                            <div class="small-muted">Tokyo • 4.9 rating</div>
-                        </div>
-                    </div>
-                    <p class="page-sub" style="margin-top:12px">Beauty, snacks, and premium lifestyle goods.</p>
-                </div>
-                <div class="card">
-                    <div style="display:flex;gap:14px;align-items:center">
-                        <div class="avatar green">MN</div>
-                        <div>
-                            <div style="font-weight:800">Mina Park</div>
-                            <div class="small-muted">Seoul • 4.8 rating</div>
-                        </div>
-                    </div>
-                    <p class="page-sub" style="margin-top:12px">Best for fashion drops and limited releases.</p>
-                </div>
-                <div class="card">
-                    <div style="display:flex;gap:14px;align-items:center">
-                        <div class="avatar blue">RK</div>
-                        <div>
-                            <div style="font-weight:800">Raka Tan</div>
-                            <div class="small-muted">Singapore • 4.9 rating</div>
-                        </div>
-                    </div>
-                    <p class="page-sub" style="margin-top:12px">Fast handling for electronics and accessories.</p>
-                </div>
-            </div>
-        </div>
-    </section>
+    </div>
 
-    <section class="section">
-        <div class="container split">
-            <div class="panel">
-                <h2 style="margin-top:0">Open the demo pages</h2>
-                <p class="page-sub">These are the pages already wired to your backend routes.</p>
-                <div class="hero-actions">
-                    <a class="btn btn-primary" href="/wallet">Wallet</a>
-                    <a class="btn btn-ghost" href="/transactions">Transactions</a>
-                </div>
-            </div>
-            <div class="panel">
-                <h2 style="margin-top:0">Design direction</h2>
-                <p class="page-sub">
-                    Use rounded cards, strong spacing, and one warm accent color so the site feels like
-                    a premium marketplace instead of a plain admin page.
-                </p>
-                <div class="chip-row">
-                    <span class="chip">Modern</span>
-                    <span class="chip">Clean</span>
-                    <span class="chip">Marketplace</span>
-                    <span class="chip">Travel vibe</span>
-                </div>
-            </div>
-        </div>
-    </section>
-</main>
+</section>
 
 <footer class="footer">
-    <div class="container footer-inner">
-        <div><strong>JSON — Jastip Online Nasional</strong><div class="small-muted">Frontend showcase for your group project.</div></div>
-        <div class="small-muted">Home page lives in <code>src/main/resources/static/index.html</code></div>
-    </div>
+    <p>© 2026 JSON Jastip. All rights reserved.</p>
 </footer>
+
 </body>
 </html>
