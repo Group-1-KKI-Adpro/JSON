@@ -60,6 +60,8 @@ public class SecurityConfig {
                         .requestMatchers(
                                 HttpMethod.GET,
                                 "/auth",
+                                "/login",
+                                "/register",
                                 "/profile",
                                 "/catalog",
                                 "/orders",
