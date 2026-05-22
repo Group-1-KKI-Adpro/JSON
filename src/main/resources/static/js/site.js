@@ -504,7 +504,6 @@ function renderWalletBalance(balance) {
     <div class="balance-card">
       <strong>Current balance</strong>
       <div class="balance-amount">${formatCurrency(balance ?? 0)}</div>
-      <p class="muted" style="margin:10px 0 0;">Available for checkout, refunds, and withdrawals.</p>
     </div>
   `;
 }
@@ -881,19 +880,12 @@ function initPlaceholders() {
   }
 
   if (page === "wallet") {
-    renderStats(document.getElementById("walletMeta"), [
-      { value: "Balance", label: "Track funds", text: "See your wallet state at a glance." },
-      { value: "Top up", label: "Quick add", text: "Deposit funds in a simple card." },
-      { value: "Withdraw", label: "Money out", text: "Request a withdrawal cleanly." }
-    ]);
-
     const balance = document.getElementById("walletBalance");
     if (balance && !balance.children.length && !balance.innerHTML.trim()) {
       balance.innerHTML = `
         <div class="balance-card">
           <strong>Current balance</strong>
           <div class="balance-amount">${formatCurrency(0)}</div>
-          <p class="muted" style="margin:10px 0 0;">Wallet data will appear here when the backend returns a balance.</p>
         </div>
       `;
     }
