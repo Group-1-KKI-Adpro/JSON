@@ -27,7 +27,15 @@ public class InventoryClient {
         try {
             catalogService.reserveStock(catalogId, quantity);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to " + failurePrefix + catalogId);
+            throw new RuntimeException("Failed to reserve stock for item " + catalogId);
+        }
+    }
+
+    public void releaseItem(int catalogId, int quantity) {
+        try {
+            catalogService.releaseStock(catalogId, quantity);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to release stock for item " + catalogId);
         }
     }
 
