@@ -2,7 +2,8 @@
 const TOKEN_KEY = "json_token";
 const PROFILE_KEY = "json_profile";
 const PUBLIC_PAGES = new Set(["home", "login", "register"]);
-const PROTECTED_PAGES = new Set(["catalog", "orders", "profile", "wallet", "vouchers", "transactions","admin"]);
+const PROTECTED_PAGES = new Set(["catalog", "catalog-add", "orders", "profile", "wallet", "vouchers", "transactions", "admin", "admin-wallet-withdrawals"]);
+const ADMIN_PAGES = new Set(["admin", "admin-wallet-withdrawals"]);
 
 function getToken() {
   return localStorage.getItem(TOKEN_KEY);
@@ -94,6 +95,10 @@ function getSupportText(profile) {
   return parts.join(" · ") || "Logged in";
 }
 
+function isAdminUser(profile) {
+  return Boolean(profile && profile.role && String(profile.role).includes("ADMIN"));
+}
+
 function setNotice(id, type, message) {
   const el = document.getElementById(id);
   if (!el) return;
@@ -119,6 +124,29 @@ function setActiveNavLink() {
     } catch {
       // ignore invalid URLs
     }
+  });
+}
+
+function syncAdminNavigation(profile) {
+  document.querySelectorAll(".nav-links").forEach((nav) => {
+    const existing = nav.querySelector('[data-admin-nav="true"]');
+
+    if (!isAdminUser(profile)) {
+      existing?.remove();
+      return;
+    }
+
+    if (existing) {
+      existing.href = "/admin/admin-wallet-withdrawals.html";
+      existing.textContent = "Withdraw Admin";
+      return;
+    }
+
+    const adminLink = document.createElement("a");
+    adminLink.href = "/admin/admin-wallet-withdrawals.html";
+    adminLink.textContent = "Withdraw Admin";
+    adminLink.dataset.adminNav = "true";
+    nav.appendChild(adminLink);
   });
 }
 
@@ -216,6 +244,20 @@ function ensureProtectedPage() {
   return false;
 }
 
+function ensureAdminPage(profile) {
+  const page = document.body.dataset.page;
+  if (!ADMIN_PAGES.has(page)) {
+    return false;
+  }
+
+  if (!isAdminUser(profile)) {
+    window.location.replace("/wallet");
+    return true;
+  }
+
+  return false;
+}
+
 function renderCards(el, cards) {
   if (!el || el.children.length || el.innerHTML.trim()) return;
   el.innerHTML = cards.map((card) => `
@@ -269,22 +311,6 @@ function catalogSearchText(item) {
     item?.price != null ? `price ${item.price}` : "",
     item?.stock != null ? `stock ${item.stock}` : ""
   ].join(" ").toLowerCase();
-}
-
-function renderCatalogStatsFromItems(items) {
-  const totalItems = items.length;
-  const totalStock = items.reduce((sum, item) => sum + Number(item?.stock || 0), 0);
-  const avgPrice = totalItems
-    ? Math.round(items.reduce((sum, item) => sum + Number(item?.price || 0), 0) / totalItems)
-    : 0;
-  const uniqueJastipers = new Set(items.map((item) => item?.jastiperId).filter((value) => value !== undefined && value !== null)).size;
-
-  renderStats(document.getElementById("catalogStats"), [
-    { value: `${totalItems}`, label: "Items in catalog", text: "Loaded directly from the backend" },
-    { value: `${totalStock}`, label: "Total stock", text: "Across all visible products" },
-    { value: formatCurrency(avgPrice), label: "Average price", text: "Simple snapshot for browsing" },
-    { value: `${uniqueJastipers}`, label: "Jastiper owners", text: "Unique sellers in this catalog" }
-  ]);
 }
 
 function renderCatalogEmptyState() {
@@ -370,8 +396,6 @@ async function loadCatalogPageData() {
     const items = await response.json();
     const normalized = Array.isArray(items) ? items : [];
     setCatalogItemsCache(normalized);
-    renderCatalogStatsFromItems(normalized);
-
     if (!normalized.length) {
       renderCatalogEmptyState();
       setNotice(noticeId, null, "");
@@ -480,7 +504,6 @@ function renderWalletBalance(balance) {
     <div class="balance-card">
       <strong>Current balance</strong>
       <div class="balance-amount">${formatCurrency(balance ?? 0)}</div>
-      <p class="muted" style="margin:10px 0 0;">Available for checkout, refunds, and withdrawals.</p>
     </div>
   `;
 }
@@ -550,6 +573,61 @@ function renderTransactionsTable(items) {
   `).join("");
 }
 
+function renderPendingWithdrawStats(items) {
+  const totalAmount = items.reduce((sum, tx) => sum + Number(tx?.amount || 0), 0);
+  const uniqueUsers = new Set(items.map((tx) => tx?.userId).filter((value) => value !== undefined && value !== null)).size;
+  const oldest = items.length ? formatTimestamp(items[items.length - 1]?.timestamp) : "None";
+  const el = document.getElementById("adminWithdrawStats");
+  if (!el) return;
+
+  el.innerHTML = [
+    { value: `${items.length}`, label: "Pending requests", text: "Waiting for admin review" },
+    { value: formatCurrency(totalAmount), label: "Total requested", text: "Combined pending amount" },
+    { value: `${uniqueUsers}`, label: "Unique users", text: `Oldest request ${oldest}` }
+  ].map((item) => `
+    <article class="mini-stat">
+      <strong>${escapeHtml(item.value)}</strong>
+      <small>${escapeHtml(item.label)}</small>
+      <small>${escapeHtml(item.text)}</small>
+    </article>
+  `).join("");
+}
+
+function renderPendingWithdrawTable(items) {
+  const tbody = document.getElementById("pendingWithdrawTableBody");
+  if (!tbody) return;
+
+  if (!items.length) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="6">
+          <div class="empty-state">
+            <strong>No pending withdrawals</strong>
+            <p style="margin:0; line-height:1.6;">New withdrawal requests will appear here when users submit them.</p>
+          </div>
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = items.map((tx) => `
+    <tr>
+      <td>${escapeHtml(formatTimestamp(tx.timestamp))}</td>
+      <td>${escapeHtml(String(tx.userId ?? "-"))}</td>
+      <td>${escapeHtml(formatCurrency(tx.amount))}</td>
+      <td><span class="${statusClass(tx.status)}">${escapeHtml(tx.status || "UNKNOWN")}</span></td>
+      <td>${escapeHtml(tx.description || "-")}</td>
+      <td>
+        <div class="action-stack">
+          <button class="btn-secondary admin-withdraw-action" type="button" data-action="approve" data-id="${escapeHtml(String(tx.id))}">Approve</button>
+          <button class="btn-ghost admin-withdraw-action" type="button" data-action="reject" data-id="${escapeHtml(String(tx.id))}">Reject</button>
+        </div>
+      </td>
+    </tr>
+  `).join("");
+}
+
 async function fetchWalletTransactions(limit = 10) {
   const response = await authFetch(`/api/wallet/transactions?limit=${limit}`);
   if (!response.ok) {
@@ -578,6 +656,32 @@ async function loadTransactionsPageData() {
     : transactions.filter((tx) => String(tx.type).toUpperCase() === filter);
 
   renderTransactionsTable(filtered);
+}
+
+async function loadAdminWithdrawalsPageData() {
+  const response = await authFetch("/api/admin/wallet/withdraw/pending");
+  if (!response.ok) {
+    throw new Error(`Failed to load pending withdrawals (${response.status})`);
+  }
+
+  const items = await response.json();
+  const normalized = Array.isArray(items) ? items : [];
+  renderPendingWithdrawStats(normalized);
+  renderPendingWithdrawTable(normalized);
+}
+
+async function verifyPendingWithdrawal(transactionId, status, failureReason = null) {
+  const response = await authFetch(`/api/admin/wallet/withdraw/${transactionId}/verify`, {
+    method: "POST",
+    body: JSON.stringify({ status, failureReason })
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(text || `Failed to ${String(status).toLowerCase()} withdrawal`);
+  }
+
+  return response.json();
 }
 
 function setupWalletForms() {
@@ -668,6 +772,56 @@ function setupTransactionsPage() {
   }
 }
 
+function setupAdminWithdrawalsPage() {
+  const refresh = document.getElementById("refreshPendingWithdrawals");
+  const tbody = document.getElementById("pendingWithdrawTableBody");
+
+  if (refresh) {
+    refresh.addEventListener("click", async () => {
+      try {
+        await loadAdminWithdrawalsPageData();
+        setNotice("adminWithdrawNotice", "success", "Pending withdrawals refreshed.");
+      } catch (err) {
+        setNotice("adminWithdrawNotice", "error", err.message || "Failed to refresh pending withdrawals");
+      }
+    });
+  }
+
+  if (tbody) {
+    tbody.addEventListener("click", async (event) => {
+      const button = event.target.closest(".admin-withdraw-action");
+      if (!button) return;
+
+      const transactionId = button.dataset.id;
+      const action = button.dataset.action;
+      const status = action === "approve" ? "SUCCESS" : "FAILED";
+      const failureReason = status === "FAILED"
+        ? (window.prompt("Reason for rejection:", "Rejected by admin") || "Rejected by admin").trim()
+        : null;
+
+      if (status === "FAILED" && !failureReason) {
+        setNotice("adminWithdrawNotice", "info", "Rejection cancelled.");
+        return;
+      }
+
+      try {
+        button.disabled = true;
+        await verifyPendingWithdrawal(transactionId, status, failureReason);
+        await loadAdminWithdrawalsPageData();
+        setNotice(
+          "adminWithdrawNotice",
+          "success",
+          status === "SUCCESS" ? "Withdrawal approved." : "Withdrawal rejected."
+        );
+      } catch (err) {
+        setNotice("adminWithdrawNotice", "error", err.message || "Failed to update withdrawal request");
+      } finally {
+        button.disabled = false;
+      }
+    });
+  }
+}
+
 function initPlaceholders() {
   const page = document.body.dataset.page;
 
@@ -687,15 +841,6 @@ function initPlaceholders() {
         '<span class="badge">⌕ Search-ready</span>'
       ].join('');
     }
-  }
-
-  if (page === "catalog") {
-    renderStats(document.getElementById("catalogStats"), [
-      { value: "Search", label: "Browse quickly", text: "Filter by name, origin, or Jastiper." },
-      { value: "Items", label: "Backend connected", text: "Catalog data comes straight from /api/catalog." },
-      { value: "Add", label: "Separate page", text: "Create new items on their own screen." },
-      { value: "Stock", label: "Inventory ready", text: "See stock and price at a glance." }
-    ]);
   }
 
   if (page === "catalog-add") {
@@ -735,19 +880,12 @@ function initPlaceholders() {
   }
 
   if (page === "wallet") {
-    renderStats(document.getElementById("walletMeta"), [
-      { value: "Balance", label: "Track funds", text: "See your wallet state at a glance." },
-      { value: "Top up", label: "Quick add", text: "Deposit funds in a simple card." },
-      { value: "Withdraw", label: "Money out", text: "Request a withdrawal cleanly." }
-    ]);
-
     const balance = document.getElementById("walletBalance");
     if (balance && !balance.children.length && !balance.innerHTML.trim()) {
       balance.innerHTML = `
         <div class="balance-card">
           <strong>Current balance</strong>
           <div class="balance-amount">${formatCurrency(0)}</div>
-          <p class="muted" style="margin:10px 0 0;">Wallet data will appear here when the backend returns a balance.</p>
         </div>
       `;
     }
@@ -792,6 +930,14 @@ function initPlaceholders() {
         </tr>
       `;
     }
+  }
+
+  if (page === "admin-wallet-withdrawals") {
+    renderStats(document.getElementById("adminWithdrawStats"), [
+      { value: "0", label: "Pending requests", text: "Waiting for admin review" },
+      { value: formatCurrency(0), label: "Total requested", text: "Combined pending amount" },
+      { value: "0", label: "Unique users", text: "Oldest request None" }
+    ]);
   }
 }
 
@@ -968,6 +1114,10 @@ function setupPageInteractions() {
   if (page === "orders") {
     setupOrderCheckout();
   }
+
+  if (page === "admin-wallet-withdrawals") {
+    setupAdminWithdrawalsPage();
+  }
 }
 
 async function initApp() {
@@ -982,6 +1132,12 @@ async function initApp() {
   setupAuthForms();
   showToken();
   const currentUser = await loadCurrentUser();
+  syncAdminNavigation(currentUser);
+  setActiveNavLink();
+
+  if (ensureAdminPage(currentUser)) {
+    return;
+  }
 
   const page = document.body.dataset.page;
   if (page === "catalog") {
@@ -1012,7 +1168,7 @@ async function initApp() {
 
   if (page === "vouchers") {
     const adminSection = document.getElementById("adminVoucherSection");
-    if (adminSection && currentUser && currentUser.role && currentUser.role.includes("ADMIN")) {
+    if (adminSection && isAdminUser(currentUser)) {
       adminSection.classList.remove("hidden");
     }
     
@@ -1021,6 +1177,15 @@ async function initApp() {
       setNotice("voucherNotice", null, "");
     } catch (err) {
       setNotice("voucherNotice", "error", err.message || "Failed to load active vouchers");
+    }
+  }
+
+  if (page === "admin-wallet-withdrawals") {
+    try {
+      await loadAdminWithdrawalsPageData();
+      setNotice("adminWithdrawNotice", null, "");
+    } catch (err) {
+      setNotice("adminWithdrawNotice", "error", err.message || "Failed to load pending withdrawals");
     }
   }
 }

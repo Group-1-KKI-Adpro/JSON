@@ -7,7 +7,6 @@
   <link rel="stylesheet" href="/css/site.css" />
 </head>
 <body data-page="profile">
-<div class="shell">
   <header class="topbar">
     <a class="brand" href="/">
       <span class="brand-mark">J</span>
@@ -28,7 +27,7 @@
     <div id="accountWidget" class="account-widget"></div>
   </header>
 
-  <main>
+  <main class="shell">
     <section class="hero profile-hero">
       <div>
         <p class="eyebrow">Account center</p>
@@ -38,13 +37,9 @@
           a verified Jastiper through KYC.
         </p>
         <div class="hero-actions">
-          <button id="refreshProfile" class="btn primary" type="button">Refresh profile</button>
-          <a class="btn ghost" href="/catalog">Back to catalog</a>
+          <button id="refreshProfile" class="button" type="button">Refresh profile</button>
+          <a class="btn-ghost" href="/catalog">Back to catalog</a>
         </div>
-      </div>
-
-      <div id="profileStatusCard" class="hero-card">
-        <p class="muted">Loading account status...</p>
       </div>
     </section>
 
@@ -92,7 +87,7 @@
             <input id="profileFullName" type="text" maxlength="100" placeholder="Your full name" />
           </label>
 
-          <button class="btn primary" type="submit">Save profile</button>
+          <button class="button" type="submit">Save profile</button>
         </form>
       </section>
 
@@ -122,7 +117,7 @@
             <input id="kycSocialMediaLink" type="url" maxlength="255" placeholder="https://instagram.com/username" />
           </label>
 
-          <button id="kycSubmitButton" class="btn primary" type="submit">
+          <button id="kycSubmitButton" class="button" type="submit">
             Submit KYC application
           </button>
         </form>
@@ -144,7 +139,7 @@
             Username
             <input id="publicProfileUsername" type="text" placeholder="e.g. jastiper" />
           </label>
-          <button class="btn primary" type="submit">View public profile</button>
+          <button class="button" type="submit">View public profile</button>
         </form>
 
         <div id="publicProfileResult" class="profile-public-result">
@@ -157,8 +152,6 @@
   <footer class="footer">
     © 2026 JSON Jastip. Profile and KYC.
   </footer>
-</div>
-
 <script src="/js/site.js"></script>
 <script src="/js/profile.js"></script>
 </body>
