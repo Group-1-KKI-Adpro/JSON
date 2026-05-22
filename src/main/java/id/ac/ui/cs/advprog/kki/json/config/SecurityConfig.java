@@ -63,6 +63,7 @@ public class SecurityConfig {
                                 "/register",
                                 "/profile",
                                 "/catalog",
+                                "/catalog/new",
                                 "/orders",
                                 "/vouchers",
                                 "/wallet",
