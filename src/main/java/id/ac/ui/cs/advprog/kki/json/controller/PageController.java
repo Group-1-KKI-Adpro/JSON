@@ -31,6 +31,11 @@ public class PageController {
         return "forward:/catalog.html";
     }
 
+    @GetMapping("/catalog/new")
+    public String catalogCreatePage() {
+        return "forward:/catalog-new.html";
+    }
+
     @GetMapping("/orders")
     public String ordersPage() {
         return "forward:/orders.html";
