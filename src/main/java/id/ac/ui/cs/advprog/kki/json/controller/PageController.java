@@ -55,4 +55,9 @@ public class PageController {
     public String adminPage() {
         return "forward:/admin.html";
     }
+
+    @GetMapping("/users")
+    public String usersPage() {
+        return "forward:/public-profile.html";
+    }
 }

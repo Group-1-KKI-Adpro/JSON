@@ -1403,5 +1403,196 @@ button[type="submit"]:active {
     grid-template-columns: 1fr;
   }
 }
+/* Orders role views */
+.orders-section {
+  margin-top: 1.5rem;
+}
 
+.order-panel {
+  overflow: hidden;
+}
 
+.order-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.order-view-card {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: #ffffff;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.05);
+}
+
+.order-view-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.order-view-header h3 {
+  margin: 0.75rem 0 0.25rem;
+}
+
+.order-total {
+  font-size: 1.15rem;
+  color: #0f172a;
+  white-space: nowrap;
+}
+
+.order-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.7rem;
+}
+
+.order-meta-grid span {
+  padding: 0.7rem;
+  border-radius: 0.8rem;
+  background: rgba(248, 250, 252, 0.9);
+  color: #475569;
+  font-size: 0.85rem;
+}
+
+.order-action-row {
+  display: flex;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.order-state-box {
+  display: block;
+  padding: 0.85rem;
+  border-radius: 0.9rem;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: rgba(248, 250, 252, 0.9);
+}
+
+.order-state-box strong {
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.order-state-box p {
+  margin: 0;
+}
+
+.small-box {
+  font-size: 0.9rem;
+  color: #64748b;
+}
+
+.rating-form {
+  display: grid;
+  gap: 0.85rem;
+  padding: 1rem;
+  border-radius: 1rem;
+  background: rgba(248, 250, 252, 0.9);
+}
+
+.rating-form label {
+  display: grid;
+  gap: 0.35rem;
+  color: #475569;
+}
+
+.rating-form select,
+.rating-form textarea {
+  border: 1px solid rgba(15, 23, 42, 0.14);
+  border-radius: 0.85rem;
+  padding: 0.75rem;
+  background: #ffffff;
+}
+
+.order-role-row {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+.order-role-pill {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0.38rem 0.7rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  background: #e2e8f0;
+  color: #334155;
+}
+
+.order-role-pill.role-admin {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.order-role-pill.role-jastiper {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.order-role-pill.role-titiper {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.order-role-pill.status-active {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.order-role-pill.status-banned {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.order-role-pill.status-pending_verification {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+@media (max-width: 900px) {
+  .order-view-header {
+    flex-direction: column;
+  }
+
+  .order-meta-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Public profile page */
+.public-profile-panel {
+  margin-top: 1.5rem;
+}
+
+.public-profile-badge-row {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+.public-reputation-block {
+  margin-top: 1.25rem;
+  display: grid;
+  gap: 0.85rem;
+}
+
+.public-reputation-block h3 {
+  margin: 0;
+}
+
+.profile-link-pill {
+  text-decoration: none;
+}
+
+.profile-link-pill:hover {
+  filter: brightness(0.96);
+}

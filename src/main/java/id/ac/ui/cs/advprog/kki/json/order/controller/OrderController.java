@@ -7,10 +7,15 @@ import id.ac.ui.cs.advprog.kki.json.order.dto.RatingRequest;
 import id.ac.ui.cs.advprog.kki.json.order.model.Order;
 import id.ac.ui.cs.advprog.kki.json.order.model.OrderStatus;
 import id.ac.ui.cs.advprog.kki.json.order.service.OrderService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/orders")
@@ -25,62 +30,120 @@ public class OrderController {
     }
 
     @PostMapping
-    public Order createOrder(Authentication authentication,
-                             @RequestHeader("Authorization") String authHeader,
-                             @RequestBody CreateOrderRequest request) {
-        User user = getAuthenticatedUser(authentication);
-        String token = authHeader.replace("Bearer ", "");
+    public ResponseEntity<?> createOrder(
+            Authentication authentication,
+            @RequestHeader("Authorization") String authHeader,
+            @RequestBody CreateOrderRequest request
+    ) {
+        try {
+            User user = getAuthenticatedUser(authentication);
+            String token = authHeader.replace("Bearer ", "");
 
-        return orderService.createOrder(
-                user.getId(),
-                request.getShippingAddress(),
-                request.getItems(),
-                request.getVoucherCode(),
-                token
-        );
+            Order order = orderService.createOrder(
+                    user.getId(),
+                    request.getShippingAddress(),
+                    request.getItems(),
+                    request.getVoucherCode(),
+                    token
+            );
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(order);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(error(e.getMessage()));
+        } catch (ResponseStatusException e) {
+            return ResponseEntity
+                    .status(e.getStatusCode())
+                    .body(error(e.getReason()));
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(error(e.getMessage()));
+        }
     }
 
     @GetMapping("/me")
-    public List<Order> getBuyerOrders(Authentication authentication) {
-        User user = getAuthenticatedUser(authentication);
-        return orderService.getBuyerOrders(user.getId());
+    public ResponseEntity<?> getBuyerOrders(Authentication authentication) {
+        try {
+            User user = getAuthenticatedUser(authentication);
+            List<Order> orders = orderService.getBuyerOrders(user.getId());
+            return ResponseEntity.ok(orders);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(error(e.getMessage()));
+        }
     }
 
     @GetMapping("/jastiper/me")
-    public List<Order> getJastiperOrders(Authentication authentication) {
-        User user = getAuthenticatedUser(authentication);
-        return orderService.getJastiperOrders(user.getId());
+    public ResponseEntity<?> getJastiperOrders(Authentication authentication) {
+        try {
+            User user = getAuthenticatedUser(authentication);
+            List<Order> orders = orderService.getJastiperOrders(user.getId());
+            return ResponseEntity.ok(orders);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(error(e.getMessage()));
+        }
     }
 
     @PatchMapping("/{id}/status")
-    public Order updateStatus(Authentication authentication,
-                              @PathVariable String id,
-                              @RequestParam OrderStatus status) {
-        User user = getAuthenticatedUser(authentication);
-        return orderService.updateStatus(id, status, user.getId());
+    public ResponseEntity<?> updateStatus(
+            Authentication authentication,
+            @PathVariable String id,
+            @RequestParam OrderStatus status
+    ) {
+        try {
+            User user = getAuthenticatedUser(authentication);
+            Order order = orderService.updateStatus(id, status, user.getId());
+            return ResponseEntity.ok(order);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(error(e.getMessage()));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(error(e.getMessage()));
+        }
     }
 
     @PostMapping("/{id}/cancel")
-    public Order cancelOrder(Authentication authentication,
-                             @PathVariable String id) {
-        User user = getAuthenticatedUser(authentication);
-        return orderService.cancelOrder(id, user.getId());
+    public ResponseEntity<?> cancelOrder(
+            Authentication authentication,
+            @PathVariable String id
+    ) {
+        try {
+            User user = getAuthenticatedUser(authentication);
+            Order order = orderService.cancelOrder(id, user.getId());
+            return ResponseEntity.ok(order);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(error(e.getMessage()));
+        }
     }
 
     @PostMapping("/{id}/rating")
-    public Order rateOrder(Authentication authentication,
-                           @PathVariable String id,
-                           @RequestBody RatingRequest request) {
-        User user = getAuthenticatedUser(authentication);
-        return orderService.rateOrder(id, user.getId(), request);
+    public ResponseEntity<?> rateOrder(
+            Authentication authentication,
+            @PathVariable String id,
+            @RequestBody RatingRequest request
+    ) {
+        try {
+            User user = getAuthenticatedUser(authentication);
+            Order order = orderService.rateOrder(id, user.getId(), request);
+            return ResponseEntity.ok(order);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(error(e.getMessage()));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(error(e.getMessage()));
+        }
     }
 
     private User getAuthenticatedUser(Authentication authentication) {
         if (authentication == null || authentication.getPrincipal() == null) {
-            throw new RuntimeException("Authentication is required");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authentication is required");
         }
 
         String email = (String) authentication.getPrincipal();
         return authService.getByEmail(email);
+    }
+
+    private Map<String, String> error(String message) {
+        return Collections.singletonMap(
+                "error",
+                message == null || message.isBlank() ? "Request failed" : message
+        );
     }
 }
