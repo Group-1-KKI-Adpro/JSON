@@ -15,6 +15,7 @@ import id.ac.ui.cs.advprog.kki.json.order.repository.OrderRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -63,82 +64,88 @@ public class OrderService {
 
         Long orderJastiperId = null;
         long total = 0;
+        List<OrderItem> reservedItems = new ArrayList<>();
 
-        for (ItemRequest req : items) {
-            if (req.getCatalogItemId() == null) {
-                throw new IllegalArgumentException("catalogItemId is required");
+        try {
+            for (ItemRequest req : items) {
+                if (req.getCatalogItemId() == null) {
+                    throw new IllegalArgumentException("catalogItemId is required");
+                }
+
+                if (req.getQty() == null || req.getQty() <= 0) {
+                    throw new IllegalArgumentException("qty must be > 0");
+                }
+
+                CatalogItemSnapshot catalogItem = inventoryClient.getItem(req.getCatalogItemId());
+
+                if (catalogItem == null) {
+                    throw new RuntimeException("Catalog item not found");
+                }
+
+                if (catalogItem.getJastiperId() == null) {
+                    throw new RuntimeException("Catalog item has no Jastiper owner");
+                }
+
+                Long itemJastiperId = catalogItem.getJastiperId().longValue();
+
+                if (orderJastiperId == null) {
+                    orderJastiperId = itemJastiperId;
+                } else if (!orderJastiperId.equals(itemJastiperId)) {
+                    throw new IllegalArgumentException("One order can only contain items from one Jastiper");
+                }
+
+                if (catalogItem.getPrice() == null || catalogItem.getPrice() < 0) {
+                    throw new RuntimeException("Invalid catalog item price");
+                }
+
+                OrderItem item = new OrderItem();
+                item.setCatalogItemId(req.getCatalogItemId());
+                item.setQty(req.getQty());
+                item.setPriceSnapshot(catalogItem.getPrice().longValue());
+
+                order.addItem(item);
+                total += catalogItem.getPrice().longValue() * req.getQty();
             }
-
-            if (req.getQty() == null || req.getQty() <= 0) {
-                throw new IllegalArgumentException("qty must be > 0");
-            }
-
-            CatalogItemSnapshot catalogItem = inventoryClient.getItem(req.getCatalogItemId());
-
-            if (catalogItem == null) {
-                throw new RuntimeException("Catalog item not found");
-            }
-
-            if (catalogItem.getJastiperId() == null) {
-                throw new RuntimeException("Catalog item has no Jastiper owner");
-            }
-
-            Long itemJastiperId = catalogItem.getJastiperId().longValue();
 
             if (orderJastiperId == null) {
-                orderJastiperId = itemJastiperId;
-            } else if (!orderJastiperId.equals(itemJastiperId)) {
-                throw new IllegalArgumentException("One order can only contain items from one Jastiper");
+                throw new RuntimeException("Cannot determine Jastiper for this order");
             }
 
-            if (catalogItem.getPrice() == null || catalogItem.getPrice() < 0) {
-                throw new RuntimeException("Invalid catalog item price");
+            if (buyerId.equals(orderJastiperId)) {
+                throw new IllegalArgumentException("Buyer cannot order their own catalog item");
             }
 
-            OrderItem item = new OrderItem();
-            item.setCatalogItemId(req.getCatalogItemId());
-            item.setQty(req.getQty());
-            item.setPriceSnapshot(catalogItem.getPrice().longValue());
+            order.setJastiperId(orderJastiperId);
 
-            order.addItem(item);
+            if (voucherCode != null && !voucherCode.isBlank()) {
+                double discounted = voucherClient.applyVoucher(voucherCode, (double) total);
+                total = (long) discounted;
+            }
 
-            total += catalogItem.getPrice().longValue() * req.getQty();
+            long balance = walletClient.getBalance(token);
+            if (balance < total) {
+                throw new RuntimeException("Insufficient balance");
+            }
+
+            for (OrderItem item : order.getItems()) {
+                inventoryClient.reserveItem(item.getCatalogItemId(), item.getQty());
+                reservedItems.add(item);
+            }
+
+            order.setTotalPrice(total);
+            order.setStatus(OrderStatus.PAID);
+
+            Order savedOrder = orderRepository.save(order);
+
+            if (voucherCode != null && !voucherCode.isBlank()) {
+                voucherClient.useVoucher(voucherCode, savedOrder.getId(), token);
+            }
+
+            return savedOrder;
+        } catch (RuntimeException e) {
+            releaseReservedStockQuietly(reservedItems);
+            throw e;
         }
-
-        if (orderJastiperId == null) {
-            throw new RuntimeException("Cannot determine Jastiper for this order");
-        }
-
-        if (buyerId.equals(orderJastiperId)) {
-            throw new IllegalArgumentException("Buyer cannot order their own catalog item");
-        }
-
-        order.setJastiperId(orderJastiperId);
-
-        if (voucherCode != null && !voucherCode.isBlank()) {
-            double discounted = voucherClient.applyVoucher(voucherCode, (double) total);
-            total = (long) discounted;
-        }
-
-        long balance = walletClient.getBalance(token);
-        if (balance < total) {
-            throw new RuntimeException("Insufficient balance");
-        }
-
-        for (OrderItem item : order.getItems()) {
-            inventoryClient.reserveItem(item.getCatalogItemId(), item.getQty());
-        }
-
-        order.setTotalPrice(total);
-        order.setStatus(OrderStatus.PAID);
-
-        Order savedOrder = orderRepository.save(order);
-
-        if (voucherCode != null && !voucherCode.isBlank()) {
-            voucherClient.useVoucher(voucherCode, savedOrder.getId(), token);
-        }
-
-        return savedOrder;
     }
 
     @Transactional
@@ -188,6 +195,7 @@ public class OrderService {
             throw new RuntimeException("Order is already cancelled");
         }
 
+        releaseReservedStockQuietly(order.getItems());
         walletClient.refund(order.getBuyerId(), order.getTotalPrice());
 
         order.setStatus(OrderStatus.CANCELLED);
@@ -242,6 +250,20 @@ public class OrderService {
         );
 
         return savedOrder;
+    }
+
+    private void releaseReservedStockQuietly(List<OrderItem> items) {
+        if (items == null || items.isEmpty()) {
+            return;
+        }
+
+        for (OrderItem item : items) {
+            try {
+                inventoryClient.releaseItem(item.getCatalogItemId(), item.getQty());
+            } catch (Exception ignored) {
+                // Best-effort rollback of remote inventory reservation.
+            }
+        }
     }
 
     private void validateRating(Integer rating, String fieldName) {

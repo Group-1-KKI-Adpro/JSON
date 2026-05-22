@@ -68,6 +68,30 @@ public class CatalogController {
         return ResponseEntity.ok(items);
     }
 
+    @GetMapping("/catalog/search")
+    public ResponseEntity<?> searchCatalogItems(@RequestParam(name = "keyword", required = false) String keyword) {
+        if (keyword == null || keyword.isBlank()) {
+            return ResponseEntity.badRequest().body(error("keyword is required"));
+        }
+
+        List<CatalogItemResponse> items = catalogService.searchCatalogItems(keyword)
+                .stream()
+                .map(CatalogItemResponse::new)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(items);
+    }
+
+    @GetMapping("/catalog/jastiper/{jastiperId}")
+    public ResponseEntity<List<CatalogItemResponse>> getCatalogItemsByJastiperId(@PathVariable int jastiperId) {
+        List<CatalogItemResponse> items = catalogService.getCatalogItemsByJastiperId(jastiperId)
+                .stream()
+                .map(CatalogItemResponse::new)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(items);
+    }
+
     @GetMapping("/catalog/{id}")
     public ResponseEntity<?> getCatalogItemById(@PathVariable int id) {
         try {

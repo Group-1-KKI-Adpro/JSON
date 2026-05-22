@@ -249,38 +249,206 @@ function renderEmptyState(el, title, text, actionHtml = "") {
   `;
 }
 
-function setupCatalogSearch() {
-  const input = document.getElementById("catalogSearch");
-  const grid = document.getElementById("catalogGrid");
-  const empty = document.getElementById("catalogEmpty");
-  if (!input || !grid) return;
-
-  input.addEventListener("input", () => {
-    const query = input.value.trim().toLowerCase();
-    const cards = grid.querySelectorAll(".card");
-    let visible = 0;
-    cards.forEach((card) => {
-      const haystack = card.textContent.toLowerCase();
-      const match = !query || haystack.includes(query);
-      card.style.display = match ? "" : "none";
-      if (match) visible += 1;
-    });
-    if (empty) empty.classList.toggle("hidden", visible > 0);
-  });
+function getCatalogItemsCache() {
+  if (!window.__catalogItemsCache) {
+    window.__catalogItemsCache = [];
+  }
+  return window.__catalogItemsCache;
 }
 
-function setupCatalogPanelToggle() {
-  const button = document.getElementById("catalogManageToggle");
-  const panel = document.getElementById("catalogManagePanel");
-  if (!button || !panel) return;
+function setCatalogItemsCache(items) {
+  window.__catalogItemsCache = Array.isArray(items) ? items : [];
+}
 
-  button.addEventListener("click", () => {
-    panel.classList.toggle("hidden-panel");
-    button.textContent = panel.classList.contains("hidden-panel") ? "Show add form" : "Add item";
+function catalogSearchText(item) {
+  return [
+    item?.name,
+    item?.description,
+    item?.origin,
+    item?.jastiperId != null ? `jastiper ${item.jastiperId}` : "",
+    item?.price != null ? `price ${item.price}` : "",
+    item?.stock != null ? `stock ${item.stock}` : ""
+  ].join(" ").toLowerCase();
+}
+
+function renderCatalogStatsFromItems(items) {
+  const totalItems = items.length;
+  const totalStock = items.reduce((sum, item) => sum + Number(item?.stock || 0), 0);
+  const avgPrice = totalItems
+    ? Math.round(items.reduce((sum, item) => sum + Number(item?.price || 0), 0) / totalItems)
+    : 0;
+  const uniqueJastipers = new Set(items.map((item) => item?.jastiperId).filter((value) => value !== undefined && value !== null)).size;
+
+  renderStats(document.getElementById("catalogStats"), [
+    { value: `${totalItems}`, label: "Items in catalog", text: "Loaded directly from the backend" },
+    { value: `${totalStock}`, label: "Total stock", text: "Across all visible products" },
+    { value: formatCurrency(avgPrice), label: "Average price", text: "Simple snapshot for browsing" },
+    { value: `${uniqueJastipers}`, label: "Jastiper owners", text: "Unique sellers in this catalog" }
+  ]);
+}
+
+function renderCatalogEmptyState() {
+  const empty = document.getElementById("catalogEmpty");
+  const grid = document.getElementById("catalogGrid");
+  if (grid) grid.classList.add("hidden");
+  if (!empty) return;
+
+  empty.classList.remove("hidden");
+  empty.innerHTML = `
+    <div class="empty-state">
+      <strong>No catalog items yet</strong>
+      <p style="margin:0 0 14px; line-height:1.6;">
+        Start by adding the first item on a separate page, then come back here to browse and search.
+      </p>
+      <a class="button" href="/catalog/new">Add the first item</a>
+    </div>
+  `;
+}
+
+function renderCatalogCards(items) {
+  const grid = document.getElementById("catalogGrid");
+  const empty = document.getElementById("catalogEmpty");
+  if (!grid) return;
+
+  if (!items.length) {
+    renderCatalogEmptyState();
+    if (empty) {
+      empty.classList.remove("hidden");
+    }
+    return;
+  }
+
+  if (empty) empty.classList.add("hidden");
+  grid.classList.remove("hidden");
+
+  grid.innerHTML = items.map((item) => {
+    const searchText = escapeHtml(catalogSearchText(item));
+    return `
+      <article class="card catalog-card" data-search="${searchText}">
+        <div class="card-inner">
+          <div class="card-top">
+            <div>
+              <h3 class="card-title">${escapeHtml(item.name || "Unnamed item")}</h3>
+              <div class="card-subtitle">Jastiper #${escapeHtml(item.jastiperId ?? "-")} · ${escapeHtml(item.origin || "Unknown origin")}</div>
+            </div>
+            <span class="badge">${escapeHtml(String(item.stock ?? 0))} stock</span>
+          </div>
+
+          <p class="muted" style="margin:0; line-height:1.65;">
+            ${escapeHtml(item.description || "No description provided.")}
+          </p>
+
+          <div class="badges">
+            <span class="badge gray">${escapeHtml(formatCurrency(item.price || 0))}</span>
+            <span class="badge gray">Purchased: ${escapeHtml(item.purchaseDate || "-")}</span>
+            <span class="badge gray">Updated: ${escapeHtml(formatTimestamp(item.updatedAt))}</span>
+          </div>
+
+          <div class="card-actions">
+            <span class="pill">Item ID ${escapeHtml(item.id ?? "-")}</span>
+            <span class="pill">Created ${escapeHtml(formatTimestamp(item.createdAt))}</span>
+          </div>
+        </div>
+      </article>
+    `;
+  }).join("");
+}
+
+async function loadCatalogPageData() {
+  const noticeId = "catalogNotice";
+  const grid = document.getElementById("catalogGrid");
+  const empty = document.getElementById("catalogEmpty");
+
+  if (!grid || !empty) return;
+
+  try {
+    const response = await authFetch("/api/catalog");
+    if (!response.ok) {
+      throw new Error("Failed to load catalog items");
+    }
+
+    const items = await response.json();
+    const normalized = Array.isArray(items) ? items : [];
+    setCatalogItemsCache(normalized);
+    renderCatalogStatsFromItems(normalized);
+
+    if (!normalized.length) {
+      renderCatalogEmptyState();
+      setNotice(noticeId, null, "");
+      return;
+    }
+
+    empty.classList.add("hidden");
+    grid.classList.remove("hidden");
+    renderCatalogCards(normalized);
+    setNotice(noticeId, null, "");
+  } catch (err) {
+    renderCatalogEmptyState();
+    setNotice(noticeId, "error", err.message || "Failed to load catalog");
+  }
+}
+
+function applyCatalogFilter() {
+  const input = document.getElementById("catalogSearch");
+  const noticeId = "catalogNotice";
+  const query = (input?.value || "").trim().toLowerCase();
+  const cards = document.querySelectorAll("#catalogGrid .catalog-card");
+  let visible = 0;
+
+  cards.forEach((card) => {
+    const haystack = card.dataset.search || card.textContent.toLowerCase();
+    const match = !query || haystack.includes(query);
+    card.style.display = match ? "" : "none";
+    if (match) visible += 1;
   });
+
+  const grid = document.getElementById("catalogGrid");
+  const empty = document.getElementById("catalogEmpty");
+  const hasItems = getCatalogItemsCache().length > 0;
+
+  if (!hasItems) {
+    if (empty) empty.classList.remove("hidden");
+    if (grid) grid.classList.add("hidden");
+    setNotice(noticeId, null, "");
+    return;
+  }
+
+  if (visible === 0) {
+    if (empty) {
+      empty.classList.remove("hidden");
+      empty.innerHTML = `
+        <div class="empty-state">
+          <strong>No matching items</strong>
+          <p style="margin:0 0 14px; line-height:1.6;">
+            Try a different keyword or clear the search box to see every item again.
+          </p>
+          <button class="btn-ghost" type="button" id="catalogClearSearch">Clear search</button>
+        </div>
+      `;
+      const clearButton = document.getElementById("catalogClearSearch");
+      clearButton?.addEventListener("click", () => {
+        if (input) input.value = "";
+        applyCatalogFilter();
+      });
+    }
+    if (grid) grid.classList.add("hidden");
+    setNotice(noticeId, "info", "No items match your search.");
+  } else {
+    if (empty) empty.classList.add("hidden");
+    if (grid) grid.classList.remove("hidden");
+    setNotice(noticeId, null, "");
+  }
+}
+
+function setupCatalogSearch() {
+  const input = document.getElementById("catalogSearch");
+  if (!input) return;
+
+  input.addEventListener("input", applyCatalogFilter);
 }
 
 function setupSimpleRefresh(buttonId) {
+
   const button = document.getElementById(buttonId);
   if (!button) return;
   button.addEventListener("click", () => window.location.reload());
@@ -523,18 +691,19 @@ function initPlaceholders() {
 
   if (page === "catalog") {
     renderStats(document.getElementById("catalogStats"), [
-      { value: "Search", label: "Find items quickly", text: "Filter by name, origin, or jastiper." },
-      { value: "Add item", label: "Empty-first workflow", text: "Start with zero items and grow the catalog." },
-      { value: "Model", label: "CatalogItem ready", text: "Backend uses the catalog model directly." },
-      { value: "Checkout", label: "Order integration", text: "Move selected items to the orders page." }
+      { value: "Search", label: "Browse quickly", text: "Filter by name, origin, or Jastiper." },
+      { value: "Items", label: "Backend connected", text: "Catalog data comes straight from /api/catalog." },
+      { value: "Add", label: "Separate page", text: "Create new items on their own screen." },
+      { value: "Stock", label: "Inventory ready", text: "See stock and price at a glance." }
     ]);
+  }
 
-    renderEmptyState(
-      document.getElementById("catalogGrid"),
-      "No catalog items yet",
-      "This page starts clean so you can add the first items with the catalog form on the right.",
-      '<a class="button" href="#catalogManagePanel">Add the first item</a>'
-    );
+  if (page === "catalog-add") {
+    renderStats(document.getElementById("catalogFormStats"), [
+      { value: "New item", label: "Dedicated form", text: "Keep adding items out of the browse view." },
+      { value: "Save", label: "Backend POST", text: "Submits directly to /api/catalog." },
+      { value: "Redirect", label: "Back to browse", text: "Returns you to the catalogue after save." }
+    ]);
   }
 
   if (page === "orders") {
@@ -778,7 +947,10 @@ function setupPageInteractions() {
 
   if (page === "catalog") {
     setupCatalogSearch();
-    setupCatalogPanelToggle();
+  }
+
+  if (page === "catalog-add") {
+    setupCatalogCreateForm();
   }
 
   if (page === "transactions") {
@@ -812,6 +984,14 @@ async function initApp() {
   const currentUser = await loadCurrentUser();
 
   const page = document.body.dataset.page;
+  if (page === "catalog") {
+    try {
+      await loadCatalogPageData();
+    } catch (err) {
+      setNotice("catalogNotice", "error", err.message || "Failed to load catalog items");
+    }
+  }
+
   if (page === "wallet") {
     try {
       await loadWalletPageData();
@@ -938,6 +1118,47 @@ function setupAuthForms() {
       }
     });
   }
+}
+
+
+
+function setupCatalogCreateForm() {
+  const form = document.getElementById("catalogCreateForm");
+  if (!form) return;
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const payload = {
+      jastiperId: Number(document.getElementById("catalogJastiperId")?.value),
+      name: document.getElementById("catalogName")?.value?.trim(),
+      description: document.getElementById("catalogDescription")?.value?.trim() || "",
+      price: Number(document.getElementById("catalogPrice")?.value),
+      stock: Number(document.getElementById("catalogStock")?.value),
+      origin: document.getElementById("catalogOrigin")?.value?.trim() || "",
+      purchaseDate: document.getElementById("catalogPurchaseDate")?.value || null
+    };
+
+    try {
+      const response = await authFetch("/api/catalog", {
+        method: "POST",
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        const text = await response.text();
+        throw new Error(text || "Failed to save catalog item");
+      }
+
+      setNotice("catalogFormNotice", "success", "Item saved successfully. Redirecting back to the catalogue...");
+      form.reset();
+      setTimeout(() => {
+        window.location.href = "/catalog";
+      }, 900);
+    } catch (err) {
+      setNotice("catalogFormNotice", "error", err.message || "Failed to save catalog item");
+    }
+  });
 }
 
 window.addEventListener("DOMContentLoaded", initApp);
