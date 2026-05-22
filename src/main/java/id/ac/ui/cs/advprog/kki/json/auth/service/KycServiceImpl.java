@@ -53,16 +53,8 @@ public class KycServiceImpl implements KycService {
         }
 
         var existingApplication = kycApplicationRepository.findByUser(user);
-
         if (existingApplication.isPresent()) {
             KycApplication application = existingApplication.get();
-
-            if (application.getStatus() == KycStatus.APPROVED) {
-                throw new ResponseStatusException(
-                        HttpStatus.BAD_REQUEST,
-                        "Application has already been approved"
-                );
-            }
 
             if (application.getStatus() == KycStatus.PENDING) {
                 user.setStatus(AccountStatus.PENDING_VERIFICATION);
