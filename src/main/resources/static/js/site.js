@@ -922,7 +922,7 @@ function setupAuthForms() {
         setNotice(
           "authNotice",
           "success",
-          "Registration successful! Redirecting to login..."
+          "Titiper account created successfully! Redirecting to login..."
         );
 
         setTimeout(() => {
@@ -947,3 +947,69 @@ window.clearToken = clearToken;
 window.authFetch = authFetch;
 window.formatCurrency = formatCurrency;
 window.escapeHtml = escapeHtml;
+
+/* Register role flow */
+.role-flow-card {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  border-radius: 1.25rem;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(10px);
+}
+
+.role-flow-card h3 {
+  margin: 0 0 1rem;
+}
+
+.role-flow-item {
+  display: flex;
+  gap: 0.85rem;
+  align-items: flex-start;
+  margin-bottom: 0.9rem;
+}
+
+.role-flow-item:last-child {
+  margin-bottom: 0;
+}
+
+.role-flow-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.22);
+  font-weight: 700;
+  flex: 0 0 auto;
+}
+
+.role-flow-item strong {
+  display: block;
+  margin-bottom: 0.15rem;
+}
+
+.role-flow-item p {
+  margin: 0;
+  opacity: 0.88;
+}
+
+.register-role-note {
+  padding: 0.9rem;
+  border-radius: 1rem;
+  background: rgba(219, 234, 254, 0.65);
+  border: 1px solid rgba(59, 130, 246, 0.18);
+}
+
+.register-role-note strong {
+  display: block;
+  color: #1e3a8a;
+  margin-bottom: 0.25rem;
+}
+
+.register-role-note p {
+  margin: 0;
+  color: #475569;
+  font-size: 0.9rem;
+}
