@@ -11,7 +11,6 @@ import id.ac.ui.cs.advprog.kki.json.order.dto.RatingRequest;
 import id.ac.ui.cs.advprog.kki.json.order.model.Order;
 import id.ac.ui.cs.advprog.kki.json.order.model.OrderItem;
 import id.ac.ui.cs.advprog.kki.json.order.model.OrderStatus;
-import id.ac.ui.cs.advprog.kki.json.order.repository.CartRepository;
 import id.ac.ui.cs.advprog.kki.json.order.repository.OrderRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
@@ -66,6 +65,8 @@ public class OrderService {
         Long orderJastiperId = null;
         long total = 0;
         List<OrderItem> reservedItems = new ArrayList<>();
+        Order savedOrder = null;
+        boolean paymentDeducted = false;
 
         try {
             for (ItemRequest req : items) {
@@ -136,7 +137,15 @@ public class OrderService {
             order.setTotalPrice(total);
             order.setStatus(OrderStatus.PAID);
 
-            Order savedOrder = orderRepository.save(order);
+            savedOrder = orderRepository.save(order);
+
+            walletClient.deduct(
+                    buyerId,
+                    total,
+                    savedOrder.getId(),
+                    "Payment for order " + savedOrder.getId()
+            );
+            paymentDeducted = true;
 
             if (voucherCode != null && !voucherCode.isBlank()) {
                 voucherClient.useVoucher(voucherCode, savedOrder.getId(), token);
@@ -144,6 +153,7 @@ public class OrderService {
 
             return savedOrder;
         } catch (RuntimeException e) {
+            refundOrderPaymentQuietly(savedOrder, paymentDeducted);
             releaseReservedStockQuietly(reservedItems);
             throw e;
         }
@@ -197,7 +207,12 @@ public class OrderService {
         }
 
         releaseReservedStockQuietly(order.getItems());
-        walletClient.refund(order.getBuyerId(), order.getTotalPrice());
+        walletClient.refund(
+                order.getBuyerId(),
+                order.getTotalPrice(),
+                order.getId(),
+                "Refund for cancelled order " + order.getId()
+        );
 
         order.setStatus(OrderStatus.CANCELLED);
         Order savedOrder = orderRepository.save(order);
@@ -251,6 +266,23 @@ public class OrderService {
         );
 
         return savedOrder;
+    }
+
+    private void refundOrderPaymentQuietly(Order order, boolean paymentDeducted) {
+        if (!paymentDeducted || order == null || order.getId() == null) {
+            return;
+        }
+
+        try {
+            walletClient.refund(
+                    order.getBuyerId(),
+                    order.getTotalPrice(),
+                    order.getId(),
+                    "Compensation refund for failed order " + order.getId()
+            );
+        } catch (Exception ignored) {
+            // Best-effort rollback of remote wallet deduction.
+        }
     }
 
     private void releaseReservedStockQuietly(List<OrderItem> items) {

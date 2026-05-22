@@ -100,29 +100,12 @@
     }
 
     function renderRoleAccess(user) {
-        const roleCard = document.getElementById("catalogRoleCard");
         const accessBox = document.getElementById("catalogAccessBox");
         const managePanel = document.getElementById("catalogManagePanel");
 
         const isApprovedJastiper = user.role === "JASTIPER" && user.status === "ACTIVE";
         const isPending = user.status === "PENDING_VERIFICATION";
         const isBanned = user.status === "BANNED";
-
-        if (roleCard) {
-            roleCard.innerHTML = `
-                <span class="pill">Signed in</span>
-                <h2>${escapeCatalogHtml(user.fullName || user.username || "User")}</h2>
-                <p class="muted">${escapeCatalogHtml(user.email || "-")}</p>
-                <div class="catalog-role-row">
-                    <span class="catalog-role-pill role-${escapeCatalogHtml(String(user.role || "").toLowerCase())}">
-                        ${escapeCatalogHtml(user.role || "-")}
-                    </span>
-                    <span class="catalog-role-pill status-${escapeCatalogHtml(String(user.status || "").toLowerCase())}">
-                        ${escapeCatalogHtml(user.status || "-")}
-                    </span>
-                </div>
-            `;
-        }
 
         if (isApprovedJastiper) {
             if (accessBox) {
@@ -146,7 +129,7 @@
                     <p class="muted">
                         Your Jastiper application is waiting for admin approval. The add-item form is disabled until approval.
                     </p>
-                    <a class="btn ghost full" href="/profile">Check profile status</a>
+                    <a class="btn-ghost full-action" href="/profile">Check profile status</a>
                 `;
             } else if (isBanned) {
                 accessBox.innerHTML = `
@@ -161,7 +144,7 @@
                     <p class="muted">
                         Admins monitor users and catalog data. Create catalog items using an approved Jastiper account.
                     </p>
-                    <a class="btn ghost full" href="/admin">Open admin dashboard</a>
+                    <a class="btn-ghost full-action" href="/admin">Open admin dashboard</a>
                 `;
             } else {
                 accessBox.innerHTML = `
@@ -169,7 +152,7 @@
                     <p class="muted">
                         Your current role is TITIPER. You can shop and add items to cart, but catalog creation requires KYC approval.
                     </p>
-                    <a class="btn primary full" href="/profile">Apply for KYC</a>
+                    <a class="button full-action" href="/profile">Apply for KYC</a>
                 `;
             }
         }
@@ -279,7 +262,7 @@
                     </label>
 
                     <button
-                        class="btn primary"
+                        class="button"
                         type="button"
                         data-action="add-to-cart"
                         data-item-id="${escapeCatalogHtml(item.id)}"

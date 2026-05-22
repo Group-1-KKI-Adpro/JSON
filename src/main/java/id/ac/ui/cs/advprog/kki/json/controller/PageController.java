@@ -65,4 +65,5 @@ public class PageController {
     public String usersPage() {
         return "forward:/public-profile.html";
     }
+
 }

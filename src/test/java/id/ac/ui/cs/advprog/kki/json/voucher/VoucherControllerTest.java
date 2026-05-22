@@ -103,7 +103,7 @@ class VoucherControllerTest {
 
     @Test
     void validateVoucher_validCode_returnsDiscountBreakdown() throws Exception {
-        ValidateVoucherResponse response = new ValidateVoucherResponse("SAVE10", 100_000.0, 10_000.0, 90_000.0);
+        ValidateVoucherResponse response = new ValidateVoucherResponse("SAVE10", 100_000.0, DiscountType.FLAT, 10_000.0, 90_000.0);
         when(voucherService.validateVoucher("SAVE10", 100_000.0)).thenReturn(response);
 
         mockMvc.perform(post("/api/vouchers/validate")

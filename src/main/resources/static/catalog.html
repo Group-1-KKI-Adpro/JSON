@@ -7,7 +7,6 @@
   <link rel="stylesheet" href="/css/site.css" />
 </head>
 <body data-page="catalog">
-<div class="shell">
   <header class="topbar">
     <a class="brand" href="/">
       <span class="brand-mark">J</span>
@@ -28,7 +27,7 @@
     <div id="accountWidget" class="account-widget"></div>
   </header>
 
-  <main>
+  <main class="shell">
     <section class="hero catalog-hero">
       <div>
         <p class="eyebrow">Catalog</p>
@@ -39,18 +38,12 @@
 
         <div class="hero-actions">
           <input id="catalogSearch" class="search-input" type="search" placeholder="Search by item, origin, or Jastiper ID..." />
-          <button id="refreshCatalog" class="btn ghost" type="button">Refresh</button>
+          <button id="refreshCatalog" class="btn-ghost" type="button">Refresh</button>
         </div>
-      </div>
-
-      <div id="catalogRoleCard" class="hero-card">
-        <p class="muted">Checking catalog access...</p>
       </div>
     </section>
 
     <div id="catalogNotice" class="hidden"></div>
-
-    <section id="catalogStats" class="stats-grid"></section>
 
     <section class="catalog-layout">
       <section class="card catalog-list-panel">
@@ -58,7 +51,7 @@
           <div>
             <p class="eyebrow">Available items</p>
             <h2>Catalog items</h2>
-            <p class="muted">Add items to cart, then checkout from the Orders page.</p>
+            <p class="muted">Add items to cart</p>
           </div>
         </div>
 
@@ -124,7 +117,7 @@
               </label>
             </div>
 
-            <button class="btn primary" type="submit">Save item</button>
+            <button class="button" type="submit">Save item</button>
           </form>
         </section>
 
@@ -136,8 +129,8 @@
             Cart items: 0
           </div>
 
-          <a class="btn primary full" href="/orders">Go to checkout</a>
-          <button id="clearCatalogCart" class="btn ghost full" type="button">Clear cart</button>
+          <a class="button full-action" href="/orders">Go to checkout</a>
+          <button id="clearCatalogCart" class="btn-ghost full-action" type="button">Clear cart</button>
         </section>
       </aside>
     </section>
@@ -146,8 +139,6 @@
   <footer class="footer">
     © 2026 JSON Jastip. Catalog.
   </footer>
-</div>
-
 <script src="/js/site.js"></script>
 <script src="/js/catalog.js"></script>
 </body>

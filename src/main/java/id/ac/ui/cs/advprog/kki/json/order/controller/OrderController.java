@@ -7,13 +7,11 @@ import id.ac.ui.cs.advprog.kki.json.order.dto.RatingRequest;
 import id.ac.ui.cs.advprog.kki.json.order.model.Order;
 import id.ac.ui.cs.advprog.kki.json.order.model.OrderStatus;
 import id.ac.ui.cs.advprog.kki.json.order.service.OrderService;
-import id.ac.ui.cs.advprog.kki.json.order.service.CartService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-
 
 import java.util.Collections;
 import java.util.List;
@@ -25,12 +23,10 @@ public class OrderController {
 
     private final OrderService orderService;
     private final AuthService authService;
-    private final CartService cartService;
 
-    public OrderController(OrderService orderService, AuthService authService, CartService cartService) {
+    public OrderController(OrderService orderService, AuthService authService) {
         this.orderService = orderService;
         this.authService = authService;
-        this.cartService = cartService;
     }
 
     @PostMapping
@@ -143,40 +139,10 @@ public class OrderController {
         String email = (String) authentication.getPrincipal();
         return authService.getByEmail(email);
     }
-
     private Map<String, String> error(String message) {
         return Collections.singletonMap(
                 "error",
                 message == null || message.isBlank() ? "Request failed" : message
         );
     }
-
-    @PostMapping("/cart")
-    public ResponseEntity<?> addToCart(
-            Authentication authentication,
-            @RequestParam Long catalogItemId,
-            @RequestParam Integer quantity
-    ) {
-        User user = getAuthenticatedUser(authentication);
-
-        return ResponseEntity.ok(
-                cartService.addToCart(
-                        user.getId(),
-                        catalogItemId,
-                        quantity
-                )
-        );
-    }
-
-    @GetMapping("/cart")
-    public ResponseEntity<?> getCart(
-            Authentication authentication
-    ) {
-        User user = getAuthenticatedUser(authentication);
-
-        return ResponseEntity.ok(
-                cartService.getCart(user.getId())
-        );
-    }
-
 }
