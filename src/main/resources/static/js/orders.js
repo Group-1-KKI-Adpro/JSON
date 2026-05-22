@@ -87,7 +87,9 @@
         try {
             currentUser = await requestJson("/api/auth/me");
 
-            renderRoleCard(currentUser);
+            if (window.renderAccountWidget) {
+                window.renderAccountWidget(currentUser);
+            }
             renderRoleSections(currentUser);
             renderCart();
 
@@ -101,40 +103,6 @@
         } catch (error) {
             setNotice("error", error.message || "Failed to load orders.");
         }
-    }
-
-    function renderRoleCard(user) {
-        const roleCard = document.getElementById("orderRoleCard");
-        const accountWidget = document.getElementById("orderAccountWidget");
-
-        if (accountWidget) {
-            accountWidget.innerHTML = `
-                <span>${escapeHtml(user.fullName || user.username || user.email || "User")}</span>
-                <button class="btn ghost small" type="button" id="logoutButton">Logout</button>
-            `;
-
-            document.getElementById("logoutButton")?.addEventListener("click", () => {
-                localStorage.removeItem(TOKEN_KEY);
-                localStorage.removeItem("json_profile");
-                window.location.href = "/login";
-            });
-        }
-
-        if (!roleCard) return;
-
-        roleCard.innerHTML = `
-            <span class="pill">Signed in</span>
-            <h2>${escapeHtml(user.fullName || user.username || "User")}</h2>
-            <p class="muted">${escapeHtml(user.email || "-")}</p>
-            <div class="order-role-row">
-                <span class="order-role-pill role-${escapeHtml(String(user.role || "").toLowerCase())}">
-                    ${escapeHtml(user.role || "-")}
-                </span>
-                <span class="order-role-pill status-${escapeHtml(String(user.status || "").toLowerCase())}">
-                    ${escapeHtml(user.status || "-")}
-                </span>
-            </div>
-        `;
     }
 
     function renderRoleSections(user) {
@@ -180,7 +148,7 @@
                 <div class="empty-state">
                     <h3>Your cart is empty</h3>
                     <p class="muted">Browse the catalog and add items before checkout.</p>
-                    <a class="btn primary" href="/catalog">Open catalog</a>
+                    <a class="button" href="/catalog">Open catalog</a>
                 </div>
             `;
 
@@ -216,11 +184,11 @@
                         <input class="order-qty-input" type="number" min="1" value="${escapeHtml(item.qty || 1)}" data-cart-index="${index}" />
                     </label>
 
-                    <button class="btn ghost" type="button" data-action="update-cart-item" data-cart-index="${index}">
+                    <button class="btn-ghost" type="button" data-action="update-cart-item" data-cart-index="${index}">
                         Update
                     </button>
 
-                    <button class="btn danger" type="button" data-action="remove-cart-item" data-cart-index="${index}">
+                    <button class="btn-danger" type="button" data-action="remove-cart-item" data-cart-index="${index}">
                         Remove
                     </button>
                 </div>
@@ -302,17 +270,22 @@
             try {
                 setNotice("info", "Placing order...");
 
-                await requestJson("/api/orders", {
+                const createdOrder = await requestJson("/api/orders", {
                     method: "POST",
                     body: JSON.stringify(payload)
                 });
+
+                const chargedAmount = Number(createdOrder?.totalPrice || 0);
 
                 clearCart();
                 form.reset();
                 renderCart();
                 await loadBuyerOrders();
 
-                setNotice("success", "Order placed successfully.");
+                setNotice(
+                    "success",
+                    `Order placed and wallet charged ${formatCurrency(chargedAmount)}. Check Transactions for payment details.`
+                );
             } catch (error) {
                 setNotice("error", error.message || "Failed to place order.");
             }
@@ -340,7 +313,7 @@
                 <div class="empty-state">
                     <h3>No buyer orders yet</h3>
                     <p class="muted">After checkout, your purchase history will appear here.</p>
-                    <a class="btn primary" href="/catalog">Open catalog</a>
+                    <a class="button" href="/catalog">Open catalog</a>
                 </div>
             `;
             return;
@@ -367,6 +340,7 @@
                     <span>Shipping: ${escapeHtml(order.shippingAddress || "-")}</span>
                 </div>
 
+                ${renderWalletState(order, "buyer")}
                 ${renderRatingArea(order)}
             </article>
         `).join("");
@@ -429,11 +403,47 @@
                     <textarea data-review="${escapeHtml(order.id)}" rows="3" placeholder="Optional review"></textarea>
                 </label>
 
-                <button class="btn primary" type="button" data-action="rate-order" data-order-id="${escapeHtml(order.id)}">
+                <button class="button" type="button" data-action="rate-order" data-order-id="${escapeHtml(order.id)}">
                     Submit rating
                 </button>
             </form>
         `;
+    }
+
+    function renderWalletState(order, perspective) {
+        const status = String(order?.status || "").toUpperCase();
+        const amount = formatCurrency(order?.totalPrice || 0);
+        const link = '<a class="btn ghost small" href="/transactions">View transactions</a>';
+
+        if (status === "CANCELLED") {
+            return `
+                <div class="order-state-box success">
+                    <strong>Wallet refunded</strong>
+                    <p class="muted">
+                        ${perspective === "buyer"
+                ? `A refund of ${escapeHtml(amount)} should be visible in your wallet history.`
+                : `The buyer should see a refund of ${escapeHtml(amount)} in wallet history.`}
+                    </p>
+                    ${link}
+                </div>
+            `;
+        }
+
+        if (["PAID", "PURCHASED", "SHIPPED", "COMPLETED"].includes(status)) {
+            return `
+                <div class="order-state-box info">
+                    <strong>Wallet charged</strong>
+                    <p class="muted">
+                        ${perspective === "buyer"
+                ? `This order charged ${escapeHtml(amount)} from the buyer wallet.`
+                : `This order has already charged ${escapeHtml(amount)} from the buyer wallet.`}
+                    </p>
+                    ${link}
+                </div>
+            `;
+        }
+
+        return "";
     }
 
     async function submitRating(orderId) {
@@ -505,15 +515,16 @@
                         <span>Shipping: ${escapeHtml(order.shippingAddress || "-")}</span>
                     </div>
 
+                    ${renderWalletState(order, "jastiper")}
                     <div class="order-action-row">
                         ${nextStatus ? `
-                            <button class="btn primary" type="button" data-action="advance-status" data-order-id="${escapeHtml(order.id)}" data-next-status="${escapeHtml(nextStatus)}">
+                            <button class="button" type="button" data-action="advance-status" data-order-id="${escapeHtml(order.id)}" data-next-status="${escapeHtml(nextStatus)}">
                                 Mark as ${escapeHtml(nextStatus)}
                             </button>
                         ` : ""}
 
                         ${canCancel ? `
-                            <button class="btn danger" type="button" data-action="cancel-order" data-order-id="${escapeHtml(order.id)}">
+                            <button class="btn-danger" type="button" data-action="cancel-order" data-order-id="${escapeHtml(order.id)}" data-order-total="${escapeHtml(order.totalPrice ?? 0)}">
                                 Cancel order
                             </button>
                         ` : ""}
@@ -530,7 +541,7 @@
 
         list.querySelectorAll("[data-action='cancel-order']").forEach((button) => {
             button.addEventListener("click", async () => {
-                await cancelOrder(button.dataset.orderId);
+                await cancelOrder(button.dataset.orderId, button.dataset.orderTotal);
             });
         });
     }
@@ -554,13 +565,16 @@
         }
     }
 
-    async function cancelOrder(orderId) {
+    async function cancelOrder(orderId, orderTotal) {
         try {
             await requestJson(`/api/orders/${encodeURIComponent(orderId)}/cancel`, {
                 method: "POST"
             });
 
-            setNotice("success", "Order cancelled.");
+            setNotice(
+                "success",
+                `Order cancelled and buyer refund issued for ${formatCurrency(orderTotal || 0)}.`
+            );
             await loadJastiperOrders();
         } catch (error) {
             setNotice("error", error.message || "Failed to cancel order.");

@@ -1,6 +1,7 @@
 package id.ac.ui.cs.advprog.kki.json.config;
 
 import id.ac.ui.cs.advprog.kki.json.auth.security.JwtAuthFilter;
+import id.ac.ui.cs.advprog.kki.json.auth.security.InternalServiceAuthFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -15,7 +16,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, JwtAuthFilter jwtAuthFilter) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http,
+                                           JwtAuthFilter jwtAuthFilter,
+                                           InternalServiceAuthFilter internalServiceAuthFilter) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
                 .headers(headers -> headers.frameOptions(frame -> frame.disable()))
@@ -76,6 +79,7 @@ public class SecurityConfig {
                         ).permitAll()
                         .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
                         .requestMatchers("/error").permitAll()
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
 
                         /* CATALOG + SHOPPING */
                         .requestMatchers(HttpMethod.GET, "/api/catalog").permitAll()
@@ -87,6 +91,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/wallet/**").authenticated()
 
                         /* INTERNAL */
+                        .requestMatchers("/api/internal/wallet/**").hasRole("INTERNAL_SERVICE")
                         .requestMatchers("/api/internal/**").hasRole("ADMIN")
 
                         /* ADMIN */
@@ -99,6 +104,7 @@ public class SecurityConfig {
                 .httpBasic(httpBasic -> httpBasic.disable())
                 .formLogin(form -> form.disable());
 
+        http.addFilterBefore(internalServiceAuthFilter, UsernamePasswordAuthenticationFilter.class);
         http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

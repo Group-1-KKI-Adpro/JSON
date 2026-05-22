@@ -139,7 +139,6 @@ public class OrderController {
         String email = (String) authentication.getPrincipal();
         return authService.getByEmail(email);
     }
-
     private Map<String, String> error(String message) {
         return Collections.singletonMap(
                 "error",

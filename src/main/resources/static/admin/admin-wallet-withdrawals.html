@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>JSON Jastip • Transactions</title>
+  <title>JSON Jastip - Withdrawal Requests</title>
   <link rel="stylesheet" href="/css/site.css" />
   <script defer src="/js/site.js"></script>
 </head>
-<body data-page="transactions">
+<body data-page="admin-wallet-withdrawals">
 <header class="topbar">
   <a class="brand" href="/">
     <span class="brand-mark">J</span>
@@ -29,36 +29,32 @@
   <section class="section">
     <div class="section-header">
       <div>
-        <h1 class="section-title">Transactions</h1>
+        <h1 class="section-title">Withdrawal Requests</h1>
+        <p class="section-subtitle">Review pending wallet withdrawals and finalize each request as approved or rejected.</p>
       </div>
-      <div class="controls-row">
-        <select id="transactionFilter">
-          <option value="ALL">All types</option>
-          <option value="TOPUP">Top up</option>
-          <option value="PAYMENT">Payment</option>
-          <option value="REFUND">Refund</option>
-          <option value="WITHDRAW">Withdraw</option>
-        </select>
-        <button id="refreshTransactions" class="btn-ghost" type="button">Refresh</button>
+      <div class="inline-actions">
+        <a class="btn-ghost" href="/wallet" style="text-decoration:none;">Wallet</a>
+        <button id="refreshPendingWithdrawals" class="button" type="button">Refresh</button>
       </div>
     </div>
-    <div id="transactionsNotice" class="hidden"></div>
+    <div id="adminWithdrawNotice" class="hidden"></div>
+    <div id="adminWithdrawStats" class="grid cols-3" style="margin-top:16px;"></div>
   </section>
 
   <section class="section table-card">
     <table>
       <thead>
         <tr>
-          <th>Timestamp</th>
-          <th>Type</th>
+          <th>Requested</th>
+          <th>User ID</th>
           <th>Amount</th>
           <th>Status</th>
           <th>Description</th>
-          <th>Reference</th>
+          <th>Actions</th>
         </tr>
       </thead>
-      <tbody id="transactionsTableBody">
-        <tr><td colspan="6"><div class="empty-state"><strong>Loading transactions...</strong></div></td></tr>
+      <tbody id="pendingWithdrawTableBody">
+        <tr><td colspan="6"><div class="empty-state"><strong>Loading pending withdrawals...</strong></div></td></tr>
       </tbody>
     </table>
   </section>
