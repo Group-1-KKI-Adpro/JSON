@@ -65,7 +65,7 @@ public class VoucherService {
 
         double discountAmount = calculateDiscount(voucher, orderTotal);
         double finalTotal = Math.max(0.0, orderTotal - discountAmount);
-        return new ValidateVoucherResponse(code, orderTotal, discountAmount, finalTotal);
+        return new ValidateVoucherResponse(code, orderTotal, voucher.getDiscountType(), discountAmount, finalTotal);
     }
 
     @Transactional

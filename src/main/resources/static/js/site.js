@@ -914,16 +914,16 @@ function initPlaceholders() {
   if (page === "vouchers") {
     renderEmptyState(
       document.getElementById("voucherList"),
-      "No vouchers available right now",
-      "This section is ready for voucher cards, validation, and admin creation when the service is connected."
+      "No active promos right now",
+      "Check back soon — new vouchers will appear here when available."
     );
 
     const result = document.getElementById("voucherValidateResult");
     if (result && !result.children.length && !result.innerHTML.trim()) {
       result.innerHTML = `
         <div class="empty-state">
-          <strong>Validate a voucher</strong>
-          <p style="margin:0; line-height:1.6;">Enter a voucher code and order total to preview the discount result.</p>
+          <strong>Got a promo code?</strong>
+          <p style="margin:0; line-height:1.6;">Enter your code and order total above to see the discount type and how much you'll save.</p>
         </div>
       `;
     }
@@ -1011,10 +1011,13 @@ function setupVoucherForms() {
         }
         
         const data = await res.json();
+        const typeLabel = data.discountType === "PERCENTAGE" ? "Percentage discount" : "Flat discount";
         resultDiv.innerHTML = `
           <div class="notice success" style="margin-top: 10px;">
-            <strong>Valid!</strong> Discount applied: ${formatCurrency(data.discountApplied)}<br>
-            <strong>Final Total:</strong> ${formatCurrency(data.finalTotal)}
+            <strong>Voucher applied!</strong><br>
+            Type: ${typeLabel}<br>
+            You save: ${formatCurrency(data.discountAmount)}<br>
+            <strong>Final total: ${formatCurrency(data.finalTotal)}</strong>
           </div>
         `;
       } catch (err) {
@@ -1335,3 +1338,58 @@ window.clearToken = clearToken;
 window.authFetch = authFetch;
 window.formatCurrency = formatCurrency;
 window.escapeHtml = escapeHtml;
+
+(function () {
+  function getToken() {
+    return localStorage.getItem("json_token");
+  }
+
+  function readCachedProfile() {
+    try {
+      return JSON.parse(localStorage.getItem("json_profile") || "null");
+    } catch {
+      return null;
+    }
+  }
+
+  function updateAdminNavVisibility(user) {
+    const isAdmin = user && user.role === "ADMIN";
+
+    document
+        .querySelectorAll('.nav-links a[href="/admin"], .nav-links a[href="/admin.html"]')
+        .forEach((link) => {
+          link.classList.toggle("hidden", !isAdmin);
+        });
+  }
+
+  async function loadRoleForNav() {
+    updateAdminNavVisibility(readCachedProfile());
+
+    const token = getToken();
+    if (!token) {
+      updateAdminNavVisibility(null);
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/auth/me", {
+        headers: {
+          Authorization: "Bearer " + token
+        }
+      });
+
+      if (!response.ok) {
+        updateAdminNavVisibility(null);
+        return;
+      }
+
+      const user = await response.json();
+      localStorage.setItem("json_profile", JSON.stringify(user));
+      updateAdminNavVisibility(user);
+    } catch {
+      updateAdminNavVisibility(null);
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", loadRoleForNav);
+})();
