@@ -763,16 +763,16 @@ function initPlaceholders() {
   if (page === "vouchers") {
     renderEmptyState(
       document.getElementById("voucherList"),
-      "No vouchers available right now",
-      "This section is ready for voucher cards, validation, and admin creation when the service is connected."
+      "No active promos right now",
+      "Check back soon — new vouchers will appear here when available."
     );
 
     const result = document.getElementById("voucherValidateResult");
     if (result && !result.children.length && !result.innerHTML.trim()) {
       result.innerHTML = `
         <div class="empty-state">
-          <strong>Validate a voucher</strong>
-          <p style="margin:0; line-height:1.6;">Enter a voucher code and order total to preview the discount result.</p>
+          <strong>Got a promo code?</strong>
+          <p style="margin:0; line-height:1.6;">Enter your code and order total above to see the discount type and how much you'll save.</p>
         </div>
       `;
     }
@@ -852,10 +852,13 @@ function setupVoucherForms() {
         }
         
         const data = await res.json();
+        const typeLabel = data.discountType === "PERCENTAGE" ? "Percentage discount" : "Flat discount";
         resultDiv.innerHTML = `
           <div class="notice success" style="margin-top: 10px;">
-            <strong>Valid!</strong> Discount applied: ${formatCurrency(data.discountApplied)}<br>
-            <strong>Final Total:</strong> ${formatCurrency(data.finalTotal)}
+            <strong>Voucher applied!</strong><br>
+            Type: ${typeLabel}<br>
+            You save: ${formatCurrency(data.discountAmount)}<br>
+            <strong>Final total: ${formatCurrency(data.finalTotal)}</strong>
           </div>
         `;
       } catch (err) {
