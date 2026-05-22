@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JSON Jastip • Catalog</title>
+  <link rel="stylesheet" href="/css/site.css" />
+  <script defer src="/js/site.js"></script>
+</head>
+<body data-page="catalog">
+<header class="topbar">
+  <a class="brand" href="/">
+    <span class="brand-mark">J</span>
+    <span>JSON Jastip</span>
+  </a>
+  <nav class="nav-links">
+    <a href="/">Home</a>
+    <a href="/catalog">Catalog</a>
+    <a href="/orders">Orders</a>
+    <a href="/vouchers">Vouchers</a>
+    <a href="/wallet">Wallet</a>
+    <a href="/transactions">Transactions</a>
+    <a href="/profile">Profile</a>
+  </nav>
+  <div id="accountWidget" class="account-widget"></div>
+</header>
+
+<main class="shell">
+  <section class="section">
+    <div class="section-header">
+      <div>
+        <h1 class="section-title">Catalog</h1>
+        <p class="section-subtitle">Search items, add new items, and add products to your cart.</p>
+      </div>
+      <div class="controls-row">
+        <input id="catalogSearch" class="searchbar" type="search" placeholder="Search by name, origin, or jastiper..." />
+        <button id="catalogManageToggle" class="btn-ghost" type="button">Add item</button>
+      </div>
+    </div>
+    <div id="catalogNotice" class="hidden"></div>
+    <div id="catalogStats" class="grid cols-4"></div>
+  </section>
+
+  <section class="section">
+    <div class="grid cols-2">
+      <div>
+        <div id="catalogEmpty" class="empty-state hidden" style="margin-bottom:18px;">
+          <strong>No catalog items yet.</strong>
+          Add the first item using the form on the right.
+        </div>
+        <div id="catalogGrid" class="grid cols-2"></div>
+      </div>
+      <aside class="panel" id="catalogManagePanel">
+        <div class="section-header" style="margin-top:0;">
+          <div>
+            <h2 class="section-title" style="margin:0; font-size:1.5rem;">Add new item</h2>
+            <p class="section-subtitle">This uses the existing CatalogItem model.</p>
+          </div>
+        </div>
+        <form id="catalogForm" class="form">
+          <div class="input-grid">
+            <div class="field">
+              <label for="catalogJastiperId">Jastiper ID</label>
+              <input id="catalogJastiperId" type="number" min="1" placeholder="1" required />
+            </div>
+            <div class="field">
+              <label for="catalogPrice">Price</label>
+              <input id="catalogPrice" type="number" min="0" placeholder="250000" required />
+            </div>
+            <div class="field">
+              <label for="catalogStock">Stock</label>
+              <input id="catalogStock" type="number" min="0" placeholder="10" required />
+            </div>
+            <div class="field">
+              <label for="catalogPurchaseDate">Purchase date</label>
+              <input id="catalogPurchaseDate" type="date" />
+            </div>
+          </div>
+          <div class="field">
+            <label for="catalogName">Item name</label>
+            <input id="catalogName" type="text" placeholder="Example item" required />
+          </div>
+          <div class="field">
+            <label for="catalogOrigin">Origin</label>
+            <input id="catalogOrigin" type="text" placeholder="Japan / Korea / Singapore" />
+          </div>
+          <div class="field">
+            <label for="catalogDescription">Description</label>
+            <textarea id="catalogDescription" placeholder="Short item description"></textarea>
+          </div>
+          <button class="button" type="submit">Save item</button>
+        </form>
+      </aside>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-header">
+      <div>
+        <h2 class="section-title">Cart preview</h2>
+        <p class="section-subtitle">Your selected items will be checked out from the orders page.</p>
+      </div>
+      <div class="inline-actions">
+        <span class="badge">Cart items: <span id="cartCount">0 items</span></span>
+        <a class="button" href="/orders" style="text-decoration:none;">Go to checkout</a>
+      </div>
+    </div>
+    <div id="cartPreview" class="panel"></div>
+  </section>
+</main>
+
+<footer class="footer">Use the search bar to filter items in real time.</footer>
+</body>
+</html>

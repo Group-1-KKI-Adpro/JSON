@@ -8,38 +8,41 @@ import org.springframework.web.client.RestTemplate;
 import java.util.HashMap;
 import java.util.Map;
 
-@Component
+@Component("orderVoucherClient")
 public class VoucherClient {
 
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate;
     private final String BASE_URL = "http://localhost:8080/api/vouchers";
 
-    public double applyVoucher(String code, double total) {
-        String url = BASE_URL + "/validate";
+    public VoucherClient(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
 
+    public double applyVoucher(String code, double total) {
         Map<String, Object> body = new HashMap<>();
         body.put("code", code);
         body.put("orderTotal", total);
 
-        ValidateVoucherResponse response =
-                restTemplate.postForObject(url, body, ValidateVoucherResponse.class);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
 
-        return response.getFinalTotal();
+        ValidateVoucherResponse response = restTemplate.postForObject(
+                BASE_URL + "/validate", request, ValidateVoucherResponse.class);
+
+        return response != null ? response.getFinalTotal() : total;
     }
 
     public void useVoucher(String code, String orderId, String token) {
-        String url = BASE_URL + "/use";
-
         Map<String, Object> body = new HashMap<>();
         body.put("code", code);
         body.put("orderId", orderId);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(token);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
 
-        HttpEntity<Map<String, Object>> request =
-                new HttpEntity<>(body, headers);
-
-        restTemplate.postForEntity(url, request, Object.class);
+        restTemplate.postForObject(BASE_URL + "/use", request, Void.class);
     }
 }

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JSON Jastip • Wallet</title>
+  <link rel="stylesheet" href="/css/site.css" />
+  <script defer src="/js/site.js"></script>
+</head>
+<body data-page="wallet">
+<header class="topbar">
+  <a class="brand" href="/">
+    <span class="brand-mark">J</span>
+    <span>JSON Jastip</span>
+  </a>
+  <nav class="nav-links">
+    <a href="/">Home</a>
+    <a href="/catalog">Catalog</a>
+    <a href="/orders">Orders</a>
+    <a href="/vouchers">Vouchers</a>
+    <a href="/wallet">Wallet</a>
+    <a href="/transactions">Transactions</a>
+    <a href="/profile">Profile</a>
+  </nav>
+  <div id="accountWidget" class="account-widget"></div>
+</header>
+
+<main class="shell">
+  <section class="section">
+    <div class="section-header">
+      <div>
+        <h1 class="section-title">Wallet</h1>
+        <p class="section-subtitle">Top up funds, request withdrawals, and monitor your balance.</p>
+      </div>
+      <div class="inline-actions">
+        <a class="btn-ghost" href="/orders" style="text-decoration:none;">Orders</a>
+        <a class="button" href="/transactions" style="text-decoration:none;">Transactions</a>
+      </div>
+    </div>
+    <div id="walletNotice" class="hidden"></div>
+    <div id="walletMeta" class="grid cols-3" style="margin-top:16px;"></div>
+  </section>
+
+  <section class="section grid cols-2" style="align-items:start;">
+    <div class="panel">
+      <h2 class="section-title" style="margin-top:0; font-size:1.5rem;">Balance</h2>
+      <div id="walletBalance"></div>
+      <div class="section-header" style="margin-top:26px;">
+        <div>
+          <h2 class="section-title" style="margin:0; font-size:1.45rem;">Top up</h2>
+          <p class="section-subtitle">Top ups are simulated as immediate successful transactions.</p>
+        </div>
+      </div>
+      <form id="topupForm" class="form">
+        <div class="field">
+          <label for="topupAmount">Amount</label>
+          <input id="topupAmount" type="number" min="1" placeholder="50000" required />
+        </div>
+        <div class="field">
+          <label for="topupDescription">Description</label>
+          <input id="topupDescription" type="text" placeholder="Top up for checkout" />
+        </div>
+        <button class="button" type="submit">Top up</button>
+      </form>
+    </div>
+    <div class="panel">
+      <h2 class="section-title" style="margin-top:0; font-size:1.5rem;">Withdraw</h2>
+      <form id="withdrawForm" class="form">
+        <div class="field">
+          <label for="withdrawAmount">Amount</label>
+          <input id="withdrawAmount" type="number" min="1" placeholder="25000" required />
+        </div>
+        <div class="field">
+          <label for="withdrawDescription">Description</label>
+          <input id="withdrawDescription" type="text" placeholder="Withdrawal request" />
+        </div>
+        <button class="btn-secondary" type="submit">Request withdrawal</button>
+      </form>
+      <div class="section-header" style="margin-top:28px;">
+        <div>
+          <h2 class="section-title" style="margin:0; font-size:1.45rem;">Latest transactions</h2>
+          <p class="section-subtitle">This shows the same data as the transactions page.</p>
+        </div>
+      </div>
+      <div id="walletTransactions" class="list"></div>
+    </div>
+  </section>
+</main>
+</body>
+</html>

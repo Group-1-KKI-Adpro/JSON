@@ -13,7 +13,7 @@ public class UpdateVoucherRequest {
 
     private Boolean active;
 
-    protected UpdateVoucherRequest() {}
+    public UpdateVoucherRequest() {}
 
     public UpdateVoucherRequest(Instant endAt, Integer quotaToAdd, Boolean active) {
         this.endAt = endAt;
@@ -31,5 +31,17 @@ public class UpdateVoucherRequest {
 
     public Boolean getActive() {
         return active;
+    }
+
+    public void setEndAt(Instant endAt) {
+        this.endAt = endAt;
+    }
+
+    public void setQuotaToAdd(Integer quotaToAdd) {
+        this.quotaToAdd = quotaToAdd;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
     }
 }

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JSON Jastip • Transactions</title>
+  <link rel="stylesheet" href="/css/site.css" />
+  <script defer src="/js/site.js"></script>
+</head>
+<body data-page="transactions">
+<header class="topbar">
+  <a class="brand" href="/">
+    <span class="brand-mark">J</span>
+    <span>JSON Jastip</span>
+  </a>
+  <nav class="nav-links">
+    <a href="/">Home</a>
+    <a href="/catalog">Catalog</a>
+    <a href="/orders">Orders</a>
+    <a href="/vouchers">Vouchers</a>
+    <a href="/wallet">Wallet</a>
+    <a href="/transactions">Transactions</a>
+    <a href="/profile">Profile</a>
+  </nav>
+  <div id="accountWidget" class="account-widget"></div>
+</header>
+
+<main class="shell">
+  <section class="section">
+    <div class="section-header">
+      <div>
+        <h1 class="section-title">Transactions</h1>
+        <p class="section-subtitle">Search and review every wallet transaction in one place.</p>
+      </div>
+      <div class="controls-row">
+        <select id="transactionFilter">
+          <option value="ALL">All types</option>
+          <option value="TOPUP">Top up</option>
+          <option value="PAYMENT">Payment</option>
+          <option value="REFUND">Refund</option>
+          <option value="WITHDRAW">Withdraw</option>
+        </select>
+        <button id="refreshTransactions" class="btn-ghost" type="button">Refresh</button>
+      </div>
+    </div>
+    <div id="transactionsNotice" class="hidden"></div>
+  </section>
+
+  <section class="section table-card">
+    <table>
+      <thead>
+        <tr>
+          <th>Timestamp</th>
+          <th>Type</th>
+          <th>Amount</th>
+          <th>Status</th>
+          <th>Description</th>
+          <th>Reference</th>
+        </tr>
+      </thead>
+      <tbody id="transactionsTableBody">
+        <tr><td colspan="6"><div class="empty-state"><strong>Loading transactions...</strong></div></td></tr>
+      </tbody>
+    </table>
+  </section>
+</main>
+</body>
+</html>

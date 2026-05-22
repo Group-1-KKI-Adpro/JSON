@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JSON Jastip • Profile</title>
+  <link rel="stylesheet" href="/css/site.css" />
+  <script defer src="/js/site.js"></script>
+</head>
+<body data-page="profile">
+<header class="topbar">
+  <a class="brand" href="/">
+    <span class="brand-mark">J</span>
+    <span>JSON Jastip</span>
+  </a>
+  <nav class="nav-links">
+    <a href="/">Home</a>
+    <a href="/catalog">Catalog</a>
+    <a href="/orders">Orders</a>
+    <a href="/vouchers">Vouchers</a>
+    <a href="/wallet">Wallet</a>
+    <a href="/transactions">Transactions</a>
+    <a href="/profile">Profile</a>
+  </nav>
+  <div id="accountWidget" class="account-widget"></div>
+</header>
+
+<main class="shell">
+  <section class="section">
+    <div class="section-header">
+      <div>
+        <h1 class="section-title">Profile</h1>
+        <p class="section-subtitle">Update your username and full name.</p>
+      </div>
+      <div class="inline-actions">
+        <a class="btn-ghost" href="/catalog" style="text-decoration:none;">Back to catalog</a>
+      </div>
+    </div>
+    <div id="profileNotice" class="hidden"></div>
+    <div class="grid cols-2" style="align-items:start;">
+      <div class="panel">
+        <h2 class="section-title" style="margin-top:0; font-size:1.5rem;">Account snapshot</h2>
+        <div id="profileCard" class="kpi-list"></div>
+      </div>
+      <div class="panel">
+        <h2 class="section-title" style="margin-top:0; font-size:1.5rem;">Edit profile</h2>
+        <form id="profileForm" class="form">
+          <div class="field">
+            <label for="profileEmail">Email</label>
+            <input id="profileEmail" type="email" disabled />
+          </div>
+          <div class="field">
+            <label for="profileUsername">Username</label>
+            <input id="profileUsername" type="text" placeholder="Choose a username" />
+          </div>
+          <div class="field">
+            <label for="profileFullName">Full name</label>
+            <input id="profileFullName" type="text" placeholder="Full name" />
+          </div>
+          <button class="button" type="submit">Save profile</button>
+        </form>
+      </div>
+    </div>
+  </section>
+</main>
+</body>
+</html>

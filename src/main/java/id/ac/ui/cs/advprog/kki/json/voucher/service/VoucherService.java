@@ -1,25 +1,34 @@
 package id.ac.ui.cs.advprog.kki.json.voucher.service;
 
+import id.ac.ui.cs.advprog.kki.json.voucher.model.DiscountType;
+import id.ac.ui.cs.advprog.kki.json.voucher.strategy.DiscountStrategy;
 import id.ac.ui.cs.advprog.kki.json.voucher.dto.CreateVoucherRequest;
 import id.ac.ui.cs.advprog.kki.json.voucher.dto.UpdateVoucherRequest;
 import id.ac.ui.cs.advprog.kki.json.voucher.dto.UseVoucherResponse;
 import id.ac.ui.cs.advprog.kki.json.voucher.dto.ValidateVoucherResponse;
 import id.ac.ui.cs.advprog.kki.json.voucher.model.Voucher;
 import id.ac.ui.cs.advprog.kki.json.voucher.repository.VoucherRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class VoucherService {
 
     private final VoucherRepository voucherRepository;
+    private final Map<DiscountType, DiscountStrategy> discountStrategies;
 
-    public VoucherService(VoucherRepository voucherRepository) {
+    public VoucherService(VoucherRepository voucherRepository, List<DiscountStrategy> strategies) {
         this.voucherRepository = voucherRepository;
+        this.discountStrategies = strategies.stream()
+                .collect(Collectors.toMap(DiscountStrategy::getSupportedType, Function.identity()));
     }
 
     public Voucher createVoucher(CreateVoucherRequest request) {
@@ -59,8 +68,12 @@ public class VoucherService {
         return new ValidateVoucherResponse(code, orderTotal, discountAmount, finalTotal);
     }
 
+    @Transactional
     public UseVoucherResponse useVoucher(String code, String orderId, String userId) {
-        Voucher voucher = getVoucherByCode(code);
+        // Fetch the voucher using the locked query to prevent race conditions
+        Voucher voucher = voucherRepository.findByIdForUpdate(code)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Voucher not found"));
+                
         validateVoucherUsability(voucher);
 
         if (voucher.getQuota() <= 0) {
@@ -114,9 +127,10 @@ public class VoucherService {
     }
 
     private double calculateDiscount(Voucher voucher, Double orderTotal) {
-        return switch (voucher.getDiscountType()) {
-            case FLAT -> Math.min(voucher.getDiscountValue(), orderTotal);
-            case PERCENTAGE -> Math.min(orderTotal, orderTotal * voucher.getDiscountValue() / 100.0);
-        };
+        DiscountStrategy strategy = discountStrategies.get(voucher.getDiscountType());
+        if (strategy == null) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Unknown discount type: " + voucher.getDiscountType());
+        }
+        return strategy.calculateDiscount(orderTotal, voucher);
     }
 }
