@@ -281,7 +281,7 @@
                 <p class="muted">
                     Admins manage KYC requests from the admin dashboard and do not need to apply as Jastiper.
                 </p>
-                <a class="btn ghost" href="/admin">Open admin dashboard</a>
+                <a class="btn-ghost" href="/admin">Open admin dashboard</a>
             `;
             form.classList.add("hidden");
             return;

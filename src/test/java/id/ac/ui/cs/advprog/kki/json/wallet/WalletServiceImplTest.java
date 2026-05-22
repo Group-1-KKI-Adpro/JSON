@@ -18,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -301,5 +302,25 @@ public class WalletServiceImplTest {
         assertSame(verified, tx);
         verify(transactionRepository, never()).save(any(Transaction.class));
         verifyNoInteractions(walletRepository);
+    }
+
+    @Test
+    void ListPendingWithdrawalsShouldReturnPendingWithdrawTransactions() {
+        Transaction pendingA = new Transaction(1L, TransactionType.WITHDRAW, 20L, TransactionStatus.PENDING, null, "a");
+        Transaction pendingB = new Transaction(2L, TransactionType.WITHDRAW, 40L, TransactionStatus.PENDING, null, "b");
+        when(transactionRepository.findByTypeAndStatusOrderByCreatedAtAsc(
+                TransactionType.WITHDRAW,
+                TransactionStatus.PENDING
+        )).thenReturn(List.of(pendingA, pendingB));
+
+        List<Transaction> result = walletService.listPendingWithdrawals();
+
+        assertEquals(2, result.size());
+        assertSame(pendingA, result.get(0));
+        assertSame(pendingB, result.get(1));
+        verify(transactionRepository).findByTypeAndStatusOrderByCreatedAtAsc(
+                TransactionType.WITHDRAW,
+                TransactionStatus.PENDING
+        );
     }
 }
