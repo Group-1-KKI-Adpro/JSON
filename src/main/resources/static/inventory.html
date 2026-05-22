@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JSON Jastip • Inventory</title>
+  <link rel="stylesheet" href="/css/site.css" />
+  <script defer src="/js/site.js"></script>
+  <script defer src="/js/inventory.js"></script>
+</head>
+<body data-page="inventory">
+  <header class="topbar">
+    <a class="brand" href="/">
+      <span class="brand-mark">J</span>
+      <span>JSON Jastip</span>
+    </a>
+
+    <nav class="nav-links">
+      <a href="/">Home</a>
+      <a href="/catalog">Catalog</a>
+      <a href="/inventory" class="active">Inventory</a>
+      <a href="/orders">Orders</a>
+      <a href="/vouchers">Vouchers</a>
+      <a href="/wallet">Wallet</a>
+      <a href="/transactions">Transactions</a>
+      <a href="/profile">Profile</a>
+      <a href="/admin">Admin</a>
+    </nav>
+
+    <div id="accountWidget" class="account-widget"></div>
+  </header>
+
+  <main class="shell">
+    <section class="hero catalog-hero">
+      <div>
+        <p class="eyebrow">Inventory</p>
+        <h1>Manage your own consignment stock.</h1>
+        <p class="hero-copy">
+          Approved Jastipers can create catalog items, update descriptions, prices, and stock, and manage flash-sale quantity without leaving this page.
+        </p>
+
+        <div class="hero-actions">
+          <input id="inventorySearch" class="search-input" type="search" placeholder="Search your items by name..." />
+          <button id="refreshInventory" class="btn-ghost" type="button">Refresh</button>
+        </div>
+      </div>
+    </section>
+
+    <div id="inventoryNotice" class="hidden"></div>
+
+    <section class="catalog-layout">
+      <section class="card catalog-list-panel">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Your merchandise</p>
+            <h2>Inventory items</h2>
+            <p class="muted">These are the items attached to your Jastiper account.</p>
+          </div>
+        </div>
+
+        <div id="inventoryGrid" class="catalog-grid">
+          <p class="muted">Loading inventory items...</p>
+        </div>
+
+        <div id="inventoryEmpty" class="empty-state hidden">
+          <h3>No inventory yet</h3>
+          <p class="muted">Create your first catalog item from the form on the right.</p>
+        </div>
+      </section>
+
+      <aside class="catalog-sidebar">
+        <section id="inventoryAccessBox" class="card">
+          <h2>Jastiper inventory</h2>
+          <p class="muted">Loading your account...</p>
+        </section>
+
+        <section id="inventoryManagePanel" class="card hidden">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Catalog management</p>
+              <h2 id="inventoryFormTitle">Add new item</h2>
+              <p class="muted">
+                Jastiper ID is taken from your login session. Use edit mode to change the selected item.
+              </p>
+            </div>
+          </div>
+
+          <form id="inventoryForm" class="form-stack">
+            <label>
+              Item name
+              <input id="inventoryName" type="text" placeholder="e.g. Tokyo limited snack" required />
+            </label>
+
+            <label>
+              Description
+              <textarea id="inventoryDescription" rows="4" placeholder="Describe condition, quota, and notes"></textarea>
+            </label>
+
+            <div class="form-grid-2">
+              <label>
+                Price
+                <input id="inventoryPrice" type="number" min="0" step="1" placeholder="150000" required />
+              </label>
+
+              <label>
+                Stock / quota
+                <input id="inventoryStock" type="number" min="0" step="1" placeholder="5" required />
+              </label>
+            </div>
+
+            <div class="form-grid-2">
+              <label>
+                Origin
+                <input id="inventoryOrigin" type="text" placeholder="Japan / Singapore / Bali" />
+              </label>
+
+              <label>
+                Purchase date
+                <input id="inventoryPurchaseDate" type="date" />
+              </label>
+            </div>
+
+            <div class="hero-actions">
+              <button id="inventorySubmit" class="button" type="submit">Save item</button>
+              <button id="inventoryCancelEdit" class="btn-ghost hidden" type="button">Cancel edit</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="card">
+          <h2>Flash-sale stock</h2>
+          <p class="muted">Reserve or release stock to keep item counts accurate while orders move through the system.</p>
+          <a class="btn-ghost full-action" href="/catalog">Back to catalog</a>
+        </section>
+      </aside>
+    </section>
+  </main>
+
+  <footer class="footer">
+    © 2026 JSON Jastip. Inventory.
+  </footer>
+</body>
+</html>

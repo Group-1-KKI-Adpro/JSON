@@ -77,14 +77,30 @@ class KycServiceImplTest {
     }
 
     @Test
-    void apply_existingApplication_throwsConflict() {
-        when(authService.getByEmail("tara@gmail.com")).thenReturn(user);
-        when(kycApplicationRepository.findByUser(user)).thenReturn(Optional.of(application));
+    void apply_existingApplication_returnsExistingPendingApplication() {
+        User user = new User("titiper@example.com", "password", "Titiper User");
+        KycApplication existingApplication = new KycApplication(
+                user,
+                "Titiper User",
+                "https://instagram.com/titiper"
+        );
 
-        ResponseStatusException ex = assertThrows(ResponseStatusException.class,
-                () -> kycService.apply("tara@gmail.com", "Tara Nirmala Anwar", null));
+        when(authService.getByEmail("titiper@example.com")).thenReturn(user);
+        when(kycApplicationRepository.findByUser(user)).thenReturn(Optional.of(existingApplication));
+        when(userRepository.save(user)).thenReturn(user);
 
-        assertEquals(409, ex.getStatusCode().value());
+        KycResponse response = kycService.apply(
+                "titiper@example.com",
+                "Titiper User Updated",
+                "https://instagram.com/updated"
+        );
+
+        assertNotNull(response);
+        assertEquals(KycStatus.PENDING, response.getStatus());
+        assertEquals("Titiper User", response.getFullName());
+
+        verify(userRepository).save(user);
+        verify(kycApplicationRepository, never()).save(any(KycApplication.class));
     }
 
     @Test

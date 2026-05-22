@@ -6,9 +6,49 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class PageController {
 
-    @GetMapping({"/auth", "/profile", "/catalog", "/orders", "/vouchers"})
-    public String moduleEntryPage() {
-        return "forward:/index.html";
+    @GetMapping("/auth")
+    public String authPage() {
+        return "forward:/login.html";
+    }
+
+    @GetMapping("/login")
+    public String loginPage() {
+        return "forward:/login.html";
+    }
+
+    @GetMapping("/register")
+    public String registerPage() {
+        return "forward:/register.html";
+    }
+
+    @GetMapping("/profile")
+    public String profilePage() {
+        return "forward:/profile.html";
+    }
+
+    @GetMapping("/catalog")
+    public String catalogPage() {
+        return "forward:/catalog.html";
+    }
+
+    @GetMapping("/catalog/new")
+    public String catalogCreatePage() {
+        return "forward:/catalog-new.html";
+    }
+
+    @GetMapping("/inventory")
+    public String inventoryPage() {
+        return "forward:/inventory.html";
+    }
+
+    @GetMapping("/orders")
+    public String ordersPage() {
+        return "forward:/orders.html";
+    }
+
+    @GetMapping("/vouchers")
+    public String vouchersPage() {
+        return "forward:/vouchers.html";
     }
 
     @GetMapping("/wallet")
@@ -20,4 +60,15 @@ public class PageController {
     public String transactionsPage() {
         return "redirect:/transactions.html";
     }
+
+    @GetMapping("/admin")
+    public String adminPage() {
+        return "forward:/admin.html";
+    }
+
+    @GetMapping("/users")
+    public String usersPage() {
+        return "forward:/public-profile.html";
+    }
+
 }

@@ -23,6 +23,9 @@ public class CatalogItem {
     private String createdAt;
     private String updatedAt;
 
+    @Version
+    private Long version;
+
     public CatalogItem() {}
 
     @PrePersist
@@ -108,5 +111,9 @@ public class CatalogItem {
 
     public String getUpdatedAt() {
         return updatedAt;
+    }
+
+    public Long getVersion() {
+        return version;
     }
 }

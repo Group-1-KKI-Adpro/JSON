@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JSON Jastip - Withdrawal Requests</title>
+  <link rel="stylesheet" href="/css/site.css" />
+  <script defer src="/js/site.js"></script>
+</head>
+<body data-page="admin-wallet-withdrawals">
+<header class="topbar">
+  <a class="brand" href="/">
+    <span class="brand-mark">J</span>
+    <span>JSON Jastip</span>
+  </a>
+  <nav class="nav-links">
+    <a href="/">Home</a>
+    <a href="/catalog">Catalog</a>
+    <a href="/orders">Orders</a>
+    <a href="/vouchers">Vouchers</a>
+    <a href="/wallet">Wallet</a>
+    <a href="/transactions">Transactions</a>
+    <a href="/profile">Profile</a>
+  </nav>
+  <div id="accountWidget" class="account-widget"></div>
+</header>
+
+<main class="shell">
+  <section class="section">
+    <div class="section-header">
+      <div>
+        <h1 class="section-title">Withdrawal Requests</h1>
+        <p class="section-subtitle">Review pending wallet withdrawals and finalize each request as approved or rejected.</p>
+      </div>
+      <div class="inline-actions">
+        <a class="btn-ghost" href="/wallet" style="text-decoration:none;">Wallet</a>
+        <button id="refreshPendingWithdrawals" class="button" type="button">Refresh</button>
+      </div>
+    </div>
+    <div id="adminWithdrawNotice" class="hidden"></div>
+    <div id="adminWithdrawStats" class="grid cols-3" style="margin-top:16px;"></div>
+  </section>
+
+  <section class="section table-card">
+    <table>
+      <thead>
+        <tr>
+          <th>Requested</th>
+          <th>User ID</th>
+          <th>Amount</th>
+          <th>Status</th>
+          <th>Description</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="pendingWithdrawTableBody">
+        <tr><td colspan="6"><div class="empty-state"><strong>Loading pending withdrawals...</strong></div></td></tr>
+      </tbody>
+    </table>
+  </section>
+</main>
+</body>
+</html>

@@ -5,110 +5,143 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>JSON Jastip • Catalog</title>
   <link rel="stylesheet" href="/css/site.css" />
-  <script defer src="/js/site.js"></script>
 </head>
 <body data-page="catalog">
-<header class="topbar">
-  <a class="brand" href="/index.html">
-    <span class="brand-mark">J</span>
-    <span>JSON Jastip</span>
-  </a>
-  <nav class="nav-links">
-    <a href="/index.html">Home</a>
-    <a href="/catalog.html">Catalog</a>
-    <a href="/orders.html">Orders</a>
-    <a href="/vouchers.html">Vouchers</a>
-    <a href="/wallet.html">Wallet</a>
-    <a href="/transactions.html">Transactions</a>
-    <a href="/profile.html">Profile</a>
-  </nav>
-  <div id="accountWidget" class="account-widget"></div>
-</header>
+  <header class="topbar">
+    <a class="brand" href="/">
+      <span class="brand-mark">J</span>
+      <span>JSON Jastip</span>
+    </a>
 
-<main class="shell">
-  <section class="section">
-    <div class="section-header">
+    <nav class="nav-links">
+      <a href="/">Home</a>
+      <a href="/catalog" class="active">Catalog</a>
+      <a href="/inventory">Inventory</a>
+      <a href="/orders">Orders</a>
+      <a href="/vouchers">Vouchers</a>
+      <a href="/wallet">Wallet</a>
+      <a href="/transactions">Transactions</a>
+      <a href="/profile">Profile</a>
+      <a href="/admin">Admin</a>
+    </nav>
+
+    <div id="accountWidget" class="account-widget"></div>
+  </header>
+
+  <main class="shell">
+    <section class="hero catalog-hero">
       <div>
-        <h1 class="section-title">Catalog</h1>
-        <p class="section-subtitle">Search items, add new items, and add products to your cart.</p>
+        <p class="eyebrow">Catalog</p>
+        <h1>Browse items from verified Jastipers.</h1>
+        <p class="hero-copy">
+          Titipers can browse and add items to cart. Only approved, active Jastipers can create catalog items. Jastipers can also open their inventory page to manage their own listings.
+        </p>
+
+        <div class="hero-actions">
+          <input id="catalogSearch" class="search-input" type="search" placeholder="Search by item, origin, or Jastiper ID..." />
+          <button id="refreshCatalog" class="btn-ghost" type="button">Refresh</button>
+        </div>
       </div>
-      <div class="controls-row">
-        <input id="catalogSearch" class="searchbar" type="search" placeholder="Search by name, origin, or jastiper..." />
-        <button id="catalogManageToggle" class="btn-ghost" type="button">Add item</button>
-      </div>
-    </div>
+    </section>
+
     <div id="catalogNotice" class="hidden"></div>
-    <div id="catalogStats" class="grid cols-4"></div>
-  </section>
 
-  <section class="section">
-    <div class="grid cols-2">
-      <div>
-        <div id="catalogEmpty" class="empty-state hidden" style="margin-bottom:18px;">
-          <strong>No catalog items yet.</strong>
-          Add the first item using the form on the right.
-        </div>
-        <div id="catalogGrid" class="grid cols-2"></div>
-      </div>
-      <aside class="panel" id="catalogManagePanel">
-        <div class="section-header" style="margin-top:0;">
+    <section class="catalog-layout">
+      <section class="card catalog-list-panel">
+        <div class="section-heading">
           <div>
-            <h2 class="section-title" style="margin:0; font-size:1.5rem;">Add new item</h2>
-            <p class="section-subtitle">This uses the existing CatalogItem model.</p>
+            <p class="eyebrow">Available items</p>
+            <h2>Catalog items</h2>
+            <p class="muted">Add items to cart</p>
           </div>
         </div>
-        <form id="catalogForm" class="form">
-          <div class="input-grid">
-            <div class="field">
-              <label for="catalogJastiperId">Jastiper ID</label>
-              <input id="catalogJastiperId" type="number" min="1" placeholder="1" required />
-            </div>
-            <div class="field">
-              <label for="catalogPrice">Price</label>
-              <input id="catalogPrice" type="number" min="0" placeholder="250000" required />
-            </div>
-            <div class="field">
-              <label for="catalogStock">Stock</label>
-              <input id="catalogStock" type="number" min="0" placeholder="10" required />
-            </div>
-            <div class="field">
-              <label for="catalogPurchaseDate">Purchase date</label>
-              <input id="catalogPurchaseDate" type="date" />
+
+        <div id="catalogGrid" class="catalog-grid">
+          <p class="muted">Loading catalog items...</p>
+        </div>
+
+        <div id="catalogEmpty" class="empty-state hidden">
+          <h3>No matching catalog items</h3>
+          <p class="muted">Try another keyword or ask a Jastiper to add items.</p>
+        </div>
+      </section>
+
+      <aside class="catalog-sidebar">
+        <section id="catalogAccessBox" class="card">
+          <h2>Jastiper access</h2>
+          <p class="muted">Loading your role...</p>
+          <a class="button full-action" href="/inventory">Open inventory</a>
+        </section>
+
+        <section id="catalogManagePanel" class="card hidden">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Jastiper tools</p>
+              <h2>Add new item</h2>
+              <p class="muted">
+                The backend will automatically use your logged-in Jastiper ID.
+              </p>
             </div>
           </div>
-          <div class="field">
-            <label for="catalogName">Item name</label>
-            <input id="catalogName" type="text" placeholder="Example item" required />
+
+          <form id="catalogForm" class="form-stack">
+            <label>
+              Item name
+              <input id="catalogName" type="text" placeholder="e.g. Limited sneakers" required />
+            </label>
+
+            <label>
+              Description
+              <textarea id="catalogDescription" rows="4" placeholder="Describe the item condition, details, or PO rules"></textarea>
+            </label>
+
+            <div class="form-grid-2">
+              <label>
+                Price
+                <input id="catalogPrice" type="number" min="0" step="1" placeholder="150000" required />
+              </label>
+
+              <label>
+                Stock
+                <input id="catalogStock" type="number" min="0" step="1" placeholder="5" required />
+              </label>
+            </div>
+
+            <div class="form-grid-2">
+              <label>
+                Origin
+                <input id="catalogOrigin" type="text" placeholder="Japan / Singapore / Bali" />
+              </label>
+
+              <label>
+                Purchase date
+                <input id="catalogPurchaseDate" type="date" />
+              </label>
+            </div>
+
+            <button class="button" type="submit">Save item</button>
+          </form>
+        </section>
+
+        <section class="card">
+          <h2>Cart preview</h2>
+          <p class="muted">Your selected items will be checked out from the Orders page.</p>
+
+          <div id="catalogCartPreview" class="cart-preview">
+            Cart items: 0
           </div>
-          <div class="field">
-            <label for="catalogOrigin">Origin</label>
-            <input id="catalogOrigin" type="text" placeholder="Japan / Korea / Singapore" />
-          </div>
-          <div class="field">
-            <label for="catalogDescription">Description</label>
-            <textarea id="catalogDescription" placeholder="Short item description"></textarea>
-          </div>
-          <button class="button" type="submit">Save item</button>
-        </form>
+
+          <a class="button full-action" href="/orders">Go to checkout</a>
+          <button id="clearCatalogCart" class="btn-ghost full-action" type="button">Clear cart</button>
+        </section>
       </aside>
-    </div>
-  </section>
+    </section>
+  </main>
 
-  <section class="section">
-    <div class="section-header">
-      <div>
-        <h2 class="section-title">Cart preview</h2>
-        <p class="section-subtitle">Your selected items will be checked out from the orders page.</p>
-      </div>
-      <div class="inline-actions">
-        <span class="badge">Cart items: <span id="cartCount">0 items</span></span>
-        <a class="button" href="/orders.html" style="text-decoration:none;">Go to checkout</a>
-      </div>
-    </div>
-    <div id="cartPreview" class="panel"></div>
-  </section>
-</main>
-
-<footer class="footer">Use the search bar to filter items in real time.</footer>
+  <footer class="footer">
+    © 2026 JSON Jastip. Catalog.
+  </footer>
+<script src="/js/site.js"></script>
+<script src="/js/catalog.js"></script>
 </body>
 </html>

@@ -218,6 +218,14 @@ public class WalletServiceImpl implements WalletService {
         });
     }
 
+    @Override
+    public List<Transaction> listPendingWithdrawals() {
+        return transactionRepository.findByTypeAndStatusOrderByCreatedAtAsc(
+                TransactionType.WITHDRAW,
+                TransactionStatus.PENDING
+        );
+    }
+
     private static Transaction returnIfAlreadyVerified(Transaction tx, TransactionStatus desiredStatus) {
         if (tx.getStatus() != TransactionStatus.PENDING) {
             if (tx.getStatus() == desiredStatus) return tx;

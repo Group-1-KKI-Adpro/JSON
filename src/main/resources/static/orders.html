@@ -5,63 +5,144 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>JSON Jastip • Orders</title>
   <link rel="stylesheet" href="/css/site.css" />
-  <script defer src="/js/site.js"></script>
 </head>
 <body data-page="orders">
-<header class="topbar">
-  <a class="brand" href="/index.html">
-    <span class="brand-mark">J</span>
-    <span>JSON Jastip</span>
-  </a>
-  <nav class="nav-links">
-    <a href="/index.html">Home</a>
-    <a href="/catalog.html">Catalog</a>
-    <a href="/orders.html">Orders</a>
-    <a href="/vouchers.html">Vouchers</a>
-    <a href="/wallet.html">Wallet</a>
-    <a href="/transactions.html">Transactions</a>
-    <a href="/profile.html">Profile</a>
-  </nav>
-  <div id="accountWidget" class="account-widget"></div>
-</header>
+  <header class="topbar">
+    <a class="brand" href="/">
+      <span class="brand-mark">J</span>
+      <span>JSON Jastip</span>
+    </a>
 
-<main class="shell">
-  <section class="section">
-    <div class="section-header">
+    <nav class="nav-links">
+      <a href="/">Home</a>
+      <a href="/catalog">Catalog</a>
+      <a href="/orders" class="active">Orders</a>
+      <a href="/vouchers">Vouchers</a>
+      <a href="/wallet">Wallet</a>
+      <a href="/transactions">Transactions</a>
+      <a href="/profile">Profile</a>
+      <a href="/admin">Admin</a>
+    </nav>
+
+    <div id="accountWidget" class="account-widget"></div>
+  </header>
+
+  <main class="shell">
+    <section class="hero orders-hero">
       <div>
-        <h1 class="section-title">Orders</h1>
-        <p class="section-subtitle">Review your cart, place an order, and follow your order history.</p>
+        <p class="eyebrow">Orders</p>
+        <h1>Checkout, history, and Jastiper tasks.</h1>
+        <p class="hero-copy">
+          Review your cart, place orders, and track the full buyer and Jastiper flow in one place.
+        </p>
+        <div class="hero-actions">
+          <a class="btn-ghost" href="/catalog">Back to catalog</a>
+          <a class="btn-ghost" href="/wallet">Open wallet</a>
+          <button id="refreshOrders" class="button" type="button">Refresh orders</button>
+        </div>
       </div>
-      <div class="inline-actions">
-        <a class="btn-ghost" href="/catalog.html" style="text-decoration:none;">Back to catalog</a>
-        <a class="button" href="/wallet.html" style="text-decoration:none;">Open wallet</a>
-      </div>
-    </div>
-    <div id="orderNotice" class="hidden"></div>
-    <div id="orderSummary" class="grid cols-2" style="margin-top:16px;"></div>
-  </section>
+    </section>
 
-  <section class="section grid cols-2" style="align-items:start;">
-    <div class="panel">
-      <h2 class="section-title" style="margin-top:0; font-size:1.5rem;">Checkout cart</h2>
-      <div id="orderCart"></div>
-      <form id="orderForm" class="form" style="margin-top:18px;">
-        <div class="field">
-          <label for="shippingAddress">Shipping address</label>
-          <textarea id="shippingAddress" placeholder="Street, city, province, postal code" required></textarea>
+    <div id="orderNotice" class="hidden"></div>
+
+    <section id="checkoutSection" class="orders-layout">
+      <section class="card order-panel">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Checkout</p>
+            <h2>Checkout cart</h2>
+          </div>
         </div>
-        <div class="field">
-          <label for="voucherCode">Voucher code (optional)</label>
-          <input id="voucherCode" type="text" placeholder="PROMO2026" />
+
+        <div id="orderCart" class="order-cart-list">
+          <p class="muted">Loading cart...</p>
         </div>
-        <button id="placeOrderButton" class="button" type="submit">Place order</button>
-      </form>
-    </div>
-    <div class="panel">
-      <h2 class="section-title" style="margin-top:0; font-size:1.5rem;">Order history</h2>
-      <div id="orderHistory" class="grid" style="gap:16px;"></div>
-    </div>
-  </section>
-</main>
+
+        <div class="order-cart-actions">
+          <a class="btn-ghost" href="/catalog">Add more items</a>
+          <button id="clearOrderCart" class="btn-danger" type="button">Clear cart</button>
+        </div>
+      </section>
+
+      <section class="card order-panel">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Payment</p>
+            <h2>Place order</h2>
+            <p class="muted">
+              Make sure your wallet balance is enough before checkout.
+            </p>
+          </div>
+        </div>
+
+        <form id="checkoutForm" class="form-stack">
+          <label>
+            Shipping address
+            <textarea id="checkoutShippingAddress" rows="4" placeholder="Enter your full shipping address" required></textarea>
+          </label>
+
+          <label>
+            Voucher code (optional)
+            <input id="checkoutVoucherCode" type="text" placeholder="e.g. DISC10" />
+          </label>
+
+          <button id="placeOrderButton" class="button" type="submit">
+            Place order
+          </button>
+        </form>
+      </section>
+    </section>
+
+    <section id="buyerSection" class="orders-section">
+      <section class="card order-panel">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Buyer view</p>
+            <h2>My orders</h2>
+            <p class="muted">
+            </p>
+          </div>
+        </div>
+
+        <div id="buyerOrdersList" class="order-list">
+          <p class="muted">Loading buyer orders...</p>
+        </div>
+      </section>
+    </section>
+
+    <section id="jastiperSection" class="orders-section hidden">
+      <section class="card order-panel">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Jastiper view</p>
+            <h2>Incoming order to-do list</h2>
+            <p class="muted">
+              Process orders in the correct flow:
+              PAID → PURCHASED → SHIPPED → COMPLETED.
+            </p>
+          </div>
+        </div>
+
+        <div id="jastiperOrdersList" class="order-list">
+          <p class="muted">Loading Jastiper orders...</p>
+        </div>
+      </section>
+    </section>
+
+    <section id="adminOrderInfo" class="card hidden">
+      <span class="pill">Admin</span>
+      <h2>Admin order monitoring</h2>
+      <p class="muted">
+        Admin order monitoring needs a dedicated backend endpoint such as GET /api/admin/orders.
+      </p>
+      <a class="button" href="/admin">Open admin dashboard</a>
+    </section>
+  </main>
+
+  <footer class="footer">
+    © 2026 JSON Jastip. Orders.
+  </footer>
+<script src="/js/site.js"></script>
+<script src="/js/orders.js"></script>
 </body>
 </html>
