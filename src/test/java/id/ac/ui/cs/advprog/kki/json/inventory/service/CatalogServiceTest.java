@@ -66,6 +66,25 @@ class CatalogServiceTest {
     }
 
     @Test
+    void createCatalogItemForJastiper_usesAuthenticatedJastiperIdAndTrimsOptionalFields() {
+        CatalogItemRequest request = validCreateRequest();
+        request.setJastiperId(777);
+        request.setDescription("  Chocolate biscuit  ");
+        request.setOrigin(null);
+        request.setPurchaseDate(null);
+
+        when(catalogItemRepository.save(any(CatalogItem.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        CatalogItem result = catalogService.createCatalogItemForJastiper(request, 42);
+
+        assertEquals(42, result.getJastiperId());
+        assertEquals("Chocolate biscuit", result.getDescription());
+        assertNull(result.getOrigin());
+        assertNull(result.getPurchaseDate());
+        verify(catalogItemRepository).save(any(CatalogItem.class));
+    }
+
+    @Test
     void createCatalogItem_nullRequest_throwsException() {
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
                 () -> catalogService.createCatalogItem(null));
