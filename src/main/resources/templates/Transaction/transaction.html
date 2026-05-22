@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>JSON - Transactions</title>
+</head>
+<body>
+<h1>Transaction History</h1>
+<p>
+    <a href="/index.html">Back: Auth</a> |
+    <a href="/wallet">Wallet</a>
+</p>
+<p>Endpoint: <code>GET /api/wallet/transactions</code>. Uses token from <code>localStorage["json_token"]</code>.</p>
+
+<h2>Current Token</h2>
+<button type="button" onclick="clearToken()">Clear Token</button>
+<pre id="tokenOut">(none)</pre>
+
+<h2>Transactions</h2>
+<button type="button" onclick="refresh()">Refresh</button>
+<p>Newest first.</p>
+<table>
+    <thead>
+    <tr>
+        <th>Timestamp</th>
+        <th>Type</th>
+        <th>Amount</th>
+        <th>Status</th>
+        <th>Description</th>
+        <th>ID</th>
+    </tr>
+    </thead>
+    <tbody id="txBody">
+    <tr><td colspan="6">No data. Click Refresh.</td></tr>
+    </tbody>
+</table>
+<pre id="statusOut"></pre>
+
+<script>
+    const TOKEN_KEY = "json_token";
+
+    function getToken() {
+        return localStorage.getItem(TOKEN_KEY);
+    }
+
+    function showToken() {
+        const t = getToken();
+        document.getElementById("tokenOut").textContent = t ?? "(none)";
+        return t;
+    }
+
+    function clearToken() {
+        localStorage.removeItem(TOKEN_KEY);
+        showToken();
+        document.getElementById("txBody").innerHTML = `<tr><td colspan="6" class="small">Token cleared.</td></tr>`;
+        document.getElementById("statusOut").textContent = "";
+    }
+
+    async function refresh() {
+        const t = showToken();
+        if (!t) {
+            document.getElementById("statusOut").textContent = "No token. Login from /index.html first.";
+            return;
+        }
+
+        const res = await fetch("/api/wallet/transactions", {
+            headers: { "Authorization": `Bearer ${t}` }
+        });
+
+        const text = await res.text();
+        document.getElementById("statusOut").textContent = `${res.status}\n${text}`;
+
+        if (!res.ok) return;
+
+        let list = [];
+        try { list = JSON.parse(text); } catch { list = []; }
+        render(list);
+    }
+
+    function render(list) {
+        const body = document.getElementById("txBody");
+        if (!Array.isArray(list) || list.length === 0) {
+            body.innerHTML = `<tr><td colspan="6" class="small">No transactions found.</td></tr>`;
+            return;
+        }
+
+        body.innerHTML = list.map(tx => {
+            const ts = tx.timestamp ? new Date(tx.timestamp).toLocaleString() : "-";
+            const type = tx.type ?? "-";
+            const amount = tx.amount ?? 0;
+            const status = tx.status ?? "-";
+            const desc = escapeHtml(tx.description ?? "");
+            const id = tx.id ?? "-";
+            return `<tr>
+                <td>${escapeHtml(ts)}</td>
+                <td>${escapeHtml(type)}</td>
+                <td>${escapeHtml(String(amount))}</td>
+                <td>${escapeHtml(status)}</td>
+                <td>${desc || "<span class='small'>(no description)</span>"}</td>
+                <td>${escapeHtml(String(id))}</td>
+            </tr>`;
+        }).join("");
+    }
+
+    function escapeHtml(s) {
+        return String(s)
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll("\"", "&quot;")
+            .replaceAll("'", "&#039;");
+    }
+
+    showToken();
+</script>
+</body>
+</html>

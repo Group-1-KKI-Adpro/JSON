@@ -9,18 +9,18 @@
 </head>
 <body data-page="vouchers">
 <header class="topbar">
-  <a class="brand" href="/">
+  <a class="brand" href="/index.html">
     <span class="brand-mark">J</span>
     <span>JSON Jastip</span>
   </a>
   <nav class="nav-links">
-    <a href="/">Home</a>
-    <a href="/catalog">Catalog</a>
-    <a href="/orders">Orders</a>
-    <a href="/vouchers">Vouchers</a>
-    <a href="/wallet">Wallet</a>
-    <a href="/transactions">Transactions</a>
-    <a href="/profile">Profile</a>
+    <a href="/index.html">Home</a>
+    <a href="/catalog.html">Catalog</a>
+    <a href="/orders.html">Orders</a>
+    <a href="/vouchers.html">Vouchers</a>
+    <a href="/wallet.html">Wallet</a>
+    <a href="/transactions.html">Transactions</a>
+    <a href="/profile.html">Profile</a>
   </nav>
   <div id="accountWidget" class="account-widget"></div>
 </header>
@@ -33,8 +33,8 @@
         <p class="section-subtitle">Check active vouchers, validate a code, and manage admin voucher creation.</p>
       </div>
       <div class="inline-actions">
-        <a class="btn-ghost" href="/orders" style="text-decoration:none;">Orders</a>
-        <a class="button" href="/wallet" style="text-decoration:none;">Wallet</a>
+        <a class="btn-ghost" href="/orders.html" style="text-decoration:none;">Orders</a>
+        <a class="button" href="/wallet.html" style="text-decoration:none;">Wallet</a>
       </div>
     </div>
     <div id="voucherNotice" class="hidden"></div>
@@ -60,51 +60,48 @@
       </form>
       <div id="voucherValidateResult" class="kpi-list" style="margin-top:18px;"></div>
 
-      <div id="adminVoucherSection" class="hidden" style="margin-top:28px;">
-        <div class="section-header">
-          <div>
-            <h2 class="section-title" style="margin:0; font-size:1.5rem;">Create a new voucher</h2>
-            <p class="section-subtitle">Admin controls for generating new promo codes.</p>
+      <div class="section-header" style="margin-top:28px;">
+        <div>
+          <h2 class="section-title" style="margin:0; font-size:1.5rem;">Admin create voucher</h2>
+          <p class="section-subtitle">Visible for everyone, protected by admin access on submit.</p>
+        </div>
+      </div>
+      <form id="voucherCreateForm" class="form">
+        <div class="input-grid">
+          <div class="field">
+            <label for="createCode">Code</label>
+            <input id="createCode" type="text" placeholder="PROMO2026" required />
+          </div>
+          <div class="field">
+            <label for="createQuota">Quota</label>
+            <input id="createQuota" type="number" min="1" placeholder="10" required />
+          </div>
+          <div class="field">
+            <label for="createStartAt">Start at</label>
+            <input id="createStartAt" type="datetime-local" required />
+          </div>
+          <div class="field">
+            <label for="createEndAt">End at</label>
+            <input id="createEndAt" type="datetime-local" required />
           </div>
         </div>
-        
-        <form id="voucherCreateForm" class="form">
-          <div class="input-grid">
-            <div class="field">
-              <label for="createCode">Code</label>
-              <input id="createCode" type="text" placeholder="PROMO2026" required />
-            </div>
-            <div class="field">
-              <label for="createQuota">Quota</label>
-              <input id="createQuota" type="number" min="1" placeholder="10" required />
-            </div>
-            <div class="field">
-              <label for="createStartAt">Start at</label>
-              <input id="createStartAt" type="datetime-local" required />
-            </div>
-            <div class="field">
-              <label for="createEndAt">End at</label>
-              <input id="createEndAt" type="datetime-local" required />
-            </div>
-          </div>
-          <div class="field">
-            <label for="createDiscountType">Discount type</label>
-            <select id="createDiscountType" required>
-              <option value="FLAT">FLAT</option>
-              <option value="PERCENTAGE">PERCENTAGE</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="createDiscountValue">Discount value</label>
-            <input id="createDiscountValue" type="number" min="1" step="0.01" placeholder="10 or 50000" required />
-          </div>
-          <div class="field">
-            <label for="createTerms">Terms</label>
-            <textarea id="createTerms" placeholder="Voucher terms and conditions"></textarea>
-          </div>
-          <button class="button" type="submit">Create voucher</button>
-        </form>
-      </div>
+        <div class="field">
+          <label for="createDiscountType">Discount type</label>
+          <select id="createDiscountType" required>
+            <option value="FLAT">FLAT</option>
+            <option value="PERCENTAGE">PERCENTAGE</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="createDiscountValue">Discount value</label>
+          <input id="createDiscountValue" type="number" min="1" step="0.01" placeholder="10 or 50000" required />
+        </div>
+        <div class="field">
+          <label for="createTerms">Terms</label>
+          <textarea id="createTerms" placeholder="Voucher terms and conditions"></textarea>
+        </div>
+        <button class="button" type="submit">Create voucher</button>
+      </form>
     </div>
   </section>
 </main>

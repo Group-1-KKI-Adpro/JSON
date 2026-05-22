@@ -56,11 +56,10 @@ public class SecurityConfig {
                                 "/favicon.ico",
                                 "/*.html"
                         ).permitAll()
+                        .requestMatchers("/Transaction/**").permitAll()
                         .requestMatchers(
                                 HttpMethod.GET,
                                 "/auth",
-                                "/login",
-                                "/register",
                                 "/profile",
                                 "/catalog",
                                 "/orders",
