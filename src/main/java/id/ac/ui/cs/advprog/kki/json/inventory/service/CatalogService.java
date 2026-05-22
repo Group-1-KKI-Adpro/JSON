@@ -17,19 +17,29 @@ public class CatalogService {
         this.catalogItemRepository = catalogItemRepository;
     }
 
-    public CatalogItem createCatalogItem(CatalogItemRequest request) {
+    public CatalogItem createCatalogItemForJastiper(CatalogItemRequest request, int authenticatedJastiperId) {
         validateCreateRequest(request);
 
         CatalogItem item = new CatalogItem();
-        item.setJastiperId(request.getJastiperId());
-        item.setName(request.getName());
-        item.setDescription(request.getDescription());
+        item.setJastiperId(authenticatedJastiperId);
+        item.setName(request.getName().trim());
+        item.setDescription(cleanText(request.getDescription()));
         item.setPrice(request.getPrice());
         item.setStock(request.getStock());
-        item.setOrigin(request.getOrigin());
-        item.setPurchaseDate(request.getPurchaseDate());
+        item.setOrigin(cleanText(request.getOrigin()));
+        item.setPurchaseDate(cleanText(request.getPurchaseDate()));
 
         return catalogItemRepository.save(item);
+    }
+
+    /*
+     * Kept only for compatibility with older tests/internal code.
+     * HTTP catalog creation must use createCatalogItemForJastiper(...)
+     * so jastiperId comes from the authenticated JWT user, not from request body.
+     */
+    @Deprecated
+    public CatalogItem createCatalogItem(CatalogItemRequest request) {
+        return createCatalogItemForJastiper(request, request.getJastiperId());
     }
 
     public List<CatalogItem> getAllCatalogItems() {
@@ -92,18 +102,29 @@ public class CatalogService {
 
         CatalogItem item = getCatalogItemById(id);
         item.setStock(item.getStock() + quantity);
+
         return catalogItemRepository.save(item);
     }
 
     private void validateCreateRequest(CatalogItemRequest request) {
+        if (request == null) {
+            throw new IllegalArgumentException("Request cannot be empty");
+        }
+
         if (request.getName() == null || request.getName().isBlank()) {
             throw new IllegalArgumentException("Name cannot be empty");
         }
+
         if (request.getPrice() < 0) {
             throw new IllegalArgumentException("Price cannot be negative");
         }
+
         if (request.getStock() < 0) {
             throw new IllegalArgumentException("Stock cannot be negative");
         }
+    }
+
+    private String cleanText(String value) {
+        return value == null ? null : value.trim();
     }
 }
