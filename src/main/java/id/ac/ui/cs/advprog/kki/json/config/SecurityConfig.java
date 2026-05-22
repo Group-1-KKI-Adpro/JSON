@@ -53,6 +53,7 @@ public class SecurityConfig {
                                 "/profile.html",
                                 "/wallet.html",
                                 "/transactions.html",
+                                "/admin.html",
                                 "/favicon.ico",
                                 "/*.html"
                         ).permitAll()
@@ -66,7 +67,8 @@ public class SecurityConfig {
                                 "/orders",
                                 "/vouchers",
                                 "/wallet",
-                                "/transactions"
+                                "/transactions",
+                                "/admin"
                         ).permitAll()
                         .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
                         .requestMatchers("/error").permitAll()
@@ -83,7 +85,6 @@ public class SecurityConfig {
                         .requestMatchers("/api/admin/wallet/**").hasRole("ADMIN")
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
-                        /* EVERYTHING ELSE */
                         /* EVERYTHING ELSE */
                         .anyRequest().authenticated()
                 )
