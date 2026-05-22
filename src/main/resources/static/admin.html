@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>JSON Jastip • Admin Dashboard</title>
+    <link rel="stylesheet" href="/css/site.css" />
+</head>
+<body data-page="admin">
+<div class="shell">
+    <header class="topbar">
+        <a class="brand" href="/">
+            <span class="brand-mark">J</span>
+            <span>JSON Jastip</span>
+        </a>
+
+        <nav class="nav-links">
+            <a href="/">Home</a>
+            <a href="/catalog">Catalog</a>
+            <a href="/orders">Orders</a>
+            <a href="/vouchers">Vouchers</a>
+            <a href="/wallet">Wallet</a>
+            <a href="/transactions">Transactions</a>
+            <a href="/profile">Profile</a>
+            <a href="/admin" class="active">Admin</a>
+        </nav>
+
+        <div id="accountWidget" class="account-widget"></div>
+    </header>
+
+    <main>
+        <section class="hero admin-hero">
+            <div>
+                <p class="eyebrow">Admin control center</p>
+                <h1>Manage KYC approvals and user roles.</h1>
+                <p class="hero-copy">
+                    Review pending Jastiper verification requests, approve or reject KYC,
+                    and monitor every user account status from one dashboard.
+                </p>
+                <div class="hero-actions">
+                    <button id="refreshAdminData" class="btn primary" type="button">
+                        Refresh dashboard
+                    </button>
+                    <a class="btn ghost" href="/profile">Back to profile</a>
+                </div>
+            </div>
+
+            <div id="adminSummary" class="hero-card">
+                <p class="muted">Checking admin access...</p>
+            </div>
+        </section>
+
+        <div id="adminNotice" class="hidden"></div>
+
+        <section id="adminAccessDenied" class="card hidden">
+            <span class="pill danger">Access denied</span>
+            <h2>Admin role required</h2>
+            <p class="muted">
+                This page is only for users with the ADMIN role. Log in using an admin account
+                before opening the dashboard.
+            </p>
+            <a class="btn primary" href="/login">Go to login</a>
+        </section>
+
+        <section id="adminDashboard" class="admin-dashboard hidden">
+            <div id="adminStats" class="admin-stat-grid"></div>
+
+            <section class="card admin-panel">
+                <div class="section-heading">
+                    <div>
+                        <p class="eyebrow">KYC queue</p>
+                        <h2>Pending Jastiper applications</h2>
+                        <p class="muted">
+                            Approve users who passed verification, or reject requests that do not meet the requirement.
+                        </p>
+                    </div>
+                </div>
+
+                <div id="pendingKycList" class="admin-list"></div>
+            </section>
+
+            <section class="card admin-panel">
+                <div class="section-heading">
+                    <div>
+                        <p class="eyebrow">User monitoring</p>
+                        <h2>All users</h2>
+                        <p class="muted">
+                            Change account status, promote Titiper to Jastiper, or demote Jastiper to Titiper.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="admin-table-wrapper">
+                    <table class="admin-table">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>User</th>
+                            <th>Current role</th>
+                            <th>Current status</th>
+                            <th>Set role</th>
+                            <th>Set status</th>
+                            <th>Action</th>
+                        </tr>
+                        </thead>
+                        <tbody id="adminUsersTableBody">
+                        <tr>
+                            <td colspan="7">Loading users...</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </section>
+    </main>
+
+    <footer class="footer">
+        © 2026 JSON Jastip. Admin dashboard.
+    </footer>
+</div>
+
+<script src="/js/site.js"></script>
+<script src="/js/admin.js"></script>
+</body>
+</html>

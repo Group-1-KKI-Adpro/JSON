@@ -1,14 +1,20 @@
 package id.ac.ui.cs.advprog.kki.json.inventory.controller;
 
+import id.ac.ui.cs.advprog.kki.json.auth.service.AuthService;
 import id.ac.ui.cs.advprog.kki.json.inventory.dto.CatalogItemRequest;
 import id.ac.ui.cs.advprog.kki.json.inventory.dto.CatalogItemResponse;
 import id.ac.ui.cs.advprog.kki.json.inventory.dto.CatalogItemUpdateRequest;
 import id.ac.ui.cs.advprog.kki.json.inventory.dto.CatalogReserveRequest;
 import id.ac.ui.cs.advprog.kki.json.inventory.model.CatalogItem;
 import id.ac.ui.cs.advprog.kki.json.inventory.service.CatalogService;
+import id.ac.ui.cs.advprog.kki.json.model.AccountStatus;
+import id.ac.ui.cs.advprog.kki.json.model.Role;
+import id.ac.ui.cs.advprog.kki.json.model.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Collections;
 import java.util.List;
@@ -20,16 +26,33 @@ import java.util.stream.Collectors;
 public class CatalogController {
 
     private final CatalogService catalogService;
+    private final AuthService authService;
 
-    public CatalogController(CatalogService catalogService) {
+    public CatalogController(CatalogService catalogService, AuthService authService) {
         this.catalogService = catalogService;
+        this.authService = authService;
     }
 
     @PostMapping("/catalog")
-    public ResponseEntity<?> createCatalogItem(@RequestBody CatalogItemRequest request) {
+    public ResponseEntity<?> createCatalogItem(
+            @RequestBody CatalogItemRequest request,
+            Authentication authentication
+    ) {
         try {
-            CatalogItem item = catalogService.createCatalogItem(request);
-            return ResponseEntity.status(HttpStatus.CREATED).body(new CatalogItemResponse(item));
+            User currentUser = requireApprovedJastiper(authentication);
+
+            CatalogItem item = catalogService.createCatalogItemForJastiper(
+                    request,
+                    Math.toIntExact(currentUser.getId())
+            );
+
+            return ResponseEntity
+                    .status(HttpStatus.CREATED)
+                    .body(new CatalogItemResponse(item));
+        } catch (ResponseStatusException e) {
+            return ResponseEntity
+                    .status(e.getStatusCode())
+                    .body(error(e.getReason()));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(error(e.getMessage()));
         }
@@ -80,8 +103,10 @@ public class CatalogController {
     }
 
     @PatchMapping("/catalog/{id}")
-    public ResponseEntity<?> updateCatalogItem(@PathVariable int id,
-                                               @RequestBody CatalogItemUpdateRequest request) {
+    public ResponseEntity<?> updateCatalogItem(
+            @PathVariable int id,
+            @RequestBody CatalogItemUpdateRequest request
+    ) {
         try {
             CatalogItem item = catalogService.updateCatalogItem(id, request);
             return ResponseEntity.ok(new CatalogItemResponse(item));
@@ -103,8 +128,10 @@ public class CatalogController {
     }
 
     @PostMapping("/catalog/{id}/reserve")
-    public ResponseEntity<?> reserveStock(@PathVariable int id,
-                                          @RequestBody CatalogReserveRequest request) {
+    public ResponseEntity<?> reserveStock(
+            @PathVariable int id,
+            @RequestBody CatalogReserveRequest request
+    ) {
         try {
             CatalogItem item = catalogService.reserveStock(id, request.getQuantity());
             return ResponseEntity.ok(new CatalogItemResponse(item));
@@ -116,8 +143,10 @@ public class CatalogController {
     }
 
     @PostMapping("/catalog/{id}/release")
-    public ResponseEntity<?> releaseStock(@PathVariable int id,
-                                          @RequestBody CatalogReserveRequest request) {
+    public ResponseEntity<?> releaseStock(
+            @PathVariable int id,
+            @RequestBody CatalogReserveRequest request
+    ) {
         try {
             CatalogItem item = catalogService.releaseStock(id, request.getQuantity());
             return ResponseEntity.ok(new CatalogItemResponse(item));
@@ -148,7 +177,31 @@ public class CatalogController {
         }
     }
 
+    private User requireApprovedJastiper(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authentication required");
+        }
+
+        User user = authService.getByEmail(authentication.getName());
+
+        if (user.getStatus() != AccountStatus.ACTIVE) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Only active users can create catalog items"
+            );
+        }
+
+        if (user.getRole() != Role.JASTIPER) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Only approved Jastipers can create catalog items"
+            );
+        }
+
+        return user;
+    }
+
     private Map<String, String> error(String message) {
-        return Collections.singletonMap("error", message);
+        return Collections.singletonMap("error", message == null ? "Request failed" : message);
     }
 }
