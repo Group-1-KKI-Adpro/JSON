@@ -1,52 +1,90 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>JSON Jastip • Catalog</title>
-  <link rel="stylesheet" href="/css/site.css" />
-  <script defer src="/js/site.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Catalogue</title>
+
+  <link rel="stylesheet" href="/css/site.css">
 </head>
-<body data-page="catalog">
-<header class="topbar">
-  <a class="brand" href="/">
-    <span class="brand-mark">J</span>
-    <span>JSON Jastip</span>
-  </a>
-  <nav class="nav-links">
-    <a href="/">Home</a>
-    <a href="/catalog">Catalog</a>
-    <a href="/orders">Orders</a>
-    <a href="/vouchers">Vouchers</a>
-    <a href="/wallet">Wallet</a>
-    <a href="/transactions">Transactions</a>
-    <a href="/profile">Profile</a>
-  </nav>
-  <div id="accountWidget" class="account-widget"></div>
-</header>
+<body>
 
-<main class="shell">
-  <section class="section">
-    <div class="section-header">
-      <div>
-        <h1 class="section-title">Catalog</h1>
-        <p class="section-subtitle">Search and browse items from the backend catalog. Add new items from a separate page.</p>
-      </div>
-      <div class="controls-row">
-        <input id="catalogSearch" class="searchbar" type="search" placeholder="Search by name, origin, description, or jastiper..." />
-      </div>
-    </div>
-    <div id="catalogNotice" class="hidden"></div>
-    <div id="catalogStats" class="grid cols-4"></div>
-  </section>
+<div class="catalog-container">
 
-  <section class="section">
-    <div id="catalogEmpty" class="hidden"></div>
-    <div id="catalogGrid" class="grid cols-2"></div>
-  </section>
-</main>
+  <h1>Catalogue</h1>
 
-<a class="button catalog-fab" href="/catalog/new">Add item</a>
-<footer class="footer">Use the search bar to filter items in real time.</footer>
+  <div class="search-container">
+    <input
+            type="text"
+            id="searchInput"
+            placeholder="Search items..."
+    >
+  </div>
+
+  <div id="catalogList" class="catalog-list"></div>
+
+</div>
+
+<button id="floatingAddBtn" class="floating-add-btn">
+  +
+</button>
+
+<script>
+
+  async function loadCatalog() {
+
+      try {
+
+          const response = await fetch("/api/catalog");
+
+          const items = await response.json();
+
+          const catalogList = document.getElementById("catalogList");
+
+          catalogList.innerHTML = "";
+
+          if (items.length === 0) {
+
+              catalogList.innerHTML = `
+                  <div class="empty-state">
+                      <h2>No items found</h2>
+                      <p>Add the first item to your catalogue.</p>
+                  </div>
+              `;
+
+              return;
+          }
+
+          items.forEach(item => {
+
+              const div = document.createElement("div");
+
+              div.className = "catalog-card";
+
+              div.innerHTML = `
+                  <h3>${item.name}</h3>
+                  <p>${item.description}</p>
+                  <p><strong>Price:</strong> ${item.price}</p>
+              `;
+
+              catalogList.appendChild(div);
+          });
+
+      } catch (err) {
+
+          console.error(err);
+      }
+  }
+
+  document.getElementById("floatingAddBtn")
+      .addEventListener("click", () => {
+
+          window.location.href = "/catalog/new";
+      });
+
+  loadCatalog();
+
+</script>
+
 </body>
 </html>
