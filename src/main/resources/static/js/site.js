@@ -313,22 +313,6 @@ function catalogSearchText(item) {
   ].join(" ").toLowerCase();
 }
 
-function renderCatalogStatsFromItems(items) {
-  const totalItems = items.length;
-  const totalStock = items.reduce((sum, item) => sum + Number(item?.stock || 0), 0);
-  const avgPrice = totalItems
-    ? Math.round(items.reduce((sum, item) => sum + Number(item?.price || 0), 0) / totalItems)
-    : 0;
-  const uniqueJastipers = new Set(items.map((item) => item?.jastiperId).filter((value) => value !== undefined && value !== null)).size;
-
-  renderStats(document.getElementById("catalogStats"), [
-    { value: `${totalItems}`, label: "Items in catalog", text: "Loaded directly from the backend" },
-    { value: `${totalStock}`, label: "Total stock", text: "Across all visible products" },
-    { value: formatCurrency(avgPrice), label: "Average price", text: "Simple snapshot for browsing" },
-    { value: `${uniqueJastipers}`, label: "Jastiper owners", text: "Unique sellers in this catalog" }
-  ]);
-}
-
 function renderCatalogEmptyState() {
   const empty = document.getElementById("catalogEmpty");
   const grid = document.getElementById("catalogGrid");
@@ -412,8 +396,6 @@ async function loadCatalogPageData() {
     const items = await response.json();
     const normalized = Array.isArray(items) ? items : [];
     setCatalogItemsCache(normalized);
-    renderCatalogStatsFromItems(normalized);
-
     if (!normalized.length) {
       renderCatalogEmptyState();
       setNotice(noticeId, null, "");
@@ -860,15 +842,6 @@ function initPlaceholders() {
         '<span class="badge">⌕ Search-ready</span>'
       ].join('');
     }
-  }
-
-  if (page === "catalog") {
-    renderStats(document.getElementById("catalogStats"), [
-      { value: "Search", label: "Browse quickly", text: "Filter by name, origin, or Jastiper." },
-      { value: "Items", label: "Backend connected", text: "Catalog data comes straight from /api/catalog." },
-      { value: "Add", label: "Separate page", text: "Create new items on their own screen." },
-      { value: "Stock", label: "Inventory ready", text: "See stock and price at a glance." }
-    ]);
   }
 
   if (page === "catalog-add") {
