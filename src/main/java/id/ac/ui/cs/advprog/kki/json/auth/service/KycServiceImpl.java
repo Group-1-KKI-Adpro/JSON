@@ -250,4 +250,30 @@ public class KycServiceImpl implements KycService {
 }
 
 
-//This commit adds structured monitoring logs to the Jastiper application/KYC flow in the Authentication & Profile module. The logs capture application submission, resubmission, pending application listing, admin approval, and admin rejection. Each log records the user/application identifier, operation outcome, and duration in milliseconds. These logs are relevant because KYC approval is a critical role-change flow; failures, repeated submissions, slow processing, or rejected approvals can directly affect whether users can become Jastipers and access catalog creation.
+/*
+ * Observability and Profiling Explanation
+ *
+ * This service adds observability logs for the Jastiper application/KYC flow in the
+ * Authentication & Profile module. The logs capture important monitoring data such as
+ * the user email, userId, operation outcome, pending application count, error cases,
+ * and durationMs.
+ *
+ * The monitored operations are:
+ * - User submits a Jastiper application
+ * - User resubmits an existing/rejected/demoted application
+ * - Admin views pending applications
+ * - Admin approves a Jastiper application
+ * - Admin rejects a Jastiper application
+ *
+ * These logs are relevant because the Jastiper application flow is a critical role-change
+ * process. If this flow fails or becomes slow, Titiper users cannot become Jastipers and
+ * cannot access catalog creation.
+ *
+ * Profiling is implemented using System.nanoTime(). Each important KYC operation records
+ * start time, calculates execution duration in milliseconds, and logs it as durationMs.
+ * The durationMs value is used to analyze whether the application submission, pending-list
+ * retrieval, approval, or rejection process is becoming slow.
+ *
+ * If durationMs is unusually high, it indicates that the KYC workflow, database lookup,
+ * or save operation should be investigated further.
+ */
