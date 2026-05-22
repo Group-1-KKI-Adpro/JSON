@@ -64,6 +64,12 @@ public class KycServiceImpl implements KycService {
                 );
             }
 
+            if (application.getStatus() == KycStatus.PENDING) {
+                user.setStatus(AccountStatus.PENDING_VERIFICATION);
+                userRepository.save(user);
+                return toResponse(application);
+            }
+
             application.setFullName(cleanedFullName);
             application.setSocialMediaLink(cleanedSocialMediaLink);
             application.setStatus(KycStatus.PENDING);
