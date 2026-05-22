@@ -54,6 +54,13 @@ class PageControllerTest {
     }
 
     @Test
+    void inventoryRouteForwardsToInventoryPage() throws Exception {
+        mockMvc.perform(get("/inventory"))
+                .andExpect(status().isOk())
+                .andExpect(forwardedUrl("/inventory.html"));
+    }
+
+    @Test
     void ordersRouteForwardsToOrdersPage() throws Exception {
         mockMvc.perform(get("/orders"))
                 .andExpect(status().isOk())

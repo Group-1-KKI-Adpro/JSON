@@ -92,6 +92,23 @@ public class CatalogController {
         return ResponseEntity.ok(items);
     }
 
+    @GetMapping("/catalog/mine")
+    public ResponseEntity<?> getMyCatalogItems(Authentication authentication) {
+        try {
+            User currentUser = requireApprovedJastiper(authentication);
+
+            List<CatalogItemResponse> items = catalogService.getCatalogItemsByJastiperId(
+                            Math.toIntExact(currentUser.getId()))
+                    .stream()
+                    .map(CatalogItemResponse::new)
+                    .collect(Collectors.toList());
+
+            return ResponseEntity.ok(items);
+        } catch (ResponseStatusException e) {
+            return ResponseEntity.status(e.getStatusCode()).body(error(e.getReason()));
+        }
+    }
+
     @GetMapping("/catalog/{id}")
     public ResponseEntity<?> getCatalogItemById(@PathVariable int id) {
         try {
@@ -105,11 +122,15 @@ public class CatalogController {
     @PatchMapping("/catalog/{id}")
     public ResponseEntity<?> updateCatalogItem(
             @PathVariable int id,
-            @RequestBody CatalogItemUpdateRequest request
+            @RequestBody CatalogItemUpdateRequest request,
+            Authentication authentication
     ) {
         try {
+            requireOwnerOrAdmin(authentication, id);
             CatalogItem item = catalogService.updateCatalogItem(id, request);
             return ResponseEntity.ok(new CatalogItemResponse(item));
+        } catch (ResponseStatusException e) {
+            return ResponseEntity.status(e.getStatusCode()).body(error(e.getReason()));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(error(e.getMessage()));
         } catch (RuntimeException e) {
@@ -118,10 +139,13 @@ public class CatalogController {
     }
 
     @DeleteMapping("/catalog/{id}")
-    public ResponseEntity<?> deleteCatalogItem(@PathVariable int id) {
+    public ResponseEntity<?> deleteCatalogItem(@PathVariable int id, Authentication authentication) {
         try {
+            requireOwnerOrAdmin(authentication, id);
             catalogService.deleteCatalogItem(id);
             return ResponseEntity.ok(Collections.singletonMap("message", "Catalog item deleted successfully"));
+        } catch (ResponseStatusException e) {
+            return ResponseEntity.status(e.getStatusCode()).body(error(e.getReason()));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error(e.getMessage()));
         }
@@ -178,6 +202,45 @@ public class CatalogController {
     }
 
     private User requireApprovedJastiper(Authentication authentication) {
+        User user = requireActiveUser(authentication);
+
+        if (user.getRole() != Role.JASTIPER) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Only approved Jastipers can create catalog items"
+            );
+        }
+
+        return user;
+    }
+
+    private User requireOwnerOrAdmin(Authentication authentication, int catalogItemId) {
+        User user = requireActiveUser(authentication);
+
+        if (user.getRole() == Role.ADMIN) {
+            return user;
+        }
+
+        if (user.getRole() != Role.JASTIPER) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Only approved Jastipers can modify catalog items"
+            );
+        }
+
+        CatalogItem item = catalogService.getCatalogItemById(catalogItemId);
+
+        if (item.getJastiperId() != Math.toIntExact(user.getId())) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "You can only modify your own catalog items"
+            );
+        }
+
+        return user;
+    }
+
+    private User requireActiveUser(Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authentication required");
         }
@@ -187,14 +250,7 @@ public class CatalogController {
         if (user.getStatus() != AccountStatus.ACTIVE) {
             throw new ResponseStatusException(
                     HttpStatus.FORBIDDEN,
-                    "Only active users can create catalog items"
-            );
-        }
-
-        if (user.getRole() != Role.JASTIPER) {
-            throw new ResponseStatusException(
-                    HttpStatus.FORBIDDEN,
-                    "Only approved Jastipers can create catalog items"
+                    "Only active users can access catalog management"
             );
         }
 
