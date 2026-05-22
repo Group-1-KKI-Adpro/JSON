@@ -324,7 +324,15 @@ function renderCatalogCards(items) {
   grid.innerHTML = items.map((item) => {
     const searchText = escapeHtml(catalogSearchText(item));
     return `
-      <article class="card catalog-card" data-search="${searchText}">
+      <article
+        class="card catalog-card"
+        data-item-id="${escapeHtml(item.id ?? "")}"
+        data-stock="${escapeHtml(item.stock ?? 0)}"
+        data-price="${escapeHtml(item.price ?? 0)}"
+        data-name="${escapeHtml(item.name || "")}"
+        data-jastiper-id="${escapeHtml(item.jastiperId ?? "")}"
+        data-search="${searchText}"
+      >
         <div class="card-inner">
           <div class="card-top">
             <div>
@@ -354,6 +362,7 @@ function renderCatalogCards(items) {
   }).join("");
 }
 
+
 async function loadCatalogPageData() {
   const noticeId = "catalogNotice";
   const grid = document.getElementById("catalogGrid");
@@ -375,6 +384,7 @@ async function loadCatalogPageData() {
     if (!normalized.length) {
       renderCatalogEmptyState();
       setNotice(noticeId, null, "");
+      window.dispatchEvent(new CustomEvent("catalog:rendered", { detail: { items: normalized } }));
       return;
     }
 
@@ -382,11 +392,14 @@ async function loadCatalogPageData() {
     grid.classList.remove("hidden");
     renderCatalogCards(normalized);
     setNotice(noticeId, null, "");
+    window.dispatchEvent(new CustomEvent("catalog:rendered", { detail: { items: normalized } }));
   } catch (err) {
     renderCatalogEmptyState();
     setNotice(noticeId, "error", err.message || "Failed to load catalog");
+    window.dispatchEvent(new CustomEvent("catalog:rendered", { detail: { items: [] } }));
   }
 }
+
 
 function applyCatalogFilter() {
   const input = document.getElementById("catalogSearch");
@@ -945,10 +958,6 @@ function setupOrderCheckout() {
 function setupPageInteractions() {
   const page = document.body.dataset.page;
 
-  if (page === "catalog") {
-    setupCatalogSearch();
-  }
-
   if (page === "catalog-add") {
     setupCatalogCreateForm();
   }
@@ -984,13 +993,6 @@ async function initApp() {
   const currentUser = await loadCurrentUser();
 
   const page = document.body.dataset.page;
-  if (page === "catalog") {
-    try {
-      await loadCatalogPageData();
-    } catch (err) {
-      setNotice("catalogNotice", "error", err.message || "Failed to load catalog items");
-    }
-  }
 
   if (page === "wallet") {
     try {
