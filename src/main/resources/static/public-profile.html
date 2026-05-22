@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>JSON Jastip • Public Profile</title>
+    <link rel="stylesheet" href="/css/site.css" />
+</head>
+<body data-page="public-profile">
+<div class="shell">
+    <header class="topbar">
+        <a class="brand" href="/">
+            <span class="brand-mark">J</span>
+            <span>JSON Jastip</span>
+        </a>
+
+        <nav class="nav-links">
+            <a href="/">Home</a>
+            <a href="/catalog">Catalog</a>
+            <a href="/orders">Orders</a>
+            <a href="/vouchers">Vouchers</a>
+            <a href="/wallet">Wallet</a>
+            <a href="/transactions">Transactions</a>
+            <a href="/profile">Profile</a>
+            <a href="/admin">Admin</a>
+        </nav>
+
+        <div id="publicProfileAccountWidget" class="account-widget"></div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div>
+                <p class="eyebrow">Public profile</p>
+                <h1>View Titiper and Jastiper profiles.</h1>
+                <p class="hero-copy">
+                    Jastiper profiles show reputation, average rating, successful transactions,
+                    and success rate after completed orders and submitted ratings.
+                </p>
+
+                <div class="hero-actions">
+                    <a class="btn ghost" href="/catalog">Back to catalog</a>
+                    <a class="btn ghost" href="/profile">My profile</a>
+                </div>
+            </div>
+
+            <div id="publicProfileSummary" class="hero-card">
+                <p class="muted">Loading public profile...</p>
+            </div>
+        </section>
+
+        <div id="publicProfileNotice" class="hidden"></div>
+
+        <section class="card public-profile-panel">
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">Search</p>
+                    <h2>Find profile by username</h2>
+                    <p class="muted">
+                        You can also open this page from catalog items using the Jastiper profile link.
+                    </p>
+                </div>
+            </div>
+
+            <form id="publicProfileSearchForm" class="form-stack inline-profile-form">
+                <label>
+                    Username
+                    <input id="publicProfileSearchInput" type="text" placeholder="e.g. jastiper" />
+                </label>
+
+                <button class="btn primary" type="submit">View profile</button>
+            </form>
+        </section>
+
+        <section id="publicProfileResult" class="card public-profile-panel">
+            <p class="muted">Loading profile...</p>
+        </section>
+    </main>
+
+    <footer class="footer">
+        © 2026 JSON Jastip. Public profile.
+    </footer>
+</div>
+
+<script src="/js/public-profile.js"></script>
+</body>
+</html>

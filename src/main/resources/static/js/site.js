@@ -2,7 +2,8 @@
 const TOKEN_KEY = "json_token";
 const PROFILE_KEY = "json_profile";
 const PUBLIC_PAGES = new Set(["home", "login", "register"]);
-const PROTECTED_PAGES = new Set(["catalog", "orders", "profile", "wallet", "vouchers", "transactions"]);
+const PROTECTED_PAGES = new Set(["catalog", "catalog-add", "inventory", "orders", "profile", "wallet", "vouchers", "transactions", "admin", "admin-wallet-withdrawals"]);
+const ADMIN_PAGES = new Set(["admin", "admin-wallet-withdrawals"]);
 
 function getToken() {
   return localStorage.getItem(TOKEN_KEY);
@@ -94,6 +95,10 @@ function getSupportText(profile) {
   return parts.join(" · ") || "Logged in";
 }
 
+function isAdminUser(profile) {
+  return Boolean(profile && profile.role && String(profile.role).includes("ADMIN"));
+}
+
 function setNotice(id, type, message) {
   const el = document.getElementById(id);
   if (!el) return;
@@ -119,6 +124,29 @@ function setActiveNavLink() {
     } catch {
       // ignore invalid URLs
     }
+  });
+}
+
+function syncAdminNavigation(profile) {
+  document.querySelectorAll(".nav-links").forEach((nav) => {
+    const existing = nav.querySelector('[data-admin-nav="true"]');
+
+    if (!isAdminUser(profile)) {
+      existing?.remove();
+      return;
+    }
+
+    if (existing) {
+      existing.href = "/admin/admin-wallet-withdrawals.html";
+      existing.textContent = "Withdraw Admin";
+      return;
+    }
+
+    const adminLink = document.createElement("a");
+    adminLink.href = "/admin/admin-wallet-withdrawals.html";
+    adminLink.textContent = "Withdraw Admin";
+    adminLink.dataset.adminNav = "true";
+    nav.appendChild(adminLink);
   });
 }
 
@@ -216,6 +244,20 @@ function ensureProtectedPage() {
   return false;
 }
 
+function ensureAdminPage(profile) {
+  const page = document.body.dataset.page;
+  if (!ADMIN_PAGES.has(page)) {
+    return false;
+  }
+
+  if (!isAdminUser(profile)) {
+    window.location.replace("/wallet");
+    return true;
+  }
+
+  return false;
+}
+
 function renderCards(el, cards) {
   if (!el || el.children.length || el.innerHTML.trim()) return;
   el.innerHTML = cards.map((card) => `
@@ -249,38 +291,201 @@ function renderEmptyState(el, title, text, actionHtml = "") {
   `;
 }
 
-function setupCatalogSearch() {
-  const input = document.getElementById("catalogSearch");
-  const grid = document.getElementById("catalogGrid");
-  const empty = document.getElementById("catalogEmpty");
-  if (!input || !grid) return;
-
-  input.addEventListener("input", () => {
-    const query = input.value.trim().toLowerCase();
-    const cards = grid.querySelectorAll(".card");
-    let visible = 0;
-    cards.forEach((card) => {
-      const haystack = card.textContent.toLowerCase();
-      const match = !query || haystack.includes(query);
-      card.style.display = match ? "" : "none";
-      if (match) visible += 1;
-    });
-    if (empty) empty.classList.toggle("hidden", visible > 0);
-  });
+function getCatalogItemsCache() {
+  if (!window.__catalogItemsCache) {
+    window.__catalogItemsCache = [];
+  }
+  return window.__catalogItemsCache;
 }
 
-function setupCatalogPanelToggle() {
-  const button = document.getElementById("catalogManageToggle");
-  const panel = document.getElementById("catalogManagePanel");
-  if (!button || !panel) return;
+function setCatalogItemsCache(items) {
+  window.__catalogItemsCache = Array.isArray(items) ? items : [];
+}
 
-  button.addEventListener("click", () => {
-    panel.classList.toggle("hidden-panel");
-    button.textContent = panel.classList.contains("hidden-panel") ? "Show add form" : "Add item";
+function catalogSearchText(item) {
+  return [
+    item?.name,
+    item?.description,
+    item?.origin,
+    item?.jastiperId != null ? `jastiper ${item.jastiperId}` : "",
+    item?.price != null ? `price ${item.price}` : "",
+    item?.stock != null ? `stock ${item.stock}` : ""
+  ].join(" ").toLowerCase();
+}
+
+function renderCatalogEmptyState() {
+  const empty = document.getElementById("catalogEmpty");
+  const grid = document.getElementById("catalogGrid");
+  if (grid) grid.classList.add("hidden");
+  if (!empty) return;
+
+  empty.classList.remove("hidden");
+  empty.innerHTML = `
+    <div class="empty-state">
+      <strong>No catalog items yet</strong>
+      <p style="margin:0 0 14px; line-height:1.6;">
+        Start by adding the first item on a separate page, then come back here to browse and search.
+      </p>
+      <a class="button" href="/catalog/new">Add the first item</a>
+    </div>
+  `;
+}
+
+function renderCatalogCards(items) {
+  const grid = document.getElementById("catalogGrid");
+  const empty = document.getElementById("catalogEmpty");
+  if (!grid) return;
+
+  if (!items.length) {
+    renderCatalogEmptyState();
+    if (empty) {
+      empty.classList.remove("hidden");
+    }
+    return;
+  }
+
+  if (empty) empty.classList.add("hidden");
+  grid.classList.remove("hidden");
+
+  grid.innerHTML = items.map((item) => {
+    const searchText = escapeHtml(catalogSearchText(item));
+    return `
+      <article
+        class="card catalog-card"
+        data-item-id="${escapeHtml(item.id ?? "")}"
+        data-stock="${escapeHtml(item.stock ?? 0)}"
+        data-price="${escapeHtml(item.price ?? 0)}"
+        data-name="${escapeHtml(item.name || "")}"
+        data-jastiper-id="${escapeHtml(item.jastiperId ?? "")}"
+        data-search="${searchText}"
+      >
+        <div class="card-inner">
+          <div class="card-top">
+            <div>
+              <h3 class="card-title">${escapeHtml(item.name || "Unnamed item")}</h3>
+              <div class="card-subtitle">Jastiper #${escapeHtml(item.jastiperId ?? "-")} · ${escapeHtml(item.origin || "Unknown origin")}</div>
+            </div>
+            <span class="badge">${escapeHtml(String(item.stock ?? 0))} stock</span>
+          </div>
+
+          <p class="muted" style="margin:0; line-height:1.65;">
+            ${escapeHtml(item.description || "No description provided.")}
+          </p>
+
+          <div class="badges">
+            <span class="badge gray">${escapeHtml(formatCurrency(item.price || 0))}</span>
+            <span class="badge gray">Purchased: ${escapeHtml(item.purchaseDate || "-")}</span>
+            <span class="badge gray">Updated: ${escapeHtml(formatTimestamp(item.updatedAt))}</span>
+          </div>
+
+          <div class="card-actions">
+            <span class="pill">Item ID ${escapeHtml(item.id ?? "-")}</span>
+            <span class="pill">Created ${escapeHtml(formatTimestamp(item.createdAt))}</span>
+          </div>
+        </div>
+      </article>
+    `;
+  }).join("");
+}
+
+
+async function loadCatalogPageData() {
+  const noticeId = "catalogNotice";
+  const grid = document.getElementById("catalogGrid");
+  const empty = document.getElementById("catalogEmpty");
+
+  if (!grid || !empty) return;
+
+  try {
+    const response = await authFetch("/api/catalog");
+    if (!response.ok) {
+      throw new Error("Failed to load catalog items");
+    }
+
+    const items = await response.json();
+    const normalized = Array.isArray(items) ? items : [];
+    setCatalogItemsCache(normalized);
+    if (!normalized.length) {
+      renderCatalogEmptyState();
+      setNotice(noticeId, null, "");
+      window.dispatchEvent(new CustomEvent("catalog:rendered", { detail: { items: normalized } }));
+      return;
+    }
+
+    empty.classList.add("hidden");
+    grid.classList.remove("hidden");
+    renderCatalogCards(normalized);
+    setNotice(noticeId, null, "");
+    window.dispatchEvent(new CustomEvent("catalog:rendered", { detail: { items: normalized } }));
+  } catch (err) {
+    renderCatalogEmptyState();
+    setNotice(noticeId, "error", err.message || "Failed to load catalog");
+    window.dispatchEvent(new CustomEvent("catalog:rendered", { detail: { items: [] } }));
+  }
+}
+
+
+function applyCatalogFilter() {
+  const input = document.getElementById("catalogSearch");
+  const noticeId = "catalogNotice";
+  const query = (input?.value || "").trim().toLowerCase();
+  const cards = document.querySelectorAll("#catalogGrid .catalog-card");
+  let visible = 0;
+
+  cards.forEach((card) => {
+    const haystack = card.dataset.search || card.textContent.toLowerCase();
+    const match = !query || haystack.includes(query);
+    card.style.display = match ? "" : "none";
+    if (match) visible += 1;
   });
+
+  const grid = document.getElementById("catalogGrid");
+  const empty = document.getElementById("catalogEmpty");
+  const hasItems = getCatalogItemsCache().length > 0;
+
+  if (!hasItems) {
+    if (empty) empty.classList.remove("hidden");
+    if (grid) grid.classList.add("hidden");
+    setNotice(noticeId, null, "");
+    return;
+  }
+
+  if (visible === 0) {
+    if (empty) {
+      empty.classList.remove("hidden");
+      empty.innerHTML = `
+        <div class="empty-state">
+          <strong>No matching items</strong>
+          <p style="margin:0 0 14px; line-height:1.6;">
+            Try a different keyword or clear the search box to see every item again.
+          </p>
+          <button class="btn-ghost" type="button" id="catalogClearSearch">Clear search</button>
+        </div>
+      `;
+      const clearButton = document.getElementById("catalogClearSearch");
+      clearButton?.addEventListener("click", () => {
+        if (input) input.value = "";
+        applyCatalogFilter();
+      });
+    }
+    if (grid) grid.classList.add("hidden");
+    setNotice(noticeId, "info", "No items match your search.");
+  } else {
+    if (empty) empty.classList.add("hidden");
+    if (grid) grid.classList.remove("hidden");
+    setNotice(noticeId, null, "");
+  }
+}
+
+function setupCatalogSearch() {
+  const input = document.getElementById("catalogSearch");
+  if (!input) return;
+
+  input.addEventListener("input", applyCatalogFilter);
 }
 
 function setupSimpleRefresh(buttonId) {
+
   const button = document.getElementById(buttonId);
   if (!button) return;
   button.addEventListener("click", () => window.location.reload());
@@ -312,7 +517,6 @@ function renderWalletBalance(balance) {
     <div class="balance-card">
       <strong>Current balance</strong>
       <div class="balance-amount">${formatCurrency(balance ?? 0)}</div>
-      <p class="muted" style="margin:10px 0 0;">Available for checkout, refunds, and withdrawals.</p>
     </div>
   `;
 }
@@ -382,6 +586,61 @@ function renderTransactionsTable(items) {
   `).join("");
 }
 
+function renderPendingWithdrawStats(items) {
+  const totalAmount = items.reduce((sum, tx) => sum + Number(tx?.amount || 0), 0);
+  const uniqueUsers = new Set(items.map((tx) => tx?.userId).filter((value) => value !== undefined && value !== null)).size;
+  const oldest = items.length ? formatTimestamp(items[items.length - 1]?.timestamp) : "None";
+  const el = document.getElementById("adminWithdrawStats");
+  if (!el) return;
+
+  el.innerHTML = [
+    { value: `${items.length}`, label: "Pending requests", text: "Waiting for admin review" },
+    { value: formatCurrency(totalAmount), label: "Total requested", text: "Combined pending amount" },
+    { value: `${uniqueUsers}`, label: "Unique users", text: `Oldest request ${oldest}` }
+  ].map((item) => `
+    <article class="mini-stat">
+      <strong>${escapeHtml(item.value)}</strong>
+      <small>${escapeHtml(item.label)}</small>
+      <small>${escapeHtml(item.text)}</small>
+    </article>
+  `).join("");
+}
+
+function renderPendingWithdrawTable(items) {
+  const tbody = document.getElementById("pendingWithdrawTableBody");
+  if (!tbody) return;
+
+  if (!items.length) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="6">
+          <div class="empty-state">
+            <strong>No pending withdrawals</strong>
+            <p style="margin:0; line-height:1.6;">New withdrawal requests will appear here when users submit them.</p>
+          </div>
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = items.map((tx) => `
+    <tr>
+      <td>${escapeHtml(formatTimestamp(tx.timestamp))}</td>
+      <td>${escapeHtml(String(tx.userId ?? "-"))}</td>
+      <td>${escapeHtml(formatCurrency(tx.amount))}</td>
+      <td><span class="${statusClass(tx.status)}">${escapeHtml(tx.status || "UNKNOWN")}</span></td>
+      <td>${escapeHtml(tx.description || "-")}</td>
+      <td>
+        <div class="action-stack">
+          <button class="btn-secondary admin-withdraw-action" type="button" data-action="approve" data-id="${escapeHtml(String(tx.id))}">Approve</button>
+          <button class="btn-ghost admin-withdraw-action" type="button" data-action="reject" data-id="${escapeHtml(String(tx.id))}">Reject</button>
+        </div>
+      </td>
+    </tr>
+  `).join("");
+}
+
 async function fetchWalletTransactions(limit = 10) {
   const response = await authFetch(`/api/wallet/transactions?limit=${limit}`);
   if (!response.ok) {
@@ -410,6 +669,32 @@ async function loadTransactionsPageData() {
     : transactions.filter((tx) => String(tx.type).toUpperCase() === filter);
 
   renderTransactionsTable(filtered);
+}
+
+async function loadAdminWithdrawalsPageData() {
+  const response = await authFetch("/api/admin/wallet/withdraw/pending");
+  if (!response.ok) {
+    throw new Error(`Failed to load pending withdrawals (${response.status})`);
+  }
+
+  const items = await response.json();
+  const normalized = Array.isArray(items) ? items : [];
+  renderPendingWithdrawStats(normalized);
+  renderPendingWithdrawTable(normalized);
+}
+
+async function verifyPendingWithdrawal(transactionId, status, failureReason = null) {
+  const response = await authFetch(`/api/admin/wallet/withdraw/${transactionId}/verify`, {
+    method: "POST",
+    body: JSON.stringify({ status, failureReason })
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(text || `Failed to ${String(status).toLowerCase()} withdrawal`);
+  }
+
+  return response.json();
 }
 
 function setupWalletForms() {
@@ -500,6 +785,56 @@ function setupTransactionsPage() {
   }
 }
 
+function setupAdminWithdrawalsPage() {
+  const refresh = document.getElementById("refreshPendingWithdrawals");
+  const tbody = document.getElementById("pendingWithdrawTableBody");
+
+  if (refresh) {
+    refresh.addEventListener("click", async () => {
+      try {
+        await loadAdminWithdrawalsPageData();
+        setNotice("adminWithdrawNotice", "success", "Pending withdrawals refreshed.");
+      } catch (err) {
+        setNotice("adminWithdrawNotice", "error", err.message || "Failed to refresh pending withdrawals");
+      }
+    });
+  }
+
+  if (tbody) {
+    tbody.addEventListener("click", async (event) => {
+      const button = event.target.closest(".admin-withdraw-action");
+      if (!button) return;
+
+      const transactionId = button.dataset.id;
+      const action = button.dataset.action;
+      const status = action === "approve" ? "SUCCESS" : "FAILED";
+      const failureReason = status === "FAILED"
+        ? (window.prompt("Reason for rejection:", "Rejected by admin") || "Rejected by admin").trim()
+        : null;
+
+      if (status === "FAILED" && !failureReason) {
+        setNotice("adminWithdrawNotice", "info", "Rejection cancelled.");
+        return;
+      }
+
+      try {
+        button.disabled = true;
+        await verifyPendingWithdrawal(transactionId, status, failureReason);
+        await loadAdminWithdrawalsPageData();
+        setNotice(
+          "adminWithdrawNotice",
+          "success",
+          status === "SUCCESS" ? "Withdrawal approved." : "Withdrawal rejected."
+        );
+      } catch (err) {
+        setNotice("adminWithdrawNotice", "error", err.message || "Failed to update withdrawal request");
+      } finally {
+        button.disabled = false;
+      }
+    });
+  }
+}
+
 function initPlaceholders() {
   const page = document.body.dataset.page;
 
@@ -521,20 +856,12 @@ function initPlaceholders() {
     }
   }
 
-  if (page === "catalog") {
-    renderStats(document.getElementById("catalogStats"), [
-      { value: "Search", label: "Find items quickly", text: "Filter by name, origin, or jastiper." },
-      { value: "Add item", label: "Empty-first workflow", text: "Start with zero items and grow the catalog." },
-      { value: "Model", label: "CatalogItem ready", text: "Backend uses the catalog model directly." },
-      { value: "Checkout", label: "Order integration", text: "Move selected items to the orders page." }
+  if (page === "catalog-add") {
+    renderStats(document.getElementById("catalogFormStats"), [
+      { value: "New item", label: "Dedicated form", text: "Keep adding items out of the browse view." },
+      { value: "Save", label: "Backend POST", text: "Submits directly to /api/catalog." },
+      { value: "Redirect", label: "Back to browse", text: "Returns you to the catalogue after save." }
     ]);
-
-    renderEmptyState(
-      document.getElementById("catalogGrid"),
-      "No catalog items yet",
-      "This page starts clean so you can add the first items with the catalog form on the right.",
-      '<a class="button" href="#catalogManagePanel">Add the first item</a>'
-    );
   }
 
   if (page === "orders") {
@@ -566,19 +893,12 @@ function initPlaceholders() {
   }
 
   if (page === "wallet") {
-    renderStats(document.getElementById("walletMeta"), [
-      { value: "Balance", label: "Track funds", text: "See your wallet state at a glance." },
-      { value: "Top up", label: "Quick add", text: "Deposit funds in a simple card." },
-      { value: "Withdraw", label: "Money out", text: "Request a withdrawal cleanly." }
-    ]);
-
     const balance = document.getElementById("walletBalance");
     if (balance && !balance.children.length && !balance.innerHTML.trim()) {
       balance.innerHTML = `
         <div class="balance-card">
           <strong>Current balance</strong>
           <div class="balance-amount">${formatCurrency(0)}</div>
-          <p class="muted" style="margin:10px 0 0;">Wallet data will appear here when the backend returns a balance.</p>
         </div>
       `;
     }
@@ -594,16 +914,16 @@ function initPlaceholders() {
   if (page === "vouchers") {
     renderEmptyState(
       document.getElementById("voucherList"),
-      "No vouchers available right now",
-      "This section is ready for voucher cards, validation, and admin creation when the service is connected."
+      "No active promos right now",
+      "Check back soon — new vouchers will appear here when available."
     );
 
     const result = document.getElementById("voucherValidateResult");
     if (result && !result.children.length && !result.innerHTML.trim()) {
       result.innerHTML = `
         <div class="empty-state">
-          <strong>Validate a voucher</strong>
-          <p style="margin:0; line-height:1.6;">Enter a voucher code and order total to preview the discount result.</p>
+          <strong>Got a promo code?</strong>
+          <p style="margin:0; line-height:1.6;">Enter your code and order total above to see the discount type and how much you'll save.</p>
         </div>
       `;
     }
@@ -624,14 +944,171 @@ function initPlaceholders() {
       `;
     }
   }
+
+  if (page === "admin-wallet-withdrawals") {
+    renderStats(document.getElementById("adminWithdrawStats"), [
+      { value: "0", label: "Pending requests", text: "Waiting for admin review" },
+      { value: formatCurrency(0), label: "Total requested", text: "Combined pending amount" },
+      { value: "0", label: "Unique users", text: "Oldest request None" }
+    ]);
+  }
+}
+
+async function loadVouchersPageData() {
+  const listEl = document.getElementById("voucherList");
+  if (!listEl) return;
+
+  try {
+    const res = await authFetch("/api/vouchers");
+    if (!res.ok) throw new Error("Failed to fetch active vouchers");
+    const vouchers = await res.json();
+    
+    if (!vouchers || vouchers.length === 0) {
+      renderEmptyState(listEl, "No active vouchers", "Check back later for new promos.");
+      return;
+    }
+    
+    listEl.innerHTML = vouchers.map(v => `
+      <article class="card">
+        <div class="card-inner">
+          <div class="card-top">
+            <h3 class="card-title">${escapeHtml(v.code)}</h3>
+            <span class="badge alt">${escapeHtml(v.discountType)}</span>
+          </div>
+          <p class="muted" style="margin: 8px 0;">Discount Value: ${v.discountType === 'FLAT' ? formatCurrency(v.discountValue) : v.discountValue + '%'}</p>
+          <div class="badges">
+            <span class="badge gray">Quota: ${v.quota}</span>
+            <span class="badge gray">Valid till: ${formatTimestamp(v.endAt)}</span>
+          </div>
+        </div>
+      </article>
+    `).join("");
+  } catch (err) {
+    listEl.innerHTML = `<div class="notice error">Failed to load vouchers.</div>`;
+  }
+}
+
+function setupVoucherForms() {
+  const validateForm = document.getElementById("voucherValidateForm");
+  const createForm = document.getElementById("voucherCreateForm");
+
+  if (validateForm) {
+    validateForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const code = document.getElementById("validateCode").value.trim();
+      const orderTotal = Number(document.getElementById("validateTotal").value);
+      const resultDiv = document.getElementById("voucherValidateResult");
+
+      try {
+        const res = await authFetch("/api/vouchers/validate", {
+          method: "POST",
+          body: JSON.stringify({ code, orderTotal })
+        });
+        
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error(text || "Voucher validation failed");
+        }
+        
+        const data = await res.json();
+        const typeLabel = data.discountType === "PERCENTAGE" ? "Percentage discount" : "Flat discount";
+        resultDiv.innerHTML = `
+          <div class="notice success" style="margin-top: 10px;">
+            <strong>Voucher applied!</strong><br>
+            Type: ${typeLabel}<br>
+            You save: ${formatCurrency(data.discountAmount)}<br>
+            <strong>Final total: ${formatCurrency(data.finalTotal)}</strong>
+          </div>
+        `;
+      } catch (err) {
+        resultDiv.innerHTML = `<div class="notice error" style="margin-top: 10px;">${escapeHtml(err.message)}</div>`;
+      }
+    });
+  }
+
+  if (createForm) {
+    createForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const code = document.getElementById("createCode").value.trim();
+      const quota = Number(document.getElementById("createQuota").value);
+      const startAt = document.getElementById("createStartAt").value;
+      const endAt = document.getElementById("createEndAt").value;
+      const discountType = document.getElementById("createDiscountType").value;
+      const discountValue = Number(document.getElementById("createDiscountValue").value);
+      const terms = document.getElementById("createTerms").value.trim();
+
+      try {
+        const res = await authFetch("/api/admin/vouchers", {
+          method: "POST",
+          body: JSON.stringify({ code, quota, startAt, endAt, discountType, discountValue, terms })
+        });
+        
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error(text || "Failed to create voucher");
+        }
+        
+        setNotice("voucherNotice", "success", "Voucher created successfully!");
+        createForm.reset();
+        await loadVouchersPageData();
+      } catch (err) {
+        setNotice("voucherNotice", "error", err.message);
+      }
+    });
+  }
+}
+
+
+function setupOrderCheckout() {
+  const orderForm = document.getElementById("orderForm");
+  
+  if (orderForm) {
+    orderForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      
+      const shippingAddress = document.getElementById("shippingAddress").value.trim();
+      const voucherCode = document.getElementById("voucherCode").value.trim() || null;
+      
+      const cartItems = JSON.parse(localStorage.getItem("json_cart") || "[]");
+      
+      if (cartItems.length === 0) {
+        setNotice("orderNotice", "error", "Your cart is empty. Please add items from the catalog.");
+        return;
+      }
+
+      const orderRequest = {
+        shippingAddress: shippingAddress,
+        items: cartItems,
+        voucherCode: voucherCode
+      };
+
+      try {
+        const res = await authFetch("/api/orders", {
+          method: "POST",
+          body: JSON.stringify(orderRequest)
+        });
+
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error(text || "Failed to place order.");
+        }
+
+        setNotice("orderNotice", "success", "Order placed successfully! Voucher applied if valid.");
+        localStorage.removeItem("json_cart"); // Clear cart
+        orderForm.reset();
+        
+      } catch (err) {
+        setNotice("orderNotice", "error", err.message);
+      }
+    });
+  }
 }
 
 function setupPageInteractions() {
   const page = document.body.dataset.page;
 
-  if (page === "catalog") {
-    setupCatalogSearch();
-    setupCatalogPanelToggle();
+  if (page === "catalog-add") {
+    setupCatalogCreateForm();
   }
 
   if (page === "transactions") {
@@ -640,6 +1117,18 @@ function setupPageInteractions() {
 
   if (page === "wallet") {
     setupWalletForms();
+  }
+
+  if (page === "vouchers") {
+    setupVoucherForms();
+  }
+
+  if (page === "orders") {
+    setupOrderCheckout();
+  }
+
+  if (page === "admin-wallet-withdrawals") {
+    setupAdminWithdrawalsPage();
   }
 }
 
@@ -654,9 +1143,16 @@ async function initApp() {
   setupPageInteractions();
   setupAuthForms();
   showToken();
-  await loadCurrentUser();
+  const currentUser = await loadCurrentUser();
+  syncAdminNavigation(currentUser);
+  setActiveNavLink();
+
+  if (ensureAdminPage(currentUser)) {
+    return;
+  }
 
   const page = document.body.dataset.page;
+
   if (page === "wallet") {
     try {
       await loadWalletPageData();
@@ -672,6 +1168,29 @@ async function initApp() {
       setNotice("transactionsNotice", null, "");
     } catch (err) {
       setNotice("transactionsNotice", "error", err.message || "Failed to load transactions");
+    }
+  }
+
+  if (page === "vouchers") {
+    const adminSection = document.getElementById("adminVoucherSection");
+    if (adminSection && isAdminUser(currentUser)) {
+      adminSection.classList.remove("hidden");
+    }
+    
+    try {
+      await loadVouchersPageData();
+      setNotice("voucherNotice", null, "");
+    } catch (err) {
+      setNotice("voucherNotice", "error", err.message || "Failed to load active vouchers");
+    }
+  }
+
+  if (page === "admin-wallet-withdrawals") {
+    try {
+      await loadAdminWithdrawalsPageData();
+      setNotice("adminWithdrawNotice", null, "");
+    } catch (err) {
+      setNotice("adminWithdrawNotice", "error", err.message || "Failed to load pending withdrawals");
     }
   }
 }
@@ -753,7 +1272,7 @@ function setupAuthForms() {
         setNotice(
           "authNotice",
           "success",
-          "Registration successful! Redirecting to login..."
+          "Titiper account created successfully! Redirecting to login..."
         );
 
         setTimeout(() => {
@@ -771,6 +1290,47 @@ function setupAuthForms() {
   }
 }
 
+
+
+function setupCatalogCreateForm() {
+  const form = document.getElementById("catalogCreateForm");
+  if (!form) return;
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const payload = {
+      jastiperId: Number(document.getElementById("catalogJastiperId")?.value),
+      name: document.getElementById("catalogName")?.value?.trim(),
+      description: document.getElementById("catalogDescription")?.value?.trim() || "",
+      price: Number(document.getElementById("catalogPrice")?.value),
+      stock: Number(document.getElementById("catalogStock")?.value),
+      origin: document.getElementById("catalogOrigin")?.value?.trim() || "",
+      purchaseDate: document.getElementById("catalogPurchaseDate")?.value || null
+    };
+
+    try {
+      const response = await authFetch("/api/catalog", {
+        method: "POST",
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        const text = await response.text();
+        throw new Error(text || "Failed to save catalog item");
+      }
+
+      setNotice("catalogFormNotice", "success", "Item saved successfully. Redirecting back to the catalogue...");
+      form.reset();
+      setTimeout(() => {
+        window.location.href = "/catalog";
+      }, 900);
+    } catch (err) {
+      setNotice("catalogFormNotice", "error", err.message || "Failed to save catalog item");
+    }
+  });
+}
+
 window.addEventListener("DOMContentLoaded", initApp);
 window.getToken = getToken;
 window.setToken = setToken;
@@ -778,3 +1338,58 @@ window.clearToken = clearToken;
 window.authFetch = authFetch;
 window.formatCurrency = formatCurrency;
 window.escapeHtml = escapeHtml;
+
+(function () {
+  function getToken() {
+    return localStorage.getItem("json_token");
+  }
+
+  function readCachedProfile() {
+    try {
+      return JSON.parse(localStorage.getItem("json_profile") || "null");
+    } catch {
+      return null;
+    }
+  }
+
+  function updateAdminNavVisibility(user) {
+    const isAdmin = user && user.role === "ADMIN";
+
+    document
+        .querySelectorAll('.nav-links a[href="/admin"], .nav-links a[href="/admin.html"]')
+        .forEach((link) => {
+          link.classList.toggle("hidden", !isAdmin);
+        });
+  }
+
+  async function loadRoleForNav() {
+    updateAdminNavVisibility(readCachedProfile());
+
+    const token = getToken();
+    if (!token) {
+      updateAdminNavVisibility(null);
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/auth/me", {
+        headers: {
+          Authorization: "Bearer " + token
+        }
+      });
+
+      if (!response.ok) {
+        updateAdminNavVisibility(null);
+        return;
+      }
+
+      const user = await response.json();
+      localStorage.setItem("json_profile", JSON.stringify(user));
+      updateAdminNavVisibility(user);
+    } catch {
+      updateAdminNavVisibility(null);
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", loadRoleForNav);
+})();

@@ -22,3 +22,4 @@ public interface OrderRepository extends JpaRepository<Order, String> {
     @Query("select o from Order o where o.id = :id")
     Optional<Order> findByIdForUpdate(@Param("id") String id);
 }
+

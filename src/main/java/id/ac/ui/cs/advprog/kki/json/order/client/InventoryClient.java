@@ -1,36 +1,58 @@
 package id.ac.ui.cs.advprog.kki.json.order.client;
 
+import id.ac.ui.cs.advprog.kki.json.inventory.model.CatalogItem;
+import id.ac.ui.cs.advprog.kki.json.inventory.service.CatalogService;
 import id.ac.ui.cs.advprog.kki.json.order.dto.CatalogItemSnapshot;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @Component
 public class InventoryClient {
 
-    private final RestTemplate restTemplate = new RestTemplate();
-    private final String BASE_URL = "http://localhost:8080/api/catalog";
+    private final CatalogService catalogService;
+
+    public InventoryClient(CatalogService catalogService) {
+        this.catalogService = catalogService;
+    }
 
     public CatalogItemSnapshot getItem(int catalogId) {
         try {
-            return restTemplate.getForObject(BASE_URL + "/" + catalogId, CatalogItemSnapshot.class);
+            CatalogItem item = catalogService.getCatalogItemById(catalogId);
+            return toSnapshot(item);
         } catch (Exception e) {
             throw new RuntimeException("Failed to fetch catalog item " + catalogId);
         }
     }
 
     public void reserveItem(int catalogId, int quantity) {
-        String url = BASE_URL + "/" + catalogId + "/reserve";
-
-        Map<String, Object> body = new HashMap<>();
-        body.put("quantity", quantity);
-
         try {
-            restTemplate.postForEntity(url, body, Object.class);
+            catalogService.reserveStock(catalogId, quantity);
         } catch (Exception e) {
             throw new RuntimeException("Failed to reserve stock for item " + catalogId);
         }
+    }
+
+    public void releaseItem(int catalogId, int quantity) {
+        try {
+            catalogService.releaseStock(catalogId, quantity);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to release stock for item " + catalogId);
+        }
+    }
+
+    private CatalogItemSnapshot toSnapshot(CatalogItem item) {
+        CatalogItemSnapshot snapshot = new CatalogItemSnapshot();
+
+        snapshot.setId(item.getId());
+        snapshot.setJastiperId(item.getJastiperId());
+        snapshot.setName(item.getName());
+        snapshot.setDescription(item.getDescription());
+        snapshot.setPrice(item.getPrice());
+        snapshot.setStock(item.getStock());
+        snapshot.setOrigin(item.getOrigin());
+        snapshot.setPurchaseDate(item.getPurchaseDate());
+        snapshot.setCreatedAt(item.getCreatedAt());
+        snapshot.setUpdatedAt(item.getUpdatedAt());
+
+        return snapshot;
     }
 }

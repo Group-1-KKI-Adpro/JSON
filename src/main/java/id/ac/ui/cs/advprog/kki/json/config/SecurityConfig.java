@@ -1,5 +1,6 @@
 package id.ac.ui.cs.advprog.kki.json.config;
 
+import id.ac.ui.cs.advprog.kki.json.auth.security.InternalServiceAuthFilter;
 import id.ac.ui.cs.advprog.kki.json.auth.security.JwtAuthFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,7 +16,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, JwtAuthFilter jwtAuthFilter) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http,
+                                           JwtAuthFilter jwtAuthFilter,
+                                           InternalServiceAuthFilter internalServiceAuthFilter) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
                 .headers(headers -> headers.frameOptions(frame -> frame.disable()))
@@ -48,11 +51,15 @@ public class SecurityConfig {
                                 "/login.html",
                                 "/register.html",
                                 "/catalog.html",
+                                "/catalog-new.html",
+                                "/inventory.html",
                                 "/orders.html",
                                 "/vouchers.html",
                                 "/profile.html",
                                 "/wallet.html",
                                 "/transactions.html",
+                                "/public-profile.html",
+                                "/admin.html",
                                 "/favicon.ico",
                                 "/*.html"
                         ).permitAll()
@@ -62,20 +69,30 @@ public class SecurityConfig {
                                 "/auth",
                                 "/profile",
                                 "/catalog",
+                                "/catalog/new",
+                                 "/inventory",
                                 "/orders",
                                 "/vouchers",
                                 "/wallet",
-                                "/transactions"
+                                "/transactions",
+                                "/admin",
+                                "/users"
                         ).permitAll()
                         .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
                         .requestMatchers("/error").permitAll()
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
 
                         /* CATALOG + SHOPPING */
+                        .requestMatchers(HttpMethod.GET, "/api/catalog").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/catalog/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/catalog").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/catalog/**").authenticated()
                         .requestMatchers("/api/catalog/**").authenticated()
                         .requestMatchers("/api/orders/**").authenticated()
                         .requestMatchers("/api/wallet/**").authenticated()
 
                         /* INTERNAL */
+                        .requestMatchers("/api/internal/wallet/**").hasRole("INTERNAL_SERVICE")
                         .requestMatchers("/api/internal/**").hasRole("ADMIN")
 
                         /* ADMIN */
@@ -83,12 +100,12 @@ public class SecurityConfig {
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
                         /* EVERYTHING ELSE */
-                        /* EVERYTHING ELSE */
                         .anyRequest().authenticated()
                 )
                 .httpBasic(httpBasic -> httpBasic.disable())
                 .formLogin(form -> form.disable());
 
+        http.addFilterBefore(internalServiceAuthFilter, UsernamePasswordAuthenticationFilter.class);
         http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

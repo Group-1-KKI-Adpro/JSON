@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>JSON Jastip • Login</title>
     <link rel="stylesheet" href="/css/site.css" />
-    <script defer src="/js/site.js"></script>
 </head>
 <body data-page="login">
 <header class="topbar">
@@ -13,11 +12,13 @@
         <span class="brand-mark">J</span>
         <span>JSON Jastip</span>
     </a>
+
     <nav class="nav-links">
-        <a href="/index.html">Home</a>
-        <a href="/login.html">Login</a>
-        <a href="/register.html">Register</a>
+        <a href="/">Home</a>
+        <a href="/login" class="active">Login</a>
+        <a href="/register">Register</a>
     </nav>
+
     <div id="accountWidget" class="account-widget"></div>
 </header>
 
@@ -26,28 +27,42 @@
         <div class="auth-copy">
             <div class="kicker">Protected shopping starts here</div>
             <h1>Log in before you shop.</h1>
-            <p>Once you sign in, the app shows your username, unlocks the catalog, and lets you move through orders, wallet, vouchers, and transactions with one harmonized interface.</p>
+            <p>
+                Once you sign in, the app stores your JWT session, unlocks protected pages,
+                and lets you access catalog, orders, wallet, vouchers, profile, and admin tools
+                based on your role.
+            </p>
         </div>
     </section>
+
     <section class="auth-panel-wrap">
         <div class="auth-card">
             <h2>Login</h2>
             <p class="auth-note">Use the same email and password you registered with.</p>
+
             <div id="authNotice" class="hidden"></div>
+
             <form id="loginForm" class="form">
                 <div class="field">
                     <label for="loginEmail">Email</label>
                     <input id="loginEmail" type="email" placeholder="you@example.com" required />
                 </div>
+
                 <div class="field">
                     <label for="loginPassword">Password</label>
-                    <input id="loginPassword" type="password" placeholder="Your password" required />
+                    <input id="loginPassword" type="password" placeholder="Password" required />
                 </div>
+
                 <button class="button" type="submit">Log in</button>
             </form>
-            <p class="auth-switch">No account yet? <a href="/register.html">Create one</a></p>
+
+            <p class="auth-switch">
+                No account yet? <a href="/register">Create one</a>
+            </p>
         </div>
     </section>
 </main>
+
+<script src="/js/login.js"></script>
 </body>
 </html>

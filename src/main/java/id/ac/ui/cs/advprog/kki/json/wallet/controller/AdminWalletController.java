@@ -6,11 +6,14 @@ import id.ac.ui.cs.advprog.kki.json.wallet.model.Transaction;
 import id.ac.ui.cs.advprog.kki.json.wallet.service.WalletService;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin/wallet")
@@ -20,6 +23,13 @@ public class AdminWalletController {
 
     public AdminWalletController(WalletService walletService) {
         this.walletService = walletService;
+    }
+
+    @GetMapping("/withdraw/pending")
+    public List<TransactionResponse> listPendingWithdrawals() {
+        return walletService.listPendingWithdrawals().stream()
+                .map(WalletController::toResponse)
+                .toList();
     }
 
     /*
