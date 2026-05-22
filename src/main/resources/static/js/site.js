@@ -107,14 +107,14 @@ function setNotice(id, type, message) {
 }
 
 function activePath() {
-  return window.location.pathname.replace(/\/$/, "") || "/index.html";
+  return window.location.pathname.replace(/\/$/, "") || "/";
 }
 
 function setActiveNavLink() {
   const path = activePath();
   document.querySelectorAll(".nav-links a").forEach((link) => {
     try {
-      const href = new URL(link.getAttribute("href"), window.location.origin).pathname.replace(/\/$/, "") || "/index.html";
+      const href = new URL(link.getAttribute("href"), window.location.origin).pathname.replace(/\/$/, "") || "/";
       link.classList.toggle("active", href === path);
     } catch {
       // ignore invalid URLs
@@ -132,8 +132,8 @@ function renderAccountWidget(profile) {
 
   if (!getToken()) {
     widget.innerHTML = `
-      <a class="btn-ghost" href="/login.html">Log in</a>
-      <a class="button" href="/register.html">Register</a>
+      <a class="btn-ghost" href="/login">Log in</a>
+      <a class="button" href="/register">Register</a>
     `;
     return;
   }
@@ -162,9 +162,9 @@ function renderAccountWidget(profile) {
       renderAccountWidget(null);
       const page = document.body.dataset.page;
       if (PROTECTED_PAGES.has(page)) {
-        window.location.href = "/login.html";
+        window.location.href = "/login";
       } else {
-        window.location.href = "/index.html";
+        window.location.href = "/";
       }
     });
   }
@@ -210,7 +210,7 @@ async function loadCurrentUser() {
 function ensureProtectedPage() {
   const page = document.body.dataset.page;
   if (PROTECTED_PAGES.has(page) && !getToken()) {
-    window.location.replace("/login.html");
+    window.location.replace("/login");
     return true;
   }
   return false;
@@ -326,7 +326,7 @@ function renderWalletTransactions(items) {
       <div class="empty-state">
         <strong>No transactions yet</strong>
         <p style="margin:0 0 14px; line-height:1.6;">Top ups, deductions, refunds, and withdrawals will appear here in order.</p>
-        <a class="btn-ghost" href="/transactions.html">Open transactions</a>
+        <a class="btn-ghost" href="/transactions">Open transactions</a>
       </div>
     `;
     return;
@@ -587,7 +587,7 @@ function initPlaceholders() {
       document.getElementById("walletTransactions"),
       "No transactions yet",
       "Top ups, deductions, refunds, and withdrawals will appear here in order.",
-      '<a class="btn-ghost" href="/transactions.html">Open transactions</a>'
+      '<a class="btn-ghost" href="/transactions">Open transactions</a>'
     );
   }
 
@@ -626,6 +626,153 @@ function initPlaceholders() {
   }
 }
 
+async function loadVouchersPageData() {
+  const listEl = document.getElementById("voucherList");
+  if (!listEl) return;
+
+  try {
+    const res = await authFetch("/api/vouchers");
+    if (!res.ok) throw new Error("Failed to fetch active vouchers");
+    const vouchers = await res.json();
+    
+    if (!vouchers || vouchers.length === 0) {
+      renderEmptyState(listEl, "No active vouchers", "Check back later for new promos.");
+      return;
+    }
+    
+    listEl.innerHTML = vouchers.map(v => `
+      <article class="card">
+        <div class="card-inner">
+          <div class="card-top">
+            <h3 class="card-title">${escapeHtml(v.code)}</h3>
+            <span class="badge alt">${escapeHtml(v.discountType)}</span>
+          </div>
+          <p class="muted" style="margin: 8px 0;">Discount Value: ${v.discountType === 'FLAT' ? formatCurrency(v.discountValue) : v.discountValue + '%'}</p>
+          <div class="badges">
+            <span class="badge gray">Quota: ${v.quota}</span>
+            <span class="badge gray">Valid till: ${formatTimestamp(v.endAt)}</span>
+          </div>
+        </div>
+      </article>
+    `).join("");
+  } catch (err) {
+    listEl.innerHTML = `<div class="notice error">Failed to load vouchers.</div>`;
+  }
+}
+
+function setupVoucherForms() {
+  const validateForm = document.getElementById("voucherValidateForm");
+  const createForm = document.getElementById("voucherCreateForm");
+
+  if (validateForm) {
+    validateForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const code = document.getElementById("validateCode").value.trim();
+      const orderTotal = Number(document.getElementById("validateTotal").value);
+      const resultDiv = document.getElementById("voucherValidateResult");
+
+      try {
+        const res = await authFetch("/api/vouchers/validate", {
+          method: "POST",
+          body: JSON.stringify({ code, orderTotal })
+        });
+        
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error(text || "Voucher validation failed");
+        }
+        
+        const data = await res.json();
+        resultDiv.innerHTML = `
+          <div class="notice success" style="margin-top: 10px;">
+            <strong>Valid!</strong> Discount applied: ${formatCurrency(data.discountApplied)}<br>
+            <strong>Final Total:</strong> ${formatCurrency(data.finalTotal)}
+          </div>
+        `;
+      } catch (err) {
+        resultDiv.innerHTML = `<div class="notice error" style="margin-top: 10px;">${escapeHtml(err.message)}</div>`;
+      }
+    });
+  }
+
+  if (createForm) {
+    createForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const code = document.getElementById("createCode").value.trim();
+      const quota = Number(document.getElementById("createQuota").value);
+      const startAt = document.getElementById("createStartAt").value;
+      const endAt = document.getElementById("createEndAt").value;
+      const discountType = document.getElementById("createDiscountType").value;
+      const discountValue = Number(document.getElementById("createDiscountValue").value);
+      const terms = document.getElementById("createTerms").value.trim();
+
+      try {
+        const res = await authFetch("/api/admin/vouchers", {
+          method: "POST",
+          body: JSON.stringify({ code, quota, startAt, endAt, discountType, discountValue, terms })
+        });
+        
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error(text || "Failed to create voucher");
+        }
+        
+        setNotice("voucherNotice", "success", "Voucher created successfully!");
+        createForm.reset();
+        await loadVouchersPageData();
+      } catch (err) {
+        setNotice("voucherNotice", "error", err.message);
+      }
+    });
+  }
+}
+
+
+function setupOrderCheckout() {
+  const orderForm = document.getElementById("orderForm");
+  
+  if (orderForm) {
+    orderForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      
+      const shippingAddress = document.getElementById("shippingAddress").value.trim();
+      const voucherCode = document.getElementById("voucherCode").value.trim() || null;
+      
+      const cartItems = JSON.parse(localStorage.getItem("json_cart") || "[]");
+      
+      if (cartItems.length === 0) {
+        setNotice("orderNotice", "error", "Your cart is empty. Please add items from the catalog.");
+        return;
+      }
+
+      const orderRequest = {
+        shippingAddress: shippingAddress,
+        items: cartItems,
+        voucherCode: voucherCode
+      };
+
+      try {
+        const res = await authFetch("/api/orders", {
+          method: "POST",
+          body: JSON.stringify(orderRequest)
+        });
+
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error(text || "Failed to place order.");
+        }
+
+        setNotice("orderNotice", "success", "Order placed successfully! Voucher applied if valid.");
+        localStorage.removeItem("json_cart"); // Clear cart
+        orderForm.reset();
+        
+      } catch (err) {
+        setNotice("orderNotice", "error", err.message);
+      }
+    });
+  }
+}
+
 function setupPageInteractions() {
   const page = document.body.dataset.page;
 
@@ -641,6 +788,14 @@ function setupPageInteractions() {
   if (page === "wallet") {
     setupWalletForms();
   }
+
+  if (page === "vouchers") {
+    setupVoucherForms();
+  }
+
+  if (page === "orders") {
+    setupOrderCheckout();
+  }
 }
 
 async function initApp() {
@@ -654,7 +809,7 @@ async function initApp() {
   setupPageInteractions();
   setupAuthForms();
   showToken();
-  await loadCurrentUser();
+  const currentUser = await loadCurrentUser();
 
   const page = document.body.dataset.page;
   if (page === "wallet") {
@@ -672,6 +827,20 @@ async function initApp() {
       setNotice("transactionsNotice", null, "");
     } catch (err) {
       setNotice("transactionsNotice", "error", err.message || "Failed to load transactions");
+    }
+  }
+
+  if (page === "vouchers") {
+    const adminSection = document.getElementById("adminVoucherSection");
+    if (adminSection && currentUser && currentUser.role && currentUser.role.includes("ADMIN")) {
+      adminSection.classList.remove("hidden");
+    }
+    
+    try {
+      await loadVouchersPageData();
+      setNotice("voucherNotice", null, "");
+    } catch (err) {
+      setNotice("voucherNotice", "error", err.message || "Failed to load active vouchers");
     }
   }
 }
@@ -709,7 +878,7 @@ function setupAuthForms() {
         setNotice("authNotice", "success", "Login successful! Redirecting...");
 
         setTimeout(() => {
-          window.location.href = "/catalog.html";
+          window.location.href = "/catalog";
         }, 1000);
 
       } catch (err) {
@@ -757,7 +926,7 @@ function setupAuthForms() {
         );
 
         setTimeout(() => {
-          window.location.href = "/login.html";
+          window.location.href = "/login";
         }, 1200);
 
       } catch (err) {
