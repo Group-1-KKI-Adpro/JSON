@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>JSON - Wallet</title>
+</head>
+<body>
+<h1>Wallet</h1>
+<p>
+    <a href="/index.html">Back: Auth</a> |
+    <a href="/Transaction/transaction.html">Transactions</a>
+</p>
+<p>Uses token from <code>localStorage["json_token"]</code>. Login from <code>/index.html</code> first.</p>
+
+<h2>Current Token</h2>
+<button type="button" onclick="clearToken()">Clear Token</button>
+<pre id="tokenOut">(none)</pre>
+
+<h2>Balance</h2>
+<button onclick="refreshBalance()">GET /api/wallet/balance</button>
+<pre id="balOut">(click refresh)</pre>
+
+<h2>Top Up (Simulation)</h2>
+<p>Creates a TOPUP transaction and marks SUCCESS.</p>
+<input id="amount" type="number" min="1" step="1" placeholder="amount (e.g. 50000)" />
+<input id="desc" placeholder="description (optional)" />
+<button onclick="topup()">POST /api/wallet/topup</button>
+<pre id="topupOut"></pre>
+
+<script>
+    const TOKEN_KEY = "json_token";
+
+    function getToken() {
+        return localStorage.getItem(TOKEN_KEY);
+    }
+
+    function showToken() {
+        const t = getToken();
+        document.getElementById("tokenOut").textContent = t ?? "(none)";
+        return t;
+    }
+
+    function clearToken() {
+        localStorage.removeItem(TOKEN_KEY);
+        showToken();
+        document.getElementById("balOut").textContent = "(token cleared)";
+        document.getElementById("topupOut").textContent = "";
+    }
+
+    async function refreshBalance() {
+        const t = showToken();
+        if (!t) {
+            document.getElementById("balOut").textContent = "No token. Login from /index.html first.";
+            return;
+        }
+
+        const res = await fetch("/api/wallet/balance", {
+            headers: { "Authorization": `Bearer ${t}` }
+        });
+
+        const text = await res.text();
+        document.getElementById("balOut").textContent = `${res.status}\n${text}`;
+    }
+
+    async function topup() {
+        const t = showToken();
+        if (!t) {
+            document.getElementById("topupOut").textContent = "No token. Login from /index.html first.";
+            return;
+        }
+
+        const amount = Number(document.getElementById("amount").value);
+        const description = document.getElementById("desc").value;
+        if (!Number.isFinite(amount) || amount <= 0) {
+            document.getElementById("topupOut").textContent = "Amount must be a positive number.";
+            return;
+        }
+
+        const res = await fetch("/api/wallet/topup", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${t}`
+            },
+            body: JSON.stringify({ amount, description })
+        });
+
+        const text = await res.text();
+        document.getElementById("topupOut").textContent = `${res.status}\n${text}`;
+
+        if (res.ok) await refreshBalance();
+    }
+
+    showToken();
+</script>
+</body>
+</html>
