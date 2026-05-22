@@ -1176,7 +1176,7 @@ async function initApp() {
     if (adminSection && isAdminUser(currentUser)) {
       adminSection.classList.remove("hidden");
     }
-    
+
     try {
       await loadVouchersPageData();
       setNotice("voucherNotice", null, "");
