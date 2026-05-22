@@ -42,14 +42,43 @@ public class KycServiceImpl implements KycService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User is already a Jastiper");
         }
 
-        if (kycApplicationRepository.findByUser(user).isPresent()) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "KYC application already exists");
+        String cleanedFullName = fullName == null ? "" : fullName.trim();
+        String cleanedSocialMediaLink =
+                socialMediaLink == null || socialMediaLink.isBlank()
+                        ? null
+                        : socialMediaLink.trim();
+
+        if (cleanedFullName.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Full name is required");
+        }
+
+        var existingApplication = kycApplicationRepository.findByUser(user);
+        if (existingApplication.isPresent()) {
+            KycApplication application = existingApplication.get();
+
+            if (application.getStatus() == KycStatus.PENDING) {
+                user.setStatus(AccountStatus.PENDING_VERIFICATION);
+                userRepository.save(user);
+                return toResponse(application);
+            }
+
+            application.setFullName(cleanedFullName);
+            application.setSocialMediaLink(cleanedSocialMediaLink);
+            application.setStatus(KycStatus.PENDING);
+            application.setSubmittedAt(Instant.now());
+            application.setReviewedAt(null);
+
+            user.setStatus(AccountStatus.PENDING_VERIFICATION);
+            userRepository.save(user);
+
+            KycApplication saved = kycApplicationRepository.save(application);
+            return toResponse(saved);
         }
 
         KycApplication application = new KycApplication(
                 user,
-                fullName.trim(),
-                socialMediaLink == null || socialMediaLink.isBlank() ? null : socialMediaLink.trim()
+                cleanedFullName,
+                cleanedSocialMediaLink
         );
 
         user.setStatus(AccountStatus.PENDING_VERIFICATION);

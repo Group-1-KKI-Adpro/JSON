@@ -26,7 +26,7 @@ public class KycApplication {
     @Column(nullable = false, length = 20)
     private KycStatus status;
 
-    @Column(nullable = false, updatable = false)
+    @Column(nullable = false)
     private Instant submittedAt;
 
     private Instant reviewedAt;
@@ -41,14 +41,51 @@ public class KycApplication {
         this.submittedAt = Instant.now();
     }
 
-    public Long getId() { return id; }
-    public User getUser() { return user; }
-    public String getFullName() { return fullName; }
-    public String getSocialMediaLink() { return socialMediaLink; }
-    public KycStatus getStatus() { return status; }
-    public Instant getSubmittedAt() { return submittedAt; }
-    public Instant getReviewedAt() { return reviewedAt; }
+    public Long getId() {
+        return id;
+    }
 
-    public void setStatus(KycStatus status) { this.status = status; }
-    public void setReviewedAt(Instant reviewedAt) { this.reviewedAt = reviewedAt; }
+    public User getUser() {
+        return user;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public String getSocialMediaLink() {
+        return socialMediaLink;
+    }
+
+    public KycStatus getStatus() {
+        return status;
+    }
+
+    public Instant getSubmittedAt() {
+        return submittedAt;
+    }
+
+    public Instant getReviewedAt() {
+        return reviewedAt;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
+
+    public void setSocialMediaLink(String socialMediaLink) {
+        this.socialMediaLink = socialMediaLink;
+    }
+
+    public void setStatus(KycStatus status) {
+        this.status = status;
+    }
+
+    public void setSubmittedAt(Instant submittedAt) {
+        this.submittedAt = submittedAt;
+    }
+
+    public void setReviewedAt(Instant reviewedAt) {
+        this.reviewedAt = reviewedAt;
+    }
 }
