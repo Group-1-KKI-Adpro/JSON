@@ -36,6 +36,11 @@ public class PageController {
         return "forward:/catalog-new.html";
     }
 
+    @GetMapping("/inventory")
+    public String inventoryPage() {
+        return "forward:/inventory.html";
+    }
+
     @GetMapping("/orders")
     public String ordersPage() {
         return "forward:/orders.html";

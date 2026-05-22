@@ -2,7 +2,7 @@
 const TOKEN_KEY = "json_token";
 const PROFILE_KEY = "json_profile";
 const PUBLIC_PAGES = new Set(["home", "login", "register"]);
-const PROTECTED_PAGES = new Set(["catalog", "catalog-add", "orders", "profile", "wallet", "vouchers", "transactions", "admin", "admin-wallet-withdrawals"]);
+const PROTECTED_PAGES = new Set(["catalog", "catalog-add", "inventory", "orders", "profile", "wallet", "vouchers", "transactions", "admin", "admin-wallet-withdrawals"]);
 const ADMIN_PAGES = new Set(["admin", "admin-wallet-withdrawals"]);
 
 function getToken() {

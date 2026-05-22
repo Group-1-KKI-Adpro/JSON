@@ -40,7 +40,7 @@ public class CatalogService {
      */
     @Deprecated
     public CatalogItem createCatalogItem(CatalogItemRequest request) {
-        return createCatalogItemForJastiper(request, request.getJastiperId());
+        return createCatalogItemForJastiper(request, request == null ? 0 : request.getJastiperId());
     }
 
     public List<CatalogItem> getAllCatalogItems() {
@@ -134,7 +134,7 @@ public class CatalogService {
 
     private void validateCreateRequest(CatalogItemRequest request) {
         if (request == null) {
-            throw new IllegalArgumentException("Request cannot be empty");
+            throw new IllegalArgumentException("Request cannot be null");
         }
 
         if (request.getName() == null || request.getName().isBlank()) {

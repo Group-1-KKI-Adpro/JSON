@@ -1,7 +1,7 @@
 package id.ac.ui.cs.advprog.kki.json.config;
 
-import id.ac.ui.cs.advprog.kki.json.auth.security.JwtAuthFilter;
 import id.ac.ui.cs.advprog.kki.json.auth.security.InternalServiceAuthFilter;
+import id.ac.ui.cs.advprog.kki.json.auth.security.JwtAuthFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -52,6 +52,7 @@ public class SecurityConfig {
                                 "/register.html",
                                 "/catalog.html",
                                 "/catalog-new.html",
+                                "/inventory.html",
                                 "/orders.html",
                                 "/vouchers.html",
                                 "/profile.html",
@@ -70,6 +71,7 @@ public class SecurityConfig {
                                 "/profile",
                                 "/catalog",
                                 "/catalog/new",
+                                 "/inventory",
                                 "/orders",
                                 "/vouchers",
                                 "/wallet",

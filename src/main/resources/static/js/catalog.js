@@ -114,6 +114,7 @@
                     <p class="muted">
                         You are an active Jastiper. You can add catalog items without typing any Jastiper ID.
                     </p>
+                    <a class="button full-action" href="/inventory">Open inventory</a>
                 `;
             }
             managePanel?.classList.remove("hidden");
