@@ -1168,3 +1168,58 @@ window.clearToken = clearToken;
 window.authFetch = authFetch;
 window.formatCurrency = formatCurrency;
 window.escapeHtml = escapeHtml;
+
+(function () {
+  function getToken() {
+    return localStorage.getItem("json_token");
+  }
+
+  function readCachedProfile() {
+    try {
+      return JSON.parse(localStorage.getItem("json_profile") || "null");
+    } catch {
+      return null;
+    }
+  }
+
+  function updateAdminNavVisibility(user) {
+    const isAdmin = user && user.role === "ADMIN";
+
+    document
+        .querySelectorAll('.nav-links a[href="/admin"], .nav-links a[href="/admin.html"]')
+        .forEach((link) => {
+          link.classList.toggle("hidden", !isAdmin);
+        });
+  }
+
+  async function loadRoleForNav() {
+    updateAdminNavVisibility(readCachedProfile());
+
+    const token = getToken();
+    if (!token) {
+      updateAdminNavVisibility(null);
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/auth/me", {
+        headers: {
+          Authorization: "Bearer " + token
+        }
+      });
+
+      if (!response.ok) {
+        updateAdminNavVisibility(null);
+        return;
+      }
+
+      const user = await response.json();
+      localStorage.setItem("json_profile", JSON.stringify(user));
+      updateAdminNavVisibility(user);
+    } catch {
+      updateAdminNavVisibility(null);
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", loadRoleForNav);
+})();

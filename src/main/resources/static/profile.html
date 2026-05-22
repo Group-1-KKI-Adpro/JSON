@@ -22,7 +22,6 @@
       <a href="/wallet">Wallet</a>
       <a href="/transactions">Transactions</a>
       <a href="/profile" class="active">Profile</a>
-      <a href="/admin">Admin</a>
     </nav>
 
     <div id="accountWidget" class="account-widget"></div>
@@ -30,21 +29,17 @@
 
   <main>
     <section class="hero profile-hero">
-      <div>
+      <div class="hero-card">
         <p class="eyebrow">Account center</p>
         <h1>Manage your profile and Jastiper verification.</h1>
         <p class="hero-copy">
-          Update your public identity, check your account role/status, and apply to become
-          a verified Jastiper through KYC.
+          Update your public identity, check your account status, and apply to become a verified Jastiper.
         </p>
+
         <div class="hero-actions">
           <button id="refreshProfile" class="btn primary" type="button">Refresh profile</button>
           <a class="btn ghost" href="/catalog">Back to catalog</a>
         </div>
-      </div>
-
-      <div id="profileStatusCard" class="hero-card">
-        <p class="muted">Loading account status...</p>
       </div>
     </section>
 
@@ -54,25 +49,19 @@
       <section class="card profile-panel">
         <div class="section-heading">
           <div>
-            <p class="eyebrow">Current account</p>
             <h2>Account snapshot</h2>
-            <p class="muted">This data comes from your active JWT session.</p>
           </div>
         </div>
 
         <div id="profileCard" class="profile-card-content">
-          <p class="muted">Loading your profile...</p>
+          <p class="muted">Loading profile...</p>
         </div>
       </section>
 
       <section class="card profile-panel">
         <div class="section-heading">
           <div>
-            <p class="eyebrow">Edit profile</p>
-            <h2>Public identity</h2>
-            <p class="muted">
-              Username must be unique. If left empty, the backend can generate it from your email.
-            </p>
+            <h2>Edit profile</h2>
           </div>
         </div>
 
@@ -84,12 +73,12 @@
 
           <label>
             Username
-            <input id="profileUsername" type="text" maxlength="50" placeholder="e.g. tara" />
+            <input id="profileUsername" type="text" placeholder="username" />
           </label>
 
           <label>
             Full name
-            <input id="profileFullName" type="text" maxlength="100" placeholder="Your full name" />
+            <input id="profileFullName" type="text" placeholder="Full name" />
           </label>
 
           <button class="btn primary" type="submit">Save profile</button>
@@ -99,63 +88,35 @@
       <section class="card profile-panel profile-kyc-panel">
         <div class="section-heading">
           <div>
-            <p class="eyebrow">Jastiper verification</p>
             <h2>Apply as Jastiper</h2>
-            <p class="muted">
-              Titipers must submit KYC first. Admin approval changes your role to JASTIPER.
-            </p>
           </div>
         </div>
 
         <div id="kycStateMessage" class="profile-state-box">
-          <p class="muted">Checking eligibility...</p>
+          <strong>Checking application status...</strong>
         </div>
 
         <form id="kycForm" class="form-stack">
           <label>
             Full name matching identity
-            <input id="kycFullName" type="text" maxlength="100" placeholder="Name used for verification" required />
+            <input id="kycFullName" type="text" placeholder="Full name" required />
           </label>
 
           <label>
             Social media link
-            <input id="kycSocialMediaLink" type="url" maxlength="255" placeholder="https://instagram.com/username" />
+            <input id="kycSocialMediaLink" type="url" placeholder="https://instagram.com/username" />
           </label>
 
           <button id="kycSubmitButton" class="btn primary" type="submit">
-            Submit KYC application
+            Submit Jastiper application
           </button>
         </form>
-      </section>
-
-      <section class="card profile-panel">
-        <div class="section-heading">
-          <div>
-            <p class="eyebrow">Public profile</p>
-            <h2>View profile by username</h2>
-            <p class="muted">
-              Use this to preview how a Titiper or Jastiper profile appears to other users.
-            </p>
-          </div>
-        </div>
-
-        <form id="publicProfileForm" class="form-stack inline-profile-form">
-          <label>
-            Username
-            <input id="publicProfileUsername" type="text" placeholder="e.g. jastiper" />
-          </label>
-          <button class="btn primary" type="submit">View public profile</button>
-        </form>
-
-        <div id="publicProfileResult" class="profile-public-result">
-          <p class="muted">Search a username to preview public profile information.</p>
-        </div>
       </section>
     </section>
   </main>
 
   <footer class="footer">
-    © 2026 JSON Jastip. Profile and KYC.
+    © 2026 JSON Jastip. Profile.
   </footer>
 </div>
 

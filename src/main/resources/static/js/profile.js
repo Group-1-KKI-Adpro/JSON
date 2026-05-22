@@ -174,7 +174,7 @@
                 <div class="profile-state-box">
                     <strong>Titiper account</strong>
                     <p class="muted">
-                        This account can shop and place orders. Submit KYC to request Jastiper access.
+                        This account can shop and place orders.
                     </p>
                 </div>
             `}

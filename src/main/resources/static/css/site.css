@@ -1628,3 +1628,12 @@ button[type="submit"]:active {
 .profile-link-pill:hover {
   filter: brightness(0.96);
 }
+
+/* Profile UI cleanup */
+body[data-page="profile"] main > .hero {
+  grid-template-columns: 1fr;
+}
+
+body[data-page="profile"] main > .hero > .hero-card {
+  display: none !important;
+}
