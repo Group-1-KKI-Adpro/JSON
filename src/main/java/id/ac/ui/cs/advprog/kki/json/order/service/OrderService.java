@@ -11,6 +11,7 @@ import id.ac.ui.cs.advprog.kki.json.order.dto.RatingRequest;
 import id.ac.ui.cs.advprog.kki.json.order.model.Order;
 import id.ac.ui.cs.advprog.kki.json.order.model.OrderItem;
 import id.ac.ui.cs.advprog.kki.json.order.model.OrderStatus;
+import id.ac.ui.cs.advprog.kki.json.order.repository.CartRepository;
 import id.ac.ui.cs.advprog.kki.json.order.repository.OrderRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
