@@ -22,7 +22,15 @@ public class InventoryClient {
     }
 
     public void reserveItem(int catalogId, int quantity) {
-        String url = BASE_URL + "/" + catalogId + "/reserve";
+        postQuantityAction(catalogId, quantity, "/reserve", "reserve stock for item ");
+    }
+
+    public void releaseItem(int catalogId, int quantity) {
+        postQuantityAction(catalogId, quantity, "/release", "release stock for item ");
+    }
+
+    private void postQuantityAction(int catalogId, int quantity, String suffix, String failurePrefix) {
+        String url = BASE_URL + "/" + catalogId + suffix;
 
         Map<String, Object> body = new HashMap<>();
         body.put("quantity", quantity);
@@ -30,7 +38,7 @@ public class InventoryClient {
         try {
             restTemplate.postForEntity(url, body, Object.class);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to reserve stock for item " + catalogId);
+            throw new RuntimeException("Failed to " + failurePrefix + catalogId);
         }
     }
 }

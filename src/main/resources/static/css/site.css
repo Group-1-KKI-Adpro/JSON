@@ -413,6 +413,38 @@ a {
   gap: 14px;
 }
 
+.catalog-card {
+  min-height: 100%;
+}
+
+.card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.catalog-card .card-subtitle {
+  margin-top: 4px;
+}
+
+.catalog-card .pill {
+  padding: 7px 11px;
+}
+
+#catalogEmpty .empty-state {
+  margin-bottom: 18px;
+}
+
+#catalogGrid.hidden {
+  display: none;
+}
+
+#catalogEmpty.hidden {
+  display: none;
+}
+
+
 .card-top {
   display: flex;
   align-items: flex-start;
@@ -811,4 +843,30 @@ button[type="submit"]:active {
   .nav-links {
     justify-content: flex-start;
   }
+}
+
+
+.floating-add-btn {
+  position: fixed;
+  right: 28px;
+  bottom: 28px;
+  width: 64px;
+  height: 64px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--primary), var(--primary-2));
+  color: white;
+  font-size: 2rem;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: var(--shadow);
+  z-index: 120;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.floating-add-btn:hover {
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 22px 55px rgba(79, 70, 229, 0.28);
 }
