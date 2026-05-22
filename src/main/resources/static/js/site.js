@@ -2,7 +2,7 @@
 const TOKEN_KEY = "json_token";
 const PROFILE_KEY = "json_profile";
 const PUBLIC_PAGES = new Set(["home", "login", "register"]);
-const PROTECTED_PAGES = new Set(["catalog", "catalog-add", "orders", "profile", "wallet", "vouchers", "transactions"]);
+const PROTECTED_PAGES = new Set(["catalog", "orders", "profile", "wallet", "vouchers", "transactions","admin"]);
 
 function getToken() {
   return localStorage.getItem(TOKEN_KEY);
@@ -1102,7 +1102,7 @@ function setupAuthForms() {
         setNotice(
           "authNotice",
           "success",
-          "Registration successful! Redirecting to login..."
+          "Titiper account created successfully! Redirecting to login..."
         );
 
         setTimeout(() => {

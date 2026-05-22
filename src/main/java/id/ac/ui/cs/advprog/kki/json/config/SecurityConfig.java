@@ -54,6 +54,8 @@ public class SecurityConfig {
                                 "/profile.html",
                                 "/wallet.html",
                                 "/transactions.html",
+                                "/public-profile.html",
+                                "/admin.html",
                                 "/favicon.ico",
                                 "/*.html"
                         ).permitAll()
@@ -68,7 +70,9 @@ public class SecurityConfig {
                                 "/orders",
                                 "/vouchers",
                                 "/wallet",
-                                "/transactions"
+                                "/transactions",
+                                "/admin",
+                                "/users"
                         ).permitAll()
                         .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
                         .requestMatchers("/error").permitAll()
