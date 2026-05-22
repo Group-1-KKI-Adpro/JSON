@@ -2,6 +2,8 @@ package id.ac.ui.cs.advprog.kki.json.voucher.service;
 
 import id.ac.ui.cs.advprog.kki.json.voucher.model.DiscountType;
 import id.ac.ui.cs.advprog.kki.json.voucher.strategy.DiscountStrategy;
+import id.ac.ui.cs.advprog.kki.json.voucher.strategy.FlatDiscountStrategy;
+import id.ac.ui.cs.advprog.kki.json.voucher.strategy.PercentageDiscountStrategy;
 import id.ac.ui.cs.advprog.kki.json.voucher.dto.CreateVoucherRequest;
 import id.ac.ui.cs.advprog.kki.json.voucher.dto.UpdateVoucherRequest;
 import id.ac.ui.cs.advprog.kki.json.voucher.dto.UseVoucherResponse;
@@ -16,8 +18,6 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Service
 public class VoucherService {
@@ -25,10 +25,14 @@ public class VoucherService {
     private final VoucherRepository voucherRepository;
     private final Map<DiscountType, DiscountStrategy> discountStrategies;
 
-    public VoucherService(VoucherRepository voucherRepository, List<DiscountStrategy> strategies) {
+    public VoucherService(VoucherRepository voucherRepository,
+                          PercentageDiscountStrategy percentageStrategy,
+                          FlatDiscountStrategy flatStrategy) {
         this.voucherRepository = voucherRepository;
-        this.discountStrategies = strategies.stream()
-                .collect(Collectors.toMap(DiscountStrategy::getSupportedType, Function.identity()));
+        this.discountStrategies = Map.of(
+            DiscountType.PERCENTAGE, percentageStrategy,
+            DiscountType.FLAT, flatStrategy
+        );
     }
 
     public Voucher createVoucher(CreateVoucherRequest request) {
