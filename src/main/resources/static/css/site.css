@@ -424,6 +424,21 @@ a {
   align-items: center;
 }
 
+.action-stack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.action-stack .button,
+.action-stack .btn-secondary,
+.action-stack .btn-ghost,
+.action-stack button[type="submit"],
+.action-stack button[type="button"] {
+  padding: 8px 12px;
+  border-radius: 12px;
+}
+
 .catalog-card .card-subtitle {
   margin-top: 4px;
 }

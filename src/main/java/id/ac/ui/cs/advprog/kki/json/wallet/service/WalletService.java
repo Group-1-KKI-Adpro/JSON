@@ -20,5 +20,7 @@ public interface WalletService {
     Transaction withdraw(Long userId, long amount, String description);
 
     Transaction verifyWithdraw(Long transactionId, TransactionStatus status, String failureReason);
+
+    List<Transaction> listPendingWithdrawals();
 }
 
