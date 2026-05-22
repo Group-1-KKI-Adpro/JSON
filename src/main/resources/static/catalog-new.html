@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JSON Jastip • Add Catalog Item</title>
+  <link rel="stylesheet" href="/css/site.css" />
+  <script defer src="/js/site.js"></script>
+</head>
+<body data-page="catalog-add">
+<header class="topbar">
+  <a class="brand" href="/">
+    <span class="brand-mark">J</span>
+    <span>JSON Jastip</span>
+  </a>
+  <nav class="nav-links">
+    <a href="/">Home</a>
+    <a href="/catalog">Catalog</a>
+    <a href="/orders">Orders</a>
+    <a href="/vouchers">Vouchers</a>
+    <a href="/wallet">Wallet</a>
+    <a href="/transactions">Transactions</a>
+    <a href="/profile">Profile</a>
+  </nav>
+  <div id="accountWidget" class="account-widget"></div>
+</header>
+
+<main class="shell">
+  <section class="section">
+    <div class="section-header">
+      <div>
+        <h1 class="section-title">Add catalog item</h1>
+        <p class="section-subtitle">Create a new item here, then return to the catalogue to browse it.</p>
+      </div>
+      <div class="inline-actions">
+        <a class="btn-ghost" href="/catalog" style="text-decoration:none;">Back to catalog</a>
+      </div>
+    </div>
+    <div id="catalogFormNotice" class="hidden"></div>
+    <div id="catalogFormStats" class="grid cols-3"></div>
+  </section>
+
+  <section class="section">
+    <div class="panel">
+      <div class="section-header" style="margin-top:0;">
+        <div>
+          <h2 class="section-title" style="margin:0; font-size:1.5rem;">Item details</h2>
+          <p class="section-subtitle">This form saves directly to the backend using the catalog API.</p>
+        </div>
+      </div>
+
+      <form id="catalogCreateForm" class="form">
+        <div class="input-grid">
+          <div class="field">
+            <label for="catalogJastiperId">Jastiper ID</label>
+            <input id="catalogJastiperId" type="number" min="1" placeholder="1" required />
+          </div>
+          <div class="field">
+            <label for="catalogPrice">Price</label>
+            <input id="catalogPrice" type="number" min="0" placeholder="250000" required />
+          </div>
+          <div class="field">
+            <label for="catalogStock">Stock</label>
+            <input id="catalogStock" type="number" min="0" placeholder="10" required />
+          </div>
+          <div class="field">
+            <label for="catalogPurchaseDate">Purchase date</label>
+            <input id="catalogPurchaseDate" type="date" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="catalogName">Item name</label>
+          <input id="catalogName" type="text" placeholder="Example item" required />
+        </div>
+
+        <div class="field">
+          <label for="catalogOrigin">Origin</label>
+          <input id="catalogOrigin" type="text" placeholder="Japan / Korea / Singapore" />
+        </div>
+
+        <div class="field">
+          <label for="catalogDescription">Description</label>
+          <textarea id="catalogDescription" placeholder="Short item description"></textarea>
+        </div>
+
+        <div class="inline-actions">
+          <button class="button" type="submit">Save item</button>
+          <a class="btn-ghost" href="/catalog" style="text-decoration:none;">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">Save the item first, then browse it from the catalogue page.</footer>
+</body>
+</html>

@@ -48,11 +48,14 @@ public class SecurityConfig {
                                 "/login.html",
                                 "/register.html",
                                 "/catalog.html",
+                                "/catalog-new.html",
                                 "/orders.html",
                                 "/vouchers.html",
                                 "/profile.html",
                                 "/wallet.html",
                                 "/transactions.html",
+                                "/public-profile.html",
+                                "/admin.html",
                                 "/favicon.ico",
                                 "/*.html"
                         ).permitAll()
@@ -63,15 +66,22 @@ public class SecurityConfig {
                                 "/register",
                                 "/profile",
                                 "/catalog",
+                                "/catalog/new",
                                 "/orders",
                                 "/vouchers",
                                 "/wallet",
-                                "/transactions"
+                                "/transactions",
+                                "/admin",
+                                "/users"
                         ).permitAll()
                         .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
                         .requestMatchers("/error").permitAll()
 
                         /* CATALOG + SHOPPING */
+                        .requestMatchers(HttpMethod.GET, "/api/catalog").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/catalog/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/catalog").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/catalog/**").authenticated()
                         .requestMatchers("/api/catalog/**").authenticated()
                         .requestMatchers("/api/orders/**").authenticated()
                         .requestMatchers("/api/wallet/**").authenticated()
@@ -83,7 +93,6 @@ public class SecurityConfig {
                         .requestMatchers("/api/admin/wallet/**").hasRole("ADMIN")
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
-                        /* EVERYTHING ELSE */
                         /* EVERYTHING ELSE */
                         .anyRequest().authenticated()
                 )

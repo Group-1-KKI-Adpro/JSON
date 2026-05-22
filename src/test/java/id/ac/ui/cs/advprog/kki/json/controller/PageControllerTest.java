@@ -80,4 +80,11 @@ class PageControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(forwardedUrl("/transactions.html"));
     }
+
+    @Test
+    void adminRouteForwardsToAdminPage() throws Exception {
+        mockMvc.perform(get("/admin"))
+                .andExpect(status().isOk())
+                .andExpect(forwardedUrl("/admin.html"));
+    }
 }
