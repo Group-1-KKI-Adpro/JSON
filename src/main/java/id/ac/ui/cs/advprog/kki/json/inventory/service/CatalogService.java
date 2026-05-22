@@ -4,6 +4,7 @@ import id.ac.ui.cs.advprog.kki.json.inventory.dto.CatalogItemRequest;
 import id.ac.ui.cs.advprog.kki.json.inventory.dto.CatalogItemUpdateRequest;
 import id.ac.ui.cs.advprog.kki.json.inventory.model.CatalogItem;
 import id.ac.ui.cs.advprog.kki.json.inventory.repository.CatalogItemRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -36,13 +37,31 @@ public class CatalogService {
         return catalogItemRepository.findAll();
     }
 
+    public List<CatalogItem> searchCatalogItems(String keyword) {
+        if (keyword == null || keyword.isBlank()) {
+            return getAllCatalogItems();
+        }
+
+        String trimmed = keyword.trim();
+        return catalogItemRepository
+                .findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseOrOriginContainingIgnoreCase(
+                        trimmed, trimmed, trimmed
+                );
+    }
+
+    public List<CatalogItem> getCatalogItemsByJastiperId(int jastiperId) {
+        return catalogItemRepository.findByJastiperId(jastiperId);
+    }
+
     public CatalogItem getCatalogItemById(int id) {
         return catalogItemRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Catalog item not found"));
     }
 
+    @Transactional
     public CatalogItem updateCatalogItem(int id, CatalogItemUpdateRequest request) {
-        CatalogItem item = getCatalogItemById(id);
+        CatalogItem item = catalogItemRepository.findByIdForUpdate(id)
+                .orElseThrow(() -> new RuntimeException("Catalog item not found"));
 
         if (request.getDescription() != null) {
             item.setDescription(request.getDescription());
@@ -65,17 +84,21 @@ public class CatalogService {
         return catalogItemRepository.save(item);
     }
 
+    @Transactional
     public void deleteCatalogItem(int id) {
-        CatalogItem item = getCatalogItemById(id);
+        CatalogItem item = catalogItemRepository.findByIdForUpdate(id)
+                .orElseThrow(() -> new RuntimeException("Catalog item not found"));
         catalogItemRepository.delete(item);
     }
 
+    @Transactional
     public CatalogItem reserveStock(int id, int quantity) {
         if (quantity <= 0) {
             throw new IllegalArgumentException("Quantity must be greater than 0");
         }
 
-        CatalogItem item = getCatalogItemById(id);
+        CatalogItem item = catalogItemRepository.findByIdForUpdate(id)
+                .orElseThrow(() -> new RuntimeException("Catalog item not found"));
 
         if (item.getStock() < quantity) {
             throw new IllegalArgumentException("Insufficient stock");
@@ -85,17 +108,23 @@ public class CatalogService {
         return catalogItemRepository.save(item);
     }
 
+    @Transactional
     public CatalogItem releaseStock(int id, int quantity) {
         if (quantity <= 0) {
             throw new IllegalArgumentException("Quantity must be greater than 0");
         }
 
-        CatalogItem item = getCatalogItemById(id);
+        CatalogItem item = catalogItemRepository.findByIdForUpdate(id)
+                .orElseThrow(() -> new RuntimeException("Catalog item not found"));
+
         item.setStock(item.getStock() + quantity);
         return catalogItemRepository.save(item);
     }
 
     private void validateCreateRequest(CatalogItemRequest request) {
+        if (request == null) {
+            throw new IllegalArgumentException("Request cannot be null");
+        }
         if (request.getName() == null || request.getName().isBlank()) {
             throw new IllegalArgumentException("Name cannot be empty");
         }
