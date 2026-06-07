@@ -99,6 +99,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/admin/wallet/**").hasRole("ADMIN")
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
+                        .requestMatchers("/actuator/**").permitAll()
+
                         /* EVERYTHING ELSE */
                         .anyRequest().authenticated()
                 )
