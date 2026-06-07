@@ -53,12 +53,12 @@ public class PageController {
 
     @GetMapping("/wallet")
     public String walletPage() {
-        return "forward:/wallet.html";
+        return "redirect:/wallet.html";
     }
 
     @GetMapping("/transactions")
     public String transactionsPage() {
-        return "forward:/transactions.html";
+        return "redirect:/transactions.html";
     }
 
     @GetMapping("/admin")

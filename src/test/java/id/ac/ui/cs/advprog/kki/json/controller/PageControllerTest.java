@@ -7,6 +7,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class PageControllerTest {
@@ -77,15 +78,15 @@ class PageControllerTest {
     @Test
     void walletRouteForwardsToWalletPage() throws Exception {
         mockMvc.perform(get("/wallet"))
-                .andExpect(status().isOk())
-                .andExpect(forwardedUrl("/wallet.html"));
+                .andExpect(status().is3xxRedirection()) // Expects 302 Redirect instead of 200 OK
+                .andExpect(redirectedUrl("/wallet.html")); // Expects redirectedUrl instead of forwardedUrl
     }
 
     @Test
     void transactionsRouteForwardsToTransactionsPage() throws Exception {
         mockMvc.perform(get("/transactions"))
-                .andExpect(status().isOk())
-                .andExpect(forwardedUrl("/transactions.html"));
+                .andExpect(status().is3xxRedirection()) // Expects 302 Redirect instead of 200 OK
+                .andExpect(redirectedUrl("/transactions.html")); // Expects redirectedUrl instead of forwardedUrl
     }
 
     @Test

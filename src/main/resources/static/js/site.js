@@ -112,14 +112,14 @@ function setNotice(id, type, message) {
 }
 
 function activePath() {
-  return window.location.pathname.replace(/\/$/, "") || "/";
+  return window.location.pathname.replace(/\/$/, "") || "/index.html";
 }
 
 function setActiveNavLink() {
   const path = activePath();
   document.querySelectorAll(".nav-links a").forEach((link) => {
     try {
-      const href = new URL(link.getAttribute("href"), window.location.origin).pathname.replace(/\/$/, "") || "/";
+      const href = new URL(link.getAttribute("href"), window.location.origin).pathname.replace(/\/$/, "") || "/index.html";
       link.classList.toggle("active", href === path);
     } catch {
       // ignore invalid URLs
@@ -160,8 +160,8 @@ function renderAccountWidget(profile) {
 
   if (!getToken()) {
     widget.innerHTML = `
-      <a class="btn-ghost" href="/login">Log in</a>
-      <a class="button" href="/register">Register</a>
+      <a class="btn-ghost" href="/login.html">Log in</a>
+      <a class="button" href="/register.html">Register</a>
     `;
     return;
   }
@@ -190,9 +190,9 @@ function renderAccountWidget(profile) {
       renderAccountWidget(null);
       const page = document.body.dataset.page;
       if (PROTECTED_PAGES.has(page)) {
-        window.location.href = "/login";
+        window.location.href = "/login.html";
       } else {
-        window.location.href = "/";
+        window.location.href = "/index.html";
       }
     });
   }
@@ -238,7 +238,7 @@ async function loadCurrentUser() {
 function ensureProtectedPage() {
   const page = document.body.dataset.page;
   if (PROTECTED_PAGES.has(page) && !getToken()) {
-    window.location.replace("/login");
+    window.location.replace("/login.html");
     return true;
   }
   return false;
@@ -530,7 +530,7 @@ function renderWalletTransactions(items) {
       <div class="empty-state">
         <strong>No transactions yet</strong>
         <p style="margin:0 0 14px; line-height:1.6;">Top ups, deductions, refunds, and withdrawals will appear here in order.</p>
-        <a class="btn-ghost" href="/transactions">Open transactions</a>
+        <a class="btn-ghost" href="/transactions.html">Open transactions</a>
       </div>
     `;
     return;
@@ -907,7 +907,7 @@ function initPlaceholders() {
       document.getElementById("walletTransactions"),
       "No transactions yet",
       "Top ups, deductions, refunds, and withdrawals will appear here in order.",
-      '<a class="btn-ghost" href="/transactions">Open transactions</a>'
+      '<a class="btn-ghost" href="/transactions.html">Open transactions</a>'
     );
   }
 
@@ -1228,7 +1228,7 @@ function setupAuthForms() {
         setNotice("authNotice", "success", "Login successful! Redirecting...");
 
         setTimeout(() => {
-          window.location.href = "/catalog";
+          window.location.href = "/catalog.html";
         }, 1000);
 
       } catch (err) {
@@ -1276,7 +1276,7 @@ function setupAuthForms() {
         );
 
         setTimeout(() => {
-          window.location.href = "/login";
+          window.location.href = "/login.html";
         }, 1200);
 
       } catch (err) {
