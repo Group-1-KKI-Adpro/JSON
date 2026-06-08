@@ -57,18 +57,21 @@ public class SecurityConfig {
                                 "/vouchers.html",
                                 "/profile.html",
                                 "/wallet.html",
-                                "/transactions.html",
-                                "/public-profile.html",
-                                "/admin.html",
-                                "/favicon.ico",
-                                "/*.html"
-                        ).permitAll()
+                                 "/transactions.html",
+                                 "/public-profile.html",
+                                 "/admin.html",
+                                 "/admin/admin-wallet-withdrawals.html",
+                                 "/favicon.ico",
+                                 "/*.html"
+                         ).permitAll()
                         .requestMatchers("/Transaction/**").permitAll()
                         .requestMatchers(
-                                HttpMethod.GET,
-                                "/auth",
-                                "/profile",
-                                "/catalog",
+                                 HttpMethod.GET,
+                                 "/auth",
+                                 "/login",
+                                 "/register",
+                                 "/profile",
+                                 "/catalog",
                                 "/catalog/new",
                                  "/inventory",
                                 "/orders",

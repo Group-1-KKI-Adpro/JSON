@@ -1,52 +1,39 @@
 package id.ac.ui.cs.advprog.kki.json.order.client;
 
-import id.ac.ui.cs.advprog.kki.json.wallet.dto.BalanceResponse;
-import id.ac.ui.cs.advprog.kki.json.wallet.dto.DeductRequest;
-import id.ac.ui.cs.advprog.kki.json.wallet.dto.RefundRequest;
+import id.ac.ui.cs.advprog.kki.json.auth.security.JwtService;
+import id.ac.ui.cs.advprog.kki.json.auth.service.AuthService;
+import id.ac.ui.cs.advprog.kki.json.model.User;
 import id.ac.ui.cs.advprog.kki.json.wallet.dto.TransactionResponse;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import id.ac.ui.cs.advprog.kki.json.wallet.model.Transaction;
+import id.ac.ui.cs.advprog.kki.json.wallet.service.WalletService;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 
 @Component
 public class WalletClient {
 
-    private final RestTemplate restTemplate;
-    private final String walletApiBaseUrl;
-    private final String internalServiceToken;
+    private final WalletService walletService;
+    private final JwtService jwtService;
+    private final AuthService authService;
 
-    public WalletClient(RestTemplate restTemplate,
-                        @Value("${app.wallet.base-url:http://localhost:8080/api}") String walletApiBaseUrl,
-                        @Value("${app.internal.service-token:dev-internal-service-token}") String internalServiceToken) {
-        this.restTemplate = restTemplate;
-        this.walletApiBaseUrl = walletApiBaseUrl;
-        this.internalServiceToken = internalServiceToken;
+    public WalletClient(WalletService walletService,
+                        JwtService jwtService,
+                        AuthService authService) {
+        this.walletService = walletService;
+        this.jwtService = jwtService;
+        this.authService = authService;
     }
 
     public long getBalance(String token) {
-        ResponseEntity<BalanceResponse> response = restTemplate.exchange(
-                walletApiBaseUrl + "/wallet/balance",
-                HttpMethod.GET,
-                bearerRequest(token),
-                BalanceResponse.class
-        );
-
-        return response.getBody().balance();
+        User user = userFromToken(token);
+        return walletService.getOrCreateWallet(user.getId()).getBalance();
     }
 
     public TransactionResponse deduct(Long userId,
                                       Long amount,
                                       String referenceId,
                                       String description) {
-        return postInternal(
-                "/internal/wallet/deduct",
-                new DeductRequest(userId, amount, referenceId, description),
-                TransactionResponse.class
+        return toResponse(
+                walletService.deduct(userId, amount, referenceId, description)
         );
     }
 
@@ -54,25 +41,29 @@ public class WalletClient {
                                       Long amount,
                                       String referenceId,
                                       String description) {
-        return postInternal(
-                "/internal/wallet/refund",
-                new RefundRequest(userId, amount, referenceId, description),
-                TransactionResponse.class
+        return toResponse(
+                walletService.refund(userId, amount, referenceId, description)
         );
     }
 
-    private HttpEntity<Void> bearerRequest(String token) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(token);
-        return new HttpEntity<>(headers);
+    private User userFromToken(String token) {
+        String email = jwtService.extractEmail(token);
+        return authService.getByEmail(email);
     }
 
-    private <T> T postInternal(String path, Object body, Class<T> responseType) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("X-Internal-Service-Token", internalServiceToken);
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
-        HttpEntity<Object> request = new HttpEntity<>(body, headers);
-        return restTemplate.postForObject(walletApiBaseUrl + path, request, responseType);
+    private TransactionResponse toResponse(Transaction tx) {
+        return new TransactionResponse(
+                tx.getId(),
+                tx.getUserId(),
+                tx.getType(),
+                tx.getAmount(),
+                tx.getStatus(),
+                tx.getCreatedAt(),
+                tx.getDescription(),
+                tx.getReferenceId(),
+                tx.getBalanceBefore(),
+                tx.getBalanceAfter(),
+                tx.getFailureReason()
+        );
     }
 }
