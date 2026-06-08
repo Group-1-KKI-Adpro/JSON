@@ -119,7 +119,7 @@ class OrderServiceTest {
                 "order-rollback",
                 "Payment for order order-rollback"
         )).thenReturn(transactionResponse(1L, TransactionType.PAYMENT, 150L, "order-rollback"));
-        when(voucherClient.applyVoucher("PROMO", 300.0)).thenReturn(150.0);
+        when(voucherClient.applyVoucher("PROMO", 300.0, "token-123")).thenReturn(150.0);
         doNothing().when(inventoryClient).reserveItem(101, 1);
         doThrow(new RuntimeException("Voucher use failed"))
                 .when(voucherClient).useVoucher("PROMO", "order-rollback", "token-123");

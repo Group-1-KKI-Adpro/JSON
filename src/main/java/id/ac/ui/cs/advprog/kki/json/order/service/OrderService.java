@@ -120,7 +120,7 @@ public class OrderService {
             order.setJastiperId(orderJastiperId);
 
             if (voucherCode != null && !voucherCode.isBlank()) {
-                double discounted = voucherClient.applyVoucher(voucherCode, (double) total);
+                double discounted = voucherClient.applyVoucher(voucherCode, (double) total, token);
                 total = (long) discounted;
             }
 

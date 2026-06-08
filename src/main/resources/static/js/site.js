@@ -1031,8 +1031,8 @@ function setupVoucherForms() {
       e.preventDefault();
       const code = document.getElementById("createCode").value.trim();
       const quota = Number(document.getElementById("createQuota").value);
-      const startAt = document.getElementById("createStartAt").value;
-      const endAt = document.getElementById("createEndAt").value;
+      const startAt = new Date(document.getElementById("createStartAt").value).toISOString();
+      const endAt = new Date(document.getElementById("createEndAt").value).toISOString();
       const discountType = document.getElementById("createDiscountType").value;
       const discountValue = Number(document.getElementById("createDiscountValue").value);
       const terms = document.getElementById("createTerms").value.trim();

@@ -18,12 +18,13 @@ public class VoucherClient {
         this.restTemplate = restTemplate;
     }
 
-    public double applyVoucher(String code, double total) {
+    public double applyVoucher(String code, double total, String token) {
         Map<String, Object> body = new HashMap<>();
         body.put("code", code);
         body.put("orderTotal", total);
 
         HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(token);
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
 
